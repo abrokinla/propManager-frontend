@@ -1,0 +1,220 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import DashboardLayout from '../../components/DashboardLayout';
+import ErrorBoundary from '../../components/ErrorBoundary';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import api from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
+import type { Unit, MaintenanceRequest, PaginatedResponse } from '../../types';
+
+export default function MaintenancePage() {
+  const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<MaintenanceRequest | null>(null);
+  const [form, setForm] = useState({ unit_id: '', title: '', description: '', priority: 'Medium', status: 'Open', reported_by: '' });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const { toast } = useToast();
+
+  const fetchData = async () => {
+    try {
+      const [mRes, uRes] = await Promise.all([
+        api.get<PaginatedResponse<MaintenanceRequest>>('/maintenance/'),
+        api.get<PaginatedResponse<Unit>>('/units/'),
+      ]);
+      setRequests(mRes.data.results);
+      setUnits(uRes.data.results);
+    } catch {
+      toast('Failed to load data', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    if (formErrors[e.target.name]) setFormErrors({ ...formErrors, [e.target.name]: '' });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormErrors({});
+    setSaving(true);
+    try {
+      const payload = { ...form, unit_id: Number(form.unit_id) };
+      if (editing) {
+        await api.put(`/maintenance/${editing.id}/`, payload);
+        toast('Request updated successfully', 'success');
+      } else {
+        await api.post('/maintenance/', payload);
+        toast('Request created successfully', 'success');
+      }
+      setShowForm(false);
+      setEditing(null);
+      setForm({ unit_id: '', title: '', description: '', priority: 'Medium', status: 'Open', reported_by: '' });
+      await fetchData();
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: Record<string, string[] | string> } };
+      const d = axiosError.response?.data;
+      if (d) {
+        const fe: Record<string, string> = {};
+        for (const [k, v] of Object.entries(d)) fe[k] = Array.isArray(v) ? v[0] : v;
+        setFormErrors(fe);
+      } else {
+        toast('Failed to save request', 'error');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEdit = (req: MaintenanceRequest) => {
+    setEditing(req);
+    setForm({
+      unit_id: String(req.unit?.id || req.unit_id || ''),
+      title: req.title,
+      description: req.description,
+      priority: req.priority,
+      status: req.status,
+      reported_by: req.reported_by || '',
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await api.delete(`/maintenance/${id}/`);
+      toast('Request deleted successfully', 'success');
+      setRequests(requests.filter(r => r.id !== id));
+    } catch {
+      toast('Failed to delete request', 'error');
+    }
+  };
+
+  const priorityColor = (p: string) => p === 'High' ? 'badge-danger' : p === 'Medium' ? 'badge-warning' : 'badge-info';
+  const statusColor = (s: string) => s === 'Open' ? 'badge-danger' : s === 'In Progress' ? 'badge-warning' : 'badge-success';
+
+  return (
+    <ErrorBoundary>
+    <DashboardLayout>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold">Maintenance</h1>
+          <p className="text-gray-500 mt-1">{requests.length} request{requests.length === 1 ? '' : 's'}</p>
+        </div>
+        <button onClick={() => setShowForm(true)} className="btn btn-primary">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          New Request
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="card w-full max-w-lg">
+            <h2 className="text-lg font-semibold mb-4">{editing ? 'Edit Request' : 'New Maintenance Request'}</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Unit *</label>
+                <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
+                  <option value="">Select unit...</option>
+                  {units.map(u => <option key={u.id} value={u.id}>{(u.property?.name || u.property_name || '—')} — {u.unit_number}</option>)}
+                </select>
+                {formErrors.unit_id && <p className="text-red-500 text-xs mt-1">{formErrors.unit_id}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <input name="title" value={form.title} onChange={handleChange} required placeholder="e.g. Leaking pipe in Unit A" />
+                {formErrors.title && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                <textarea name="description" value={form.description} onChange={handleChange} required rows={3} placeholder="Describe the issue..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Reported By *</label>
+                <input name="reported_by" value={form.reported_by} onChange={handleChange} required placeholder="e.g. John Doe" />
+                {formErrors.reported_by && <p className="text-red-500 text-xs mt-1">{formErrors.reported_by}</p>}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                  <select name="priority" value={form.priority} onChange={handleChange}>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select name="status" value={form.status} onChange={handleChange}>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-3 justify-end">
+                <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); }} className="btn btn-secondary">Cancel</button>
+                <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
+      ) : requests.length === 0 ? (
+        <div className="card text-center py-12">
+          <h3 className="font-semibold text-lg mb-2">No maintenance requests</h3>
+          <p className="text-gray-500 mb-4">Create a new request to track issues</p>
+          <button onClick={() => setShowForm(true)} className="btn btn-primary">New Request</button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {requests.map((req) => (
+            <div key={req.id} className="card hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <h3 className="font-semibold">{req.title}</h3>
+                  <p className="text-sm text-gray-500">{(req.unit?.property_name || req.property_name || '—')} — {(req.unit?.unit_number || req.unit_number || '—')}</p>
+                </div>
+                <div className="flex gap-2">
+                  <span className={`badge ${priorityColor(req.priority)}`}>{req.priority}</span>
+                  <span className={`badge ${statusColor(req.status)}`}>{req.status}</span>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">{req.description}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400">Reported by {req.reported_by || '—'} · {new Date(req.created_at).toLocaleDateString()}</span>
+                <div className="flex gap-2">
+                  <button onClick={() => handleEdit(req)} className="text-primary-600 hover:text-primary-700 text-sm font-medium">Edit</button>
+                  <button onClick={() => setDeleteTarget(req.id)} className="text-red-600 hover:text-red-700 text-sm font-medium">Delete</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete Request"
+        message="Are you sure you want to delete this maintenance request? This action cannot be undone."
+        onConfirm={() => {
+          const id = deleteTarget!;
+          setDeleteTarget(null);
+          return handleDelete(id);
+        }}
+        onCancel={() => setDeleteTarget(null)}
+      />
+    </DashboardLayout>
+    </ErrorBoundary>
+  );
+}

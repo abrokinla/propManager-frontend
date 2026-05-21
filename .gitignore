@@ -34,3 +34,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# wrangler
+.wrangler/
+
+# backup files
+*.bak
+
+# tailwind output
+tailwind-output.css
