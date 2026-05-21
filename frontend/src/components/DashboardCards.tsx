@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import type { DashboardStats } from '../types';
 
 interface StatCardProps {
@@ -40,13 +41,13 @@ export function QuickActions({ items }: { items: Array<{ label: string; href: st
       <h3 className="font-semibold text-lg mb-4">Quick Actions</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {items.map((item) => (
-          <a
+          <Link
             key={item.href}
             href={item.href}
             className="flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors text-sm font-medium"
           >
             {item.label}
-          </a>
+          </Link>
         ))}
       </div>
     </div>

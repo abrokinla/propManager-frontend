@@ -38,6 +38,9 @@ next-env.d.ts
 # wrangler
 .wrangler/
 
+# opennext build output
+.open-next/
+
 # backup files
 *.bak
 
