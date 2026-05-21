@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import './tailwind-output.css';
+import './globals.css';
 import ClientProvider from '../components/ClientProvider';
 
 export const metadata: Metadata = {
