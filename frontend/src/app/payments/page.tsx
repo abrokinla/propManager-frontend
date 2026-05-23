@@ -12,7 +12,7 @@ export default function PaymentsPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ tenant_id: '', amount: '', payment_date: '', month_for: '', payment_method: 'Bank Transfer', reference: '', notes: '' });
+  const [form, setForm] = useState({ tenant_id: '', amount: '', payment_date: '', period_start: '', period_end: '', years_covered: '1', payment_method: 'Bank Transfer', reference: '', notes: '' });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -38,11 +38,16 @@ export default function PaymentsPage() {
     setFormErrors({});
     setSaving(true);
     try {
-      const payload = { ...form, tenant_id: Number(form.tenant_id), amount: Number(form.amount) };
+      const payload = {
+        ...form,
+        tenant_id: Number(form.tenant_id),
+        amount: Number(form.amount),
+        years_covered: Number(form.years_covered),
+      };
       await api.post('/payments/', payload);
       toast('Payment recorded successfully', 'success');
       setShowForm(false);
-      setForm({ tenant_id: '', amount: '', payment_date: '', month_for: '', payment_method: 'Bank Transfer', reference: '', notes: '' });
+      setForm({ tenant_id: '', amount: '', payment_date: '', period_start: '', period_end: '', years_covered: '1', payment_method: 'Bank Transfer', reference: '', notes: '' });
       const { data } = await api.get<PaginatedResponse<Payment>>('/payments/');
       setPayments(data.results);
     } catch (err: unknown) {
@@ -95,7 +100,7 @@ export default function PaymentsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₦) *</label>
-                  <input name="amount" type="number" value={form.amount} onChange={handleChange} required placeholder="50000" />
+                  <input name="amount" type="number" value={form.amount} onChange={handleChange} required placeholder="1600000" />
                   {formErrors.amount && <p className="text-red-500 text-xs mt-1">{formErrors.amount}</p>}
                 </div>
                 <div>
@@ -105,8 +110,18 @@ export default function PaymentsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Month For *</label>
-                  <input name="month_for" type="month" value={form.month_for} onChange={handleChange} required />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Period Start *</label>
+                  <input name="period_start" type="date" value={form.period_start} onChange={handleChange} required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Period End *</label>
+                  <input name="period_end" type="date" value={form.period_end} onChange={handleChange} required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Years Covered</label>
+                  <input name="years_covered" type="number" min="1" value={form.years_covered} onChange={handleChange} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Method</label>
@@ -151,7 +166,8 @@ export default function PaymentsPage() {
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Tenant</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Amount</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Month</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500">Period</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500">Years</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Date</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Method</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Reference</th>
@@ -165,7 +181,8 @@ export default function PaymentsPage() {
                     <div className="text-xs text-gray-500">{p.tenant?.unit?.unit_number || p.unit_number || ''}</div>
                   </td>
                   <td className="py-3 px-4 font-semibold text-green-600">₦{Number(p.amount).toLocaleString()}</td>
-                  <td className="py-3 px-4 text-gray-600">{p.month_for}</td>
+                  <td className="py-3 px-4 text-gray-600">{p.period_start} — {p.period_end}</td>
+                  <td className="py-3 px-4 text-gray-600">{p.years_covered} yr{p.years_covered > 1 ? 's' : ''}</td>
                   <td className="py-3 px-4 text-gray-600">{p.payment_date}</td>
                   <td className="py-3 px-4"><span className="badge badge-info">{methodIcon(p.payment_method)} {p.payment_method}</span></td>
                   <td className="py-3 px-4 text-gray-500 text-xs">{p.reference || '—'}</td>

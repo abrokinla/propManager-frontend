@@ -66,7 +66,7 @@ export function RecentActivity({ payments }: { payments: DashboardStats['recent_
             <div key={i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
               <div>
                 <p className="font-medium text-sm">{p.tenant}</p>
-                <p className="text-xs text-gray-500">{p.month_for}</p>
+                <p className="text-xs text-gray-500">{p.period_start} — {p.period_end}</p>
               </div>
               <span className="font-semibold text-green-600">₦{p.amount.toLocaleString()}</span>
             </div>

@@ -1,12 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import DashboardLayout from '../../components/DashboardLayout';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
-import type { Unit, Tenant, PaginatedResponse } from '../../types';
+import type { Unit, Tenant, PaginatedResponse, TenancyStatus } from '../../types';
+
+const tenancyStatusConfig: Record<TenancyStatus, { label: string; className: string }> = {
+  pending_document: { label: 'Pending Document', className: 'badge-warning' },
+  document_sent: { label: 'Document Sent', className: 'badge-info' },
+  document_signed: { label: 'Document Signed', className: 'badge-info' },
+  active: { label: 'Active', className: 'badge-success' },
+  expired: { label: 'Expired', className: 'badge-danger' },
+  quit_notice_issued: { label: 'Quit Notice', className: 'badge-danger' },
+};
+
+const defaultForm = {
+  unit_id: '', name: '', phone: '', email: '', address: '',
+  annual_rent: '', tenancy_status: 'pending_document' as TenancyStatus,
+  lease_start_date: '', lease_renewal_date: '', lease_expiry_date: '',
+  move_in_date: '', is_active: 'true',
+};
 
 export default function TenantsPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -14,7 +31,7 @@ export default function TenantsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Tenant | null>(null);
-  const [form, setForm] = useState({ unit_id: '', name: '', phone: '', email: '', address: '', monthly_rent: '', lease_start_date: '', lease_renewal_date: '', lease_expiry_date: '', move_in_date: '', is_active: 'true' });
+  const [form, setForm] = useState(defaultForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
@@ -41,7 +58,12 @@ export default function TenantsPage() {
     setFormErrors({});
     setSaving(true);
     try {
-      const payload = { ...form, unit_id: Number(form.unit_id), monthly_rent: form.monthly_rent || null, is_active: form.is_active === 'true' };
+      const payload = {
+        ...form,
+        unit_id: Number(form.unit_id),
+        annual_rent: form.annual_rent || null,
+        is_active: form.is_active === 'true',
+      };
       if (editing) {
         await api.put(`/tenants/${editing.id}/`, payload);
         toast('Tenant updated successfully', 'success');
@@ -51,7 +73,7 @@ export default function TenantsPage() {
       }
       setShowForm(false);
       setEditing(null);
-      setForm({ unit_id: '', name: '', phone: '', email: '', address: '', monthly_rent: '', lease_start_date: '', lease_renewal_date: '', lease_expiry_date: '', move_in_date: '', is_active: 'true' });
+      setForm(defaultForm);
       const { data } = await api.get<PaginatedResponse<Tenant>>('/tenants/');
       setTenants(data.results);
     } catch (err: unknown) {
@@ -74,7 +96,8 @@ export default function TenantsPage() {
     setForm({
       unit_id: String(t.unit?.id || t.unit_id || ''),
       name: t.name, phone: t.phone, email: t.email, address: t.address || '',
-      monthly_rent: t.monthly_rent ? String(t.monthly_rent) : '',
+      annual_rent: t.annual_rent ? String(t.annual_rent) : '',
+      tenancy_status: t.tenancy_status,
       lease_start_date: t.lease_start_date || '', lease_renewal_date: t.lease_renewal_date || '',
       lease_expiry_date: t.lease_expiry_date || '', move_in_date: t.move_in_date || '',
       is_active: String(t.is_active),
@@ -140,8 +163,8 @@ export default function TenantsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Rent (₦)</label>
-                  <input name="monthly_rent" type="number" value={form.monthly_rent} onChange={handleChange} />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Annual Rent (₦)</label>
+                  <input name="annual_rent" type="number" value={form.annual_rent} onChange={handleChange} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Active</label>
@@ -172,7 +195,7 @@ export default function TenantsPage() {
                 </div>
               </div>
               <div className="flex gap-3 justify-end">
-                <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); }} className="btn btn-secondary">Cancel</button>
+                <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); setForm(defaultForm); }} className="btn btn-secondary">Cancel</button>
                 <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
               </div>
             </form>
@@ -196,30 +219,35 @@ export default function TenantsPage() {
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Unit</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Property</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Rent</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500">Annual Rent</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Lease Expiry</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500">Tenancy Status</th>
                 <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {tenants.map((t) => (
-                <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="py-3 px-4">
-                    <div className="font-medium">{t.name}</div>
-                    <div className="text-xs text-gray-500">{t.email}</div>
-                  </td>
-                  <td className="py-3 px-4 text-gray-600">{t.unit?.unit_number || t.unit_number || '—'}</td>
-                  <td className="py-3 px-4 text-gray-600">{t.unit?.property_name || t.property_name || '—'}</td>
-                  <td className="py-3 px-4">{t.monthly_rent ? `₦${Number(t.monthly_rent).toLocaleString()}` : '—'}</td>
-                  <td className="py-3 px-4 text-gray-600">{t.lease_expiry_date || '—'}</td>
-                  <td className="py-3 px-4"><span className={`badge ${t.is_active ? 'badge-success' : 'badge-danger'}`}>{t.is_active ? 'Active' : 'Inactive'}</span></td>
-                  <td className="py-3 px-4 text-right">
-                    <button onClick={() => handleEdit(t)} className="text-primary-600 hover:text-primary-700 text-sm font-medium mr-3">Edit</button>
-                    <button onClick={() => setDeleteTarget(t.id)} className="text-red-600 hover:text-red-700 text-sm font-medium">Delete</button>
-                  </td>
-                </tr>
-              ))}
+              {tenants.map((t) => {
+                const statusCfg = tenancyStatusConfig[t.tenancy_status] || tenancyStatusConfig.active;
+                return (
+                  <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <Link href={`/tenants/${t.id}`} className="font-medium text-primary-600 hover:text-primary-700">
+                        {t.name}
+                      </Link>
+                      <div className="text-xs text-gray-500">{t.email}</div>
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">{t.unit?.unit_number || t.unit_number || '—'}</td>
+                    <td className="py-3 px-4 text-gray-600">{t.unit?.property_name || t.property_name || '—'}</td>
+                    <td className="py-3 px-4">{t.annual_rent ? `₦${Number(t.annual_rent).toLocaleString()}/yr` : '—'}</td>
+                    <td className="py-3 px-4 text-gray-600">{t.lease_expiry_date || '—'}</td>
+                    <td className="py-3 px-4"><span className={`badge ${statusCfg.className}`}>{statusCfg.label}</span></td>
+                    <td className="py-3 px-4 text-right">
+                      <button onClick={() => handleEdit(t)} className="text-primary-600 hover:text-primary-700 text-sm font-medium mr-3">Edit</button>
+                      <button onClick={() => setDeleteTarget(t.id)} className="text-red-600 hover:text-red-700 text-sm font-medium">Delete</button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

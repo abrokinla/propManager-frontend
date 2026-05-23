@@ -53,6 +53,14 @@ export interface Unit {
   updated_at: string;
 }
 
+export type TenancyStatus =
+  | 'pending_document'
+  | 'document_sent'
+  | 'document_signed'
+  | 'active'
+  | 'expired'
+  | 'quit_notice_issued';
+
 export interface Tenant {
   id: number;
   name: string;
@@ -62,7 +70,8 @@ export interface Tenant {
   unit_id?: number;
   unit_number: string;
   property_name: string;
-  monthly_rent: number;
+  annual_rent: number;
+  tenancy_status: TenancyStatus;
   lease_start_date?: string;
   lease_renewal_date?: string;
   lease_expiry_date?: string;
@@ -82,7 +91,9 @@ export interface Payment {
   amount: number;
   payment_date: string;
   payment_method: string;
-  month_for: string;
+  period_start: string;
+  period_end: string;
+  years_covered: number;
   reference?: string;
   notes?: string;
   created_at?: string;
@@ -109,7 +120,7 @@ export interface DashboardStats {
   total_units: number;
   occupied_units: number;
   occupancy_rate: number;
-  monthly_revenue: number;
+  total_revenue: number;
   upcoming_lease_expirations: Array<{
     tenant: string;
     unit: string;
@@ -120,7 +131,8 @@ export interface DashboardStats {
     tenant: string;
     amount: number;
     date: string;
-    month_for: string;
+    period_start: string;
+    period_end: string;
   }>;
   open_maintenance: number;
 }
@@ -134,4 +146,48 @@ export interface PaginatedResponse<T> {
 
 export interface ApiError {
   [key: string]: string[] | string;
+}
+
+// New interfaces for enhanced tenant features
+
+export type DocumentStatus = 'draft' | 'sent' | 'viewed' | 'signed' | 'completed';
+
+export interface TenancyDocument {
+  id: number;
+  tenant: number;
+  document_type: 'tenancy_agreement';
+  status: DocumentStatus;
+  document_data: Record<string, unknown>;
+  sent_at?: string;
+  signed_at?: string;
+  file_url?: string;
+  signed_file_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ReminderChannel = 'email';
+export type ReminderType = 'lease_expiry' | 'rent_due' | 'quit_notice' | 'document_sign';
+export type DeliveryStatus = 'sent' | 'delivered' | 'failed';
+
+export interface Reminder {
+  id: number;
+  tenant: number;
+  channel: ReminderChannel;
+  reminder_type: ReminderType;
+  sent_at: string;
+  delivery_status: DeliveryStatus;
+  message: string;
+}
+
+export interface QuitNotice {
+  id: number;
+  tenant: number;
+  notice_date: string;
+  effective_date: string;
+  reason?: string;
+  status: 'issued' | 'acknowledged' | 'enforced' | 'cancelled';
+  document_url?: string;
+  created_at: string;
+  updated_at: string;
 }
