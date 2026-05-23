@@ -31,6 +31,7 @@ export interface Property {
   total_units?: number;
   owner?: User;
   units_count: number;
+  image_url?: string;
   created_at: string;
   updated_at: string;
 }

@@ -17,7 +17,7 @@ export default function UploadSignedDocumentPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.get(`/api/public/document/${token}/`)
+    api.get(`/public/document/${token}/`)
       .then(({ data }) => {
         setDocument(data);
         setLoading(false);
@@ -36,7 +36,7 @@ export default function UploadSignedDocumentPage() {
     try {
       const formData = new FormData();
       formData.append('signed_file', file);
-      await api.post(`/api/public/document/${token}/sign/`, formData, {
+      await api.post(`/public/document/${token}/sign/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setSuccess(true);

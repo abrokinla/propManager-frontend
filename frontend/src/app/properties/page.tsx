@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -13,10 +13,12 @@ export default function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Property | null>(null);
-  const [form, setForm] = useState({ name: '', address: '', property_type: 'Apartment', description: '' });
+  const [form, setForm] = useState({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '' });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Property | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const fetchProperties = async () => {
@@ -37,19 +39,47 @@ export default function PropertiesPage() {
     if (formErrors[e.target.name]) setFormErrors({ ...formErrors, [e.target.name]: '' });
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast('Please select an image file', 'error');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast('Image must be under 10MB', 'error');
+      return;
+    }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const { data } = await api.post('/upload-image/', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setForm(prev => ({ ...prev, image_url: data.image_url }));
+      toast('Image uploaded successfully', 'success');
+    } catch {
+      toast('Failed to upload image', 'error');
+    } finally {
+      setUploading(false);
+    }
+    e.target.value = '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors({});
     setSaving(true);
     try {
+      const payload = { ...form, total_units: parseInt(form.total_units, 10) };
       if (editing) {
-        await api.put(`/properties/${editing.id}/`, form);
-        toast('Property updated successfully', 'success');
+        await api.put(`/properties/${editing.id}/`, payload);
       } else {
-        await api.post('/properties/', form);
-        toast('Property created successfully', 'success');
+        await api.post('/properties/', payload);
       }
-      setForm({ name: '', address: '', property_type: 'Apartment', description: '' });
+      toast(`Property ${editing ? 'updated' : 'created'} successfully`, 'success');
+      setForm({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '' });
       setShowForm(false);
       setEditing(null);
       fetchProperties();
@@ -72,7 +102,7 @@ export default function PropertiesPage() {
 
   const handleEdit = (prop: Property) => {
     setEditing(prop);
-    setForm({ name: prop.name, address: prop.address, property_type: prop.property_type, description: prop.description });
+    setForm({ name: prop.name, address: prop.address, property_type: prop.property_type, description: prop.description, total_units: String(prop.total_units ?? 1), image_url: prop.image_url || '' });
     setShowForm(true);
   };
 
@@ -89,7 +119,7 @@ export default function PropertiesPage() {
   const closeForm = () => {
     setShowForm(false);
     setEditing(null);
-    setForm({ name: '', address: '', property_type: 'Apartment', description: '' });
+    setForm({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '' });
     setFormErrors({});
   };
 
@@ -136,12 +166,48 @@ export default function PropertiesPage() {
                 </select>
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Total Units</label>
+                <input name="total_units" type="number" min="1" value={form.total_units} onChange={handleChange} required />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea name="description" value={form.description} onChange={handleChange} rows={3} placeholder="Optional description..." />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Property Image</label>
+                {uploading ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-2"></div>
+                    <p className="text-sm text-gray-500">Uploading image...</p>
+                  </div>
+                ) : form.image_url ? (
+                  <div className="relative">
+                    <img src={form.image_url} alt="Property" className="h-36 w-full object-cover rounded-lg" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                      <button type="button" onClick={() => fileRef.current?.click()} className="bg-white text-gray-700 px-3 py-1.5 rounded text-sm font-medium">Change</button>
+                      <button type="button" onClick={() => setForm(prev => ({ ...prev, image_url: '' }))} className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium">Remove</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-primary-400 transition-colors"
+                    onClick={() => fileRef.current?.click()}
+                  >
+                    <svg className="w-10 h-10 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="font-medium text-gray-600">Click to upload image</p>
+                    <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 10MB</p>
+                  </div>
+                )}
+                <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                {form.image_url && (
+                  <input type="hidden" name="image_url" value={form.image_url} />
+                )}
+              </div>
               <div className="flex gap-3 justify-end">
                 <button type="button" onClick={closeForm} className="btn btn-secondary">Cancel</button>
-                <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">
+                <button type="submit" disabled={saving || uploading} className="btn btn-primary disabled:opacity-50">
                   {saving ? 'Saving...' : editing ? 'Update' : 'Create'}
                 </button>
               </div>
@@ -167,11 +233,16 @@ export default function PropertiesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {properties.map((prop) => (
-            <div key={prop.id} className="card hover:shadow-md transition-shadow">
+            <div key={prop.id} className="card hover:shadow-md transition-shadow overflow-hidden">
+              {prop.image_url && (
+                <div className="h-36 -mx-6 -mt-6 mb-4 overflow-hidden">
+                  <img src={prop.image_url} alt={prop.name} className="w-full h-full object-cover" />
+                </div>
+              )}
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <span className="badge badge-info mb-2">{prop.property_type}</span>
-                  <h3 className="font-semibold text-lg">{prop.name}</h3>
+                  <a href={`/properties/${prop.id}`} className="font-semibold text-lg hover:text-primary-600 transition-colors">{prop.name}</a>
                 </div>
               </div>
               <p className="text-gray-500 text-sm mb-4 flex items-center gap-1">
@@ -179,7 +250,7 @@ export default function PropertiesPage() {
                 {prop.address}
               </p>
               <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                <span>{prop.units_count} unit{prop.units_count === 1 ? '' : 's'}</span>
+                <span>{prop.total_units ?? prop.units_count} unit{(prop.total_units ?? prop.units_count) === 1 ? '' : 's'}</span>
                 <span>Added {new Date(prop.created_at).toLocaleDateString()}</span>
               </div>
               <div className="flex gap-2">

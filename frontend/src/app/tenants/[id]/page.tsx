@@ -112,7 +112,27 @@ export default function TenantDetailPage() {
   const handleSendDocument = async () => {
     setSendingDocument(true);
     try {
-      await api.post(`/tenants/${tenantId}/send-document/`);
+      const document_data = tenant ? {
+        parties: {
+          tenant: { name: tenant.name, email: tenant.email, phone: tenant.phone },
+        },
+        property: {
+          name: tenant.unit?.property_name || tenant.property_name || '',
+          unit: tenant.unit?.unit_number || tenant.unit_number || '',
+        },
+        financial_terms: {
+          annual_rent: tenant.annual_rent ? Number(tenant.annual_rent) : null,
+        },
+        term: {
+          start_date: tenant.lease_start_date || '',
+          expiry_date: tenant.lease_expiry_date || '',
+          duration: '1 year',
+        },
+      } : {};
+      await api.post(`/tenants/${tenantId}/send-document/`, {
+        document_data,
+        upload_base_url: window.location.origin,
+      });
       toast('Tenancy agreement sent to tenant', 'success');
       setShowSendDocument(false);
       fetchTenant();
