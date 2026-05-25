@@ -4,11 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../../components/DashboardLayout';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import ConfirmDialog from '../../components/ConfirmDialog';
-import api, { API_BASE_URL } from '../../lib/api';
+import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import type { Property, PaginatedResponse } from '../../types';
 
-const API_ORIGIN = API_BASE_URL?.replace(/\/api\/?$/, '') || '';
+const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/api\/?$/, '');
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -69,7 +69,7 @@ export default function PropertiesPage() {
       const { data } = await api.post('/upload-image/', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      const imageUrl = data.image_url.startsWith('/') ? `${API_BASE_URL.replace(/\/api\/?$/, '')}${data.image_url}` : data.image_url;
+      const imageUrl = data.image_url.startsWith('/') ? `${API_ORIGIN}${data.image_url}` : data.image_url;
       setForm(prev => ({ ...prev, image_url: imageUrl }));
       toast('Image uploaded successfully', 'success');
     } catch {
