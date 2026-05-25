@@ -18,6 +18,9 @@ import type {
 } from '../../../types';
 
 const tenancyStatusConfig: Record<TenancyStatus, { label: string; className: string }> = {
+  invited: { label: 'Invited', className: 'badge-warning' },
+  profile_pending: { label: 'Profile Pending', className: 'badge-warning' },
+  document_pending: { label: 'Document Pending', className: 'badge-info' },
   pending_document: { label: 'Pending Document', className: 'badge-warning' },
   document_sent: { label: 'Document Sent', className: 'badge-info' },
   document_signed: { label: 'Document Signed', className: 'badge-info' },

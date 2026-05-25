@@ -13,7 +13,7 @@ export default function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Property | null>(null);
-  const [form, setForm] = useState({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '' });
+  const [form, setForm] = useState({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '', is_published: 'false', amenities: '', nearby_places: '' });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -37,6 +37,10 @@ export default function PropertiesPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (formErrors[e.target.name]) setFormErrors({ ...formErrors, [e.target.name]: '' });
+  };
+
+  const handleTogglePublished = () => {
+    setForm(prev => ({ ...prev, is_published: prev.is_published === 'true' ? 'false' : 'true' }));
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,14 +76,14 @@ export default function PropertiesPage() {
     setFormErrors({});
     setSaving(true);
     try {
-      const payload = { ...form, total_units: parseInt(form.total_units, 10) };
+      const payload = { ...form, total_units: parseInt(form.total_units, 10), is_published: form.is_published === 'true' };
       if (editing) {
         await api.put(`/properties/${editing.id}/`, payload);
       } else {
         await api.post('/properties/', payload);
       }
       toast(`Property ${editing ? 'updated' : 'created'} successfully`, 'success');
-      setForm({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '' });
+      setForm({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '', is_published: 'false', amenities: '', nearby_places: '' });
       setShowForm(false);
       setEditing(null);
       fetchProperties();
@@ -102,7 +106,7 @@ export default function PropertiesPage() {
 
   const handleEdit = (prop: Property) => {
     setEditing(prop);
-    setForm({ name: prop.name, address: prop.address, property_type: prop.property_type, description: prop.description, total_units: String(prop.total_units ?? 1), image_url: prop.image_url || '' });
+    setForm({ name: prop.name, address: prop.address, property_type: prop.property_type, description: prop.description, total_units: String(prop.total_units ?? 1), image_url: prop.image_url || '', is_published: prop.is_published ? 'true' : 'false', amenities: prop.amenities || '', nearby_places: prop.nearby_places || '' });
     setShowForm(true);
   };
 
@@ -119,7 +123,7 @@ export default function PropertiesPage() {
   const closeForm = () => {
     setShowForm(false);
     setEditing(null);
-    setForm({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '' });
+    setForm({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '', is_published: 'false', amenities: '', nearby_places: '' });
     setFormErrors({});
   };
 
@@ -205,6 +209,21 @@ export default function PropertiesPage() {
                   <input type="hidden" name="image_url" value={form.image_url} />
                 )}
               </div>
+              <div className="flex items-center gap-3">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" checked={form.is_published === 'true'} onChange={handleTogglePublished} />
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
+                <span className="text-sm font-medium text-gray-700">Published (visible to public)</span>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amenities</label>
+                <textarea name="amenities" value={form.amenities} onChange={handleChange} rows={3} placeholder="Swimming pool, Gym, Parking, 24/7 Security..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nearby Places</label>
+                <textarea name="nearby_places" value={form.nearby_places} onChange={handleChange} rows={3} placeholder="Shopping mall, School, Hospital, Bus stop..." />
+              </div>
               <div className="flex gap-3 justify-end">
                 <button type="button" onClick={closeForm} className="btn btn-secondary">Cancel</button>
                 <button type="submit" disabled={saving || uploading} className="btn btn-primary disabled:opacity-50">
@@ -242,7 +261,8 @@ export default function PropertiesPage() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <span className="badge badge-info mb-2">{prop.property_type}</span>
-                  <a href={`/properties/${prop.id}`} className="font-semibold text-lg hover:text-primary-600 transition-colors">{prop.name}</a>
+                  {prop.is_published && <span className="badge badge-success ml-1">Published</span>}
+                  <a href={`/properties/${prop.id}`} className="font-semibold text-lg hover:text-primary-600 transition-colors block mt-1">{prop.name}</a>
                 </div>
               </div>
               <p className="text-gray-500 text-sm mb-4 flex items-center gap-1">
