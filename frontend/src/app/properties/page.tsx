@@ -5,10 +5,9 @@ import DashboardLayout from '../../components/DashboardLayout';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import api from '../../lib/api';
+import { uploadImage } from '../../lib/upload';
 import { useToast } from '../../context/ToastContext';
 import type { Property, PaginatedResponse } from '../../types';
-
-const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/api\/?$/, '');
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -22,12 +21,6 @@ export default function PropertiesPage() {
   const [deleteTarget, setDeleteTarget] = useState<Property | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-
-  const imgUrl = (url: string | undefined | null) => {
-    if (!url) return '';
-    if (url.startsWith('/')) return `${API_ORIGIN}${url}`;
-    return url;
-  };
 
   const fetchProperties = async () => {
     try {
@@ -54,29 +47,15 @@ export default function PropertiesPage() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast('Please select an image file', 'error');
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast('Image must be under 10MB', 'error');
-      return;
-    }
     setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append('image', file);
-      const { data } = await api.post('/upload-image/', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      const imageUrl = data.image_url.startsWith('/') ? `${API_ORIGIN}${data.image_url}` : data.image_url;
-      setForm(prev => ({ ...prev, image_url: imageUrl }));
+    const result = await uploadImage(file);
+    if (result.success && result.url) {
+      setForm(prev => ({ ...prev, image_url: result.url! }));
       toast('Image uploaded successfully', 'success');
-    } catch {
-      toast('Failed to upload image', 'error');
-    } finally {
-      setUploading(false);
+    } else {
+      toast(result.error || 'Failed to upload image', 'error');
     }
+    setUploading(false);
     e.target.value = '';
   };
 
@@ -211,7 +190,7 @@ export default function PropertiesPage() {
                     </div>
                   ) : form.image_url ? (
                     <div className="relative">
-                      <img src={imgUrl(form.image_url)} alt="Property" className="h-36 w-full object-cover rounded-lg" />
+                      <img src={form.image_url} alt="Property" className="h-36 w-full object-cover rounded-lg" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
                         <button type="button" onClick={() => fileRef.current?.click()} className="bg-white text-gray-700 px-3 py-1.5 rounded text-sm font-medium">Change</button>
                         <button type="button" onClick={() => setForm(prev => ({ ...prev, image_url: '' }))} className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium">Remove</button>
@@ -300,7 +279,7 @@ export default function PropertiesPage() {
             <div key={prop.id} className="card hover:shadow-md transition-shadow overflow-hidden group">
               {prop.image_url ? (
                 <div className="h-40 -mx-6 -mt-6 mb-4 overflow-hidden">
-                  <img src={imgUrl(prop.image_url)} alt={prop.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={prop.image_url} alt={prop.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
               ) : (
                 <div className="h-40 -mx-6 -mt-6 mb-4 flex items-center justify-center" style={{ background: 'var(--hover-bg)' }}>
