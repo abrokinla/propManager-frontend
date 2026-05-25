@@ -8,15 +8,24 @@ import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import type { Property, Unit, PaginatedResponse } from '../../types';
 
+interface EditState {
+  [unitId: number]: {
+    bedrooms: string;
+    bathrooms: string;
+    toilets: string;
+    size_sqft: string;
+    price_rent: string;
+    price_sale: string;
+  };
+}
+
 export default function UnitsPage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<Unit | null>(null);
-  const [form, setForm] = useState({ property_id: '', unit_number: '', bedrooms: '1', toilets: '1', bathrooms: '1', size_sqft: '', price_sale: '', price_rent: '', status: 'Available' });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editValues, setEditValues] = useState<EditState>({});
+  const [savingId, setSavingId] = useState<number | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const { toast } = useToast();
 
@@ -31,71 +40,71 @@ export default function UnitsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    if (formErrors[e.target.name]) setFormErrors({ ...formErrors, [e.target.name]: '' });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormErrors({});
-    setSaving(true);
-    try {
-      const payload = { ...form, property_id: Number(form.property_id), bedrooms: Number(form.bedrooms), toilets: Number(form.toilets), bathrooms: Number(form.bathrooms), size_sqft: form.size_sqft ? Number(form.size_sqft) : null, price_sale: form.price_sale || null, price_rent: form.price_rent || null };
-      if (editing) {
-        await api.put(`/units/${editing.id}/`, payload);
-        toast('Unit updated successfully', 'success');
-      } else {
-        await api.post('/units/', payload);
-        toast('Unit created successfully', 'success');
-      }
-      setShowForm(false);
-      setEditing(null);
-      setForm({ property_id: '', unit_number: '', bedrooms: '1', toilets: '1', bathrooms: '1', size_sqft: '', price_sale: '', price_rent: '', status: 'Available' });
-      const { data } = await api.get<PaginatedResponse<Unit>>('/units/');
-      setUnits(data.results);
-    } catch (err: unknown) {
-      const axiosError = err as { response?: { data?: Record<string, string[] | string> } };
-      const data = axiosError.response?.data;
-      if (data) {
-        const fe: Record<string, string> = {};
-        for (const [k, v] of Object.entries(data)) fe[k] = Array.isArray(v) ? v[0] : v;
-        setFormErrors(fe);
-      } else {
-        toast('Failed to save unit', 'error');
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleEdit = (unit: Unit) => {
-    setEditing(unit);
-    setForm({
-      property_id: String(unit.property?.id || unit.property_id || ''),
-      unit_number: unit.unit_number,
-      bedrooms: String(unit.bedrooms),
-      toilets: String(unit.toilets),
-      bathrooms: String(unit.bathrooms),
-      size_sqft: unit.size_sqft ? String(unit.size_sqft) : '',
-      price_sale: unit.price_sale ? String(unit.price_sale) : '',
-      price_rent: unit.price_rent ? String(unit.price_rent) : '',
-      status: unit.status,
+  const startEdit = (unit: Unit) => {
+    setEditingId(unit.id);
+    setEditValues({
+      [unit.id]: {
+        bedrooms: String(unit.bedrooms),
+        bathrooms: String(unit.bathrooms),
+        toilets: String(unit.toilets),
+        size_sqft: unit.size_sqft ? String(unit.size_sqft) : '',
+        price_rent: unit.price_rent ? String(unit.price_rent) : '',
+        price_sale: unit.price_sale ? String(unit.price_sale) : '',
+      },
     });
-    setShowForm(true);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditValues({});
+  };
+
+  const handleEditChange = (unitId: number, field: string, value: string) => {
+    setEditValues(prev => ({
+      ...prev,
+      [unitId]: { ...prev[unitId], [field]: value },
+    }));
+  };
+
+  const saveUnit = async (unit: Unit) => {
+    const vals = editValues[unit.id];
+    if (!vals) return;
+    setSavingId(unit.id);
+    try {
+      const payload = {
+        property_id: unit.property?.id || unit.property_id,
+        unit_number: unit.unit_number,
+        bedrooms: Number(vals.bedrooms),
+        bathrooms: Number(vals.bathrooms),
+        toilets: Number(vals.toilets),
+        size_sqft: vals.size_sqft ? Number(vals.size_sqft) : null,
+        price_rent: vals.price_rent || null,
+        price_sale: vals.price_sale || null,
+        status: unit.status,
+      };
+      const { data } = await api.put<Unit>(`/units/${unit.id}/`, payload);
+      setUnits(prev => prev.map(u => u.id === unit.id ? data : u));
+      toast('Unit updated', 'success');
+      cancelEdit();
+    } catch {
+      toast('Failed to update unit', 'error');
+    } finally {
+      setSavingId(null);
+    }
   };
 
   const handleDelete = async (id: number) => {
     try {
       await api.delete(`/units/${id}/`);
-      toast('Unit deleted successfully', 'success');
-      setUnits(units.filter(u => u.id !== id));
+      setUnits(prev => prev.filter(u => u.id !== id));
+      toast('Unit deleted', 'success');
     } catch {
       toast('Failed to delete unit', 'error');
     }
   };
 
   const statusColor = (s: string) => s === 'Available' ? 'badge-success' : s === 'Occupied' ? 'badge-info' : 'badge-warning';
+  const propName = (unit: Unit) => unit.property?.name || unit.property_name || '—';
 
   return (
     <ErrorBoundary>
@@ -103,88 +112,16 @@ export default function UnitsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold">Units</h1>
-          <p className="text-gray-500 mt-1">{units.length} unit{units.length === 1 ? '' : 's'}</p>
+          <p className="text-gray-500 mt-1">{units.length} unit{units.length === 1 ? '' : 's'} · Units are auto-created from property total_units</p>
         </div>
-        <button onClick={() => setShowForm(true)} className="btn btn-primary">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-          Add Unit
-        </button>
       </div>
-
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4">{editing ? 'Edit Unit' : 'Add New Unit'}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Property *</label>
-                <select name="property_id" value={form.property_id} onChange={handleChange} required>
-                  <option value="">Select property...</option>
-                  {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                {formErrors.property_id && <p className="text-red-500 text-xs mt-1">{formErrors.property_id}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Unit Number *</label>
-                <input name="unit_number" value={form.unit_number} onChange={handleChange} required placeholder="e.g. A101" />
-                {formErrors.unit_number && <p className="text-red-500 text-xs mt-1">{formErrors.unit_number}</p>}
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
-                  <input name="bedrooms" type="number" min="0" value={form.bedrooms} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
-                  <input name="bathrooms" type="number" min="0" value={form.bathrooms} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Toilets</label>
-                  <input name="toilets" type="number" min="0" value={form.toilets} onChange={handleChange} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Size (sqft)</label>
-                  <input name="size_sqft" type="number" value={form.size_sqft} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select name="status" value={form.status} onChange={handleChange}>
-                    <option value="Available">Available</option>
-                    <option value="Occupied">Occupied</option>
-                    <option value="Maintenance">Maintenance</option>
-                    <option value="Unavailable">Unavailable</option>
-                    <option value="Under Maintenance">Under Maintenance</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Sale Price (₦)</label>
-                  <input name="price_sale" type="number" value={form.price_sale} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Rent Price (₦)</label>
-                  <input name="price_rent" type="number" value={form.price_rent} onChange={handleChange} />
-                </div>
-              </div>
-              <div className="flex gap-3 justify-end">
-                <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); }} className="btn btn-secondary">Cancel</button>
-                <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {loading ? (
         <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
       ) : units.length === 0 ? (
         <div className="card text-center py-12">
           <h3 className="font-semibold text-lg mb-2">No units yet</h3>
-          <p className="text-gray-500 mb-4">Add units to your properties</p>
-          <button onClick={() => setShowForm(true)} className="btn btn-primary">Add Unit</button>
+          <p className="text-gray-500 mb-4">Units are created automatically when you set total_units on a property.</p>
         </div>
       ) : (
         <div className="card overflow-x-auto">
@@ -193,28 +130,80 @@ export default function UnitsPage() {
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Unit</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Property</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Beds/Baths</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Rent</th>
+                <th className="text-center py-3 px-4 font-medium text-gray-500">Beds</th>
+                <th className="text-center py-3 px-4 font-medium text-gray-500">Baths</th>
+                <th className="text-center py-3 px-4 font-medium text-gray-500">Toilets</th>
+                <th className="text-center py-3 px-4 font-medium text-gray-500">Sqft</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500">Rent</th>
+                <th className="text-right py-3 px-4 font-medium text-gray-500">Sale</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Tenant</th>
                 <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {units.map((unit) => (
-                <tr key={unit.id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium">{unit.unit_number}</td>
-                  <td className="py-3 px-4 text-gray-600">{unit.property?.name || unit.property_name || '—'}</td>
-                  <td className="py-3 px-4 text-gray-600">{unit.bedrooms}bd/{unit.bathrooms}ba</td>
-                  <td className="py-3 px-4">{unit.price_rent ? `₦${Number(unit.price_rent).toLocaleString()}` : '—'}</td>
-                  <td className="py-3 px-4"><span className={`badge ${statusColor(unit.status)}`}>{unit.status}</span></td>
-                  <td className="py-3 px-4 text-gray-600">{unit.tenant_name || '—'}</td>
-                  <td className="py-3 px-4 text-right">
-                    <button onClick={() => handleEdit(unit)} className="text-primary-600 hover:text-primary-700 text-sm font-medium mr-3">Edit</button>
-                    <button onClick={() => setDeleteTarget(unit.id)} className="text-red-600 hover:text-red-700 text-sm font-medium">Delete</button>
-                  </td>
-                </tr>
-              ))}
+              {units.map((unit) => {
+                const isEditing = editingId === unit.id;
+                const vals = editValues[unit.id];
+                const isSaving = savingId === unit.id;
+                return (
+                  <tr key={unit.id} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="py-3 px-4 font-medium">{unit.unit_number}</td>
+                    <td className="py-3 px-4 text-gray-600">{propName(unit)}</td>
+
+                    {isEditing && vals ? (
+                      <>
+                        <td className="py-2 px-2 text-center">
+                          <input type="number" min="0" value={vals.bedrooms} onChange={e => handleEditChange(unit.id, 'bedrooms', e.target.value)} className="w-14 text-center px-1 py-1 border border-gray-300 rounded text-sm" />
+                        </td>
+                        <td className="py-2 px-2 text-center">
+                          <input type="number" min="0" value={vals.bathrooms} onChange={e => handleEditChange(unit.id, 'bathrooms', e.target.value)} className="w-14 text-center px-1 py-1 border border-gray-300 rounded text-sm" />
+                        </td>
+                        <td className="py-2 px-2 text-center">
+                          <input type="number" min="0" value={vals.toilets} onChange={e => handleEditChange(unit.id, 'toilets', e.target.value)} className="w-14 text-center px-1 py-1 border border-gray-300 rounded text-sm" />
+                        </td>
+                        <td className="py-2 px-2 text-center">
+                          <input type="number" min="0" value={vals.size_sqft} onChange={e => handleEditChange(unit.id, 'size_sqft', e.target.value)} className="w-16 text-center px-1 py-1 border border-gray-300 rounded text-sm" placeholder="—" />
+                        </td>
+                        <td className="py-2 px-2 text-right">
+                          <input type="number" min="0" value={vals.price_rent} onChange={e => handleEditChange(unit.id, 'price_rent', e.target.value)} className="w-20 text-right px-1 py-1 border border-gray-300 rounded text-sm" placeholder="—" />
+                        </td>
+                        <td className="py-2 px-2 text-right">
+                          <input type="number" min="0" value={vals.price_sale} onChange={e => handleEditChange(unit.id, 'price_sale', e.target.value)} className="w-20 text-right px-1 py-1 border border-gray-300 rounded text-sm" placeholder="—" />
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="py-3 px-4 text-center text-gray-600">{unit.bedrooms}</td>
+                        <td className="py-3 px-4 text-center text-gray-600">{unit.bathrooms}</td>
+                        <td className="py-3 px-4 text-center text-gray-600">{unit.toilets}</td>
+                        <td className="py-3 px-4 text-center text-gray-600">{unit.size_sqft ?? '—'}</td>
+                        <td className="py-3 px-4 text-right">{unit.price_rent ? `₦${Number(unit.price_rent).toLocaleString()}` : '—'}</td>
+                        <td className="py-3 px-4 text-right">{unit.price_sale ? `₦${Number(unit.price_sale).toLocaleString()}` : '—'}</td>
+                      </>
+                    )}
+
+                    <td className="py-3 px-4"><span className={`badge ${statusColor(unit.status)}`}>{unit.status}</span></td>
+                    <td className="py-3 px-4 text-gray-600 text-xs">{unit.tenant_name || '—'}</td>
+
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      {isEditing ? (
+                        <span className="flex gap-1 justify-end">
+                          <button onClick={() => saveUnit(unit)} disabled={isSaving} className="text-green-600 hover:text-green-700 text-sm font-medium disabled:opacity-50">
+                            {isSaving ? 'Saving...' : 'Save'}
+                          </button>
+                          <button onClick={cancelEdit} className="text-gray-500 hover:text-gray-700 text-sm font-medium ml-2">Cancel</button>
+                        </span>
+                      ) : (
+                        <span className="flex gap-1 justify-end">
+                          <button onClick={() => startEdit(unit)} className="text-primary-600 hover:text-primary-700 text-sm font-medium">Edit</button>
+                          <button onClick={() => setDeleteTarget(unit.id)} className="text-red-600 hover:text-red-700 text-sm font-medium ml-2">Delete</button>
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

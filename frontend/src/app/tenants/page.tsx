@@ -10,6 +10,9 @@ import { useToast } from '../../context/ToastContext';
 import type { Unit, Tenant, PaginatedResponse, TenancyStatus } from '../../types';
 
 const tenancyStatusConfig: Record<TenancyStatus, { label: string; className: string }> = {
+  invited: { label: 'Invited', className: 'badge-warning' },
+  profile_pending: { label: 'Profile Pending', className: 'badge-warning' },
+  document_pending: { label: 'Document Pending', className: 'badge-info' },
   pending_document: { label: 'Pending Document', className: 'badge-warning' },
   document_sent: { label: 'Document Sent', className: 'badge-info' },
   document_signed: { label: 'Document Signed', className: 'badge-info' },
@@ -20,7 +23,7 @@ const tenancyStatusConfig: Record<TenancyStatus, { label: string; className: str
 
 const defaultForm = {
   unit_id: '', name: '', phone: '', email: '', address: '',
-  annual_rent: '', tenancy_status: 'pending_document' as TenancyStatus,
+  annual_rent: '', tenancy_status: 'invited' as TenancyStatus,
   lease_start_date: '', lease_renewal_date: '', lease_expiry_date: '',
   move_in_date: '', is_active: 'true',
 };
@@ -35,6 +38,7 @@ export default function TenantsPage() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [sendingInvite, setSendingInvite] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -69,7 +73,7 @@ export default function TenantsPage() {
         toast('Tenant updated successfully', 'success');
       } else {
         await api.post('/tenants/', payload);
-        toast('Tenant created successfully', 'success');
+        toast('Tenant created. Invitation sent to ' + (payload.email || 'their email'), 'success');
       }
       setShowForm(false);
       setEditing(null);
@@ -114,6 +118,20 @@ export default function TenantsPage() {
       toast('Failed to remove tenant', 'error');
     }
   };
+
+  const handleResendInvite = async (tenantId: number) => {
+    setSendingInvite(tenantId);
+    try {
+      await api.post(`/tenants/${tenantId}/resend-invite/`);
+      toast('Invitation resent successfully', 'success');
+    } catch {
+      toast('Failed to resend invitation', 'error');
+    } finally {
+      setSendingInvite(null);
+    }
+  };
+
+  const canResend = (status: TenancyStatus) => status === 'invited' || status === 'profile_pending';
 
   return (
     <ErrorBoundary>
@@ -196,7 +214,7 @@ export default function TenantsPage() {
               </div>
               <div className="flex gap-3 justify-end">
                 <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); setForm(defaultForm); }} className="btn btn-secondary">Cancel</button>
-                <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
+                <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : editing ? 'Update' : 'Create Tenant'}</button>
               </div>
             </form>
           </div>
@@ -221,7 +239,7 @@ export default function TenantsPage() {
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Property</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Annual Rent</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-500">Lease Expiry</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Tenancy Status</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
                 <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
               </tr>
             </thead>
@@ -241,8 +259,17 @@ export default function TenantsPage() {
                     <td className="py-3 px-4">{t.annual_rent ? `₦${Number(t.annual_rent).toLocaleString()}/yr` : '—'}</td>
                     <td className="py-3 px-4 text-gray-600">{t.lease_expiry_date || '—'}</td>
                     <td className="py-3 px-4"><span className={`badge ${statusCfg.className}`}>{statusCfg.label}</span></td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
                       <button onClick={() => handleEdit(t)} className="text-primary-600 hover:text-primary-700 text-sm font-medium mr-3">Edit</button>
+                      {canResend(t.tenancy_status) && (
+                        <button
+                          onClick={() => handleResendInvite(t.id)}
+                          disabled={sendingInvite === t.id}
+                          className="text-green-600 hover:text-green-700 text-sm font-medium mr-3 disabled:opacity-50"
+                        >
+                          {sendingInvite === t.id ? 'Sending...' : 'Resend Invite'}
+                        </button>
+                      )}
                       <button onClick={() => setDeleteTarget(t.id)} className="text-red-600 hover:text-red-700 text-sm font-medium">Delete</button>
                     </td>
                   </tr>

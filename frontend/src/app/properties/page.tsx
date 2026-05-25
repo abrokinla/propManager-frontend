@@ -250,7 +250,7 @@ export default function PropertiesPage() {
                 {prop.address}
               </p>
               <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                <span>{prop.total_units ?? prop.units_count} unit{(prop.total_units ?? prop.units_count) === 1 ? '' : 's'}</span>
+                <span>{prop.units_count}/{prop.total_units ?? prop.units_count} unit{(prop.total_units ?? prop.units_count) === 1 ? '' : 's'}</span>
                 <span>Added {new Date(prop.created_at).toLocaleDateString()}</span>
               </div>
               <div className="flex gap-2">

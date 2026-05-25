@@ -32,6 +32,9 @@ export interface Property {
   owner?: User;
   units_count: number;
   image_url?: string;
+  is_published?: boolean;
+  amenities?: string;
+  nearby_places?: string;
   created_at: string;
   updated_at: string;
 }
@@ -55,6 +58,9 @@ export interface Unit {
 }
 
 export type TenancyStatus =
+  | 'invited'
+  | 'profile_pending'
+  | 'document_pending'
   | 'pending_document'
   | 'document_sent'
   | 'document_signed'
@@ -73,6 +79,22 @@ export interface Tenant {
   property_name: string;
   annual_rent: number;
   tenancy_status: TenancyStatus;
+  passport_photo?: string;
+  government_id?: string;
+  occupation?: string;
+  employer_name?: string;
+  employer_address?: string;
+  next_of_kin_name?: string;
+  next_of_kin_phone?: string;
+  next_of_kin_email?: string;
+  next_of_kin_address?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  guarantor_name?: string;
+  guarantor_phone?: string;
+  guarantor_email?: string;
+  guarantor_address?: string;
+  profile_completed?: boolean;
   lease_start_date?: string;
   lease_renewal_date?: string;
   lease_expiry_date?: string;
@@ -149,7 +171,84 @@ export interface ApiError {
   [key: string]: string[] | string;
 }
 
-// New interfaces for enhanced tenant features
+// New interfaces for public listings and tenant portal
+
+export interface PublicProperty {
+  id: number;
+  name: string;
+  address: string;
+  property_type: string;
+  description: string;
+  image_url?: string;
+  total_units: number;
+  amenities: string;
+  nearby_places: string;
+  available_units_count: number;
+  price_range: { min: number; max: number } | null;
+}
+
+export interface PublicPropertyDetail extends PublicProperty {
+  available_units: Array<{
+    id: number;
+    unit_number: string;
+    bedrooms: number;
+    bathrooms: number;
+    toilets: number;
+    size_sqft: number | null;
+    price_rent: number | null;
+    price_sale: number | null;
+  }>;
+}
+
+export interface TenantProfile {
+  phone?: string;
+  address?: string;
+  occupation?: string;
+  employer_name?: string;
+  employer_address?: string;
+  next_of_kin_name?: string;
+  next_of_kin_phone?: string;
+  next_of_kin_email?: string;
+  next_of_kin_address?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  guarantor_name?: string;
+  guarantor_phone?: string;
+  guarantor_email?: string;
+  guarantor_address?: string;
+}
+
+export interface TenantSelf {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  unit_number: string;
+  property_name: string;
+  annual_rent: number;
+  tenancy_status: TenancyStatus;
+  profile_completed: boolean;
+  passport_photo: string;
+  government_id: string;
+  occupation: string;
+  employer_name: string;
+  employer_address: string;
+  next_of_kin_name: string;
+  next_of_kin_phone: string;
+  next_of_kin_email: string;
+  next_of_kin_address: string;
+  emergency_contact_name: string;
+  emergency_contact_phone: string;
+  guarantor_name: string;
+  guarantor_phone: string;
+  guarantor_email: string;
+  guarantor_address: string;
+  lease_start_date?: string;
+  lease_renewal_date?: string;
+  lease_expiry_date?: string;
+  created_at: string;
+}
 
 export type DocumentStatus = 'draft' | 'sent' | 'viewed' | 'signed' | 'completed';
 
@@ -168,7 +267,7 @@ export interface TenancyDocument {
 }
 
 export type ReminderChannel = 'email';
-export type ReminderType = 'lease_expiry' | 'rent_due' | 'quit_notice' | 'document_sign';
+export type ReminderType = 'lease_expiry' | 'rent_due' | 'rent_renewal' | 'quit_notice' | 'document_sign' | 'tenant_invite';
 export type DeliveryStatus = 'sent' | 'delivered' | 'failed';
 
 export interface Reminder {
