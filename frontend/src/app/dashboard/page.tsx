@@ -31,7 +31,7 @@ export default function DashboardPage() {
   if (error || !stats) {
     return (
       <DashboardLayout>
-        <div className="card text-center text-red-600">{error || 'Failed to load'}</div>
+        <div className="card text-center" style={{ color: 'var(--danger)' }}>{error || 'Failed to load'}</div>
       </DashboardLayout>
     );
   }
@@ -39,8 +39,8 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-gray-500 mt-1">Overview of your property portfolio</p>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Dashboard</h1>
+        <p className="mt-1" style={{ color: 'var(--text-light)' }}>Overview of your property portfolio</p>
       </div>
 
       {/* Stats grid */}

@@ -10,7 +10,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
       </div>
     );
@@ -18,10 +18,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <div className="card text-center max-w-md">
-          <h1 className="text-2xl font-bold mb-4">Please log in</h1>
-          <p className="text-gray-600 mb-6">You need to be authenticated to view this page.</p>
+          <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--text)' }}>Please log in</h1>
+          <p className="mb-6" style={{ color: 'var(--text-light)' }}>You need to be authenticated to view this page.</p>
           <Link href="/login" className="btn btn-primary">Go to Login</Link>
         </div>
       </div>
@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <Navbar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {children}

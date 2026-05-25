@@ -138,8 +138,8 @@ export default function TenantsPage() {
     <DashboardLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Tenants</h1>
-          <p className="text-gray-500 mt-1">{tenants.length} tenant{tenants.length === 1 ? '' : 's'}</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Tenants</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{tenants.length} tenant{tenants.length === 1 ? '' : 's'}</p>
         </div>
         <button onClick={() => setShowForm(true)} className="btn btn-primary">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -150,42 +150,42 @@ export default function TenantsPage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4">{editing ? 'Edit Tenant' : 'Add New Tenant'}</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{editing ? 'Edit Tenant' : 'Add New Tenant'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Unit *</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Unit *</label>
                 <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
                   <option value="">Select unit...</option>
                   {units.map(u => <option key={u.id} value={u.id}>{u.property?.name || u.property_name} - {u.unit_number}</option>)}
                 </select>
-                {formErrors.unit_id && <p className="text-red-500 text-xs mt-1">{formErrors.unit_id}</p>}
+                {formErrors.unit_id && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.unit_id}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Full Name *</label>
                 <input name="name" value={form.name} onChange={handleChange} required placeholder="John Doe" />
-                {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
+                {formErrors.name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.name}</p>}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Phone</label>
                   <input name="phone" value={form.phone} onChange={handleChange} placeholder="+234..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Email</label>
                   <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="john@example.com" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Address</label>
                 <input name="address" value={form.address} onChange={handleChange} placeholder="Home address" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Annual Rent (₦)</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Annual Rent (₦)</label>
                   <input name="annual_rent" type="number" value={form.annual_rent} onChange={handleChange} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Active</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Active</label>
                   <select name="is_active" value={form.is_active} onChange={handleChange}>
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>
@@ -194,21 +194,21 @@ export default function TenantsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Lease Start</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Start</label>
                   <input name="lease_start_date" type="date" value={form.lease_start_date} onChange={handleChange} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Lease Expiry</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Expiry</label>
                   <input name="lease_expiry_date" type="date" value={form.lease_expiry_date} onChange={handleChange} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Lease Renewal</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Renewal</label>
                   <input name="lease_renewal_date" type="date" value={form.lease_renewal_date} onChange={handleChange} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Move-in Date</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Move-in Date</label>
                   <input name="move_in_date" type="date" value={form.move_in_date} onChange={handleChange} />
                 </div>
               </div>
@@ -225,39 +225,39 @@ export default function TenantsPage() {
         <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
       ) : tenants.length === 0 ? (
         <div className="card text-center py-12">
-          <h3 className="font-semibold text-lg mb-2">No tenants yet</h3>
-          <p className="text-gray-500 mb-4">Add tenants to your units</p>
+          <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No tenants yet</h3>
+          <p className="mb-4" style={{ color: 'var(--text-light)' }}>Add tenants to your units</p>
           <button onClick={() => setShowForm(true)} className="btn btn-primary">Add Tenant</button>
         </div>
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Name</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Unit</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Property</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Annual Rent</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Lease Expiry</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
+              <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Name</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Unit</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Property</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Annual Rent</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Lease Expiry</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Status</th>
+                <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {tenants.map((t) => {
                 const statusCfg = tenancyStatusConfig[t.tenancy_status] || tenancyStatusConfig.active;
                 return (
-                  <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <tr key={t.id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td className="py-3 px-4">
                       <Link href={`/tenants/${t.id}`} className="font-medium text-primary-600 hover:text-primary-700">
                         {t.name}
                       </Link>
-                      <div className="text-xs text-gray-500">{t.email}</div>
+                      <div className="text-xs" style={{ color: 'var(--text-light)' }}>{t.email}</div>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{t.unit?.unit_number || t.unit_number || '—'}</td>
-                    <td className="py-3 px-4 text-gray-600">{t.unit?.property_name || t.property_name || '—'}</td>
-                    <td className="py-3 px-4">{t.annual_rent ? `₦${Number(t.annual_rent).toLocaleString()}/yr` : '—'}</td>
-                    <td className="py-3 px-4 text-gray-600">{t.lease_expiry_date || '—'}</td>
+                    <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.unit?.unit_number || t.unit_number || '—'}</td>
+                    <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.unit?.property_name || t.property_name || '—'}</td>
+                    <td className="py-3 px-4" style={{ color: 'var(--text)' }}>{t.annual_rent ? `₦${Number(t.annual_rent).toLocaleString()}/yr` : '—'}</td>
+                    <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.lease_expiry_date || '—'}</td>
                     <td className="py-3 px-4"><span className={`badge ${statusCfg.className}`}>{statusCfg.label}</span></td>
                     <td className="py-3 px-4 text-right whitespace-nowrap">
                       <button onClick={() => handleEdit(t)} className="text-primary-600 hover:text-primary-700 text-sm font-medium mr-3">Edit</button>
@@ -265,12 +265,13 @@ export default function TenantsPage() {
                         <button
                           onClick={() => handleResendInvite(t.id)}
                           disabled={sendingInvite === t.id}
-                          className="text-green-600 hover:text-green-700 text-sm font-medium mr-3 disabled:opacity-50"
+                          className="text-sm font-medium mr-3 disabled:opacity-50"
+                          style={{ color: 'var(--success)' }}
                         >
                           {sendingInvite === t.id ? 'Sending...' : 'Resend Invite'}
                         </button>
                       )}
-                      <button onClick={() => setDeleteTarget(t.id)} className="text-red-600 hover:text-red-700 text-sm font-medium">Delete</button>
+                      <button onClick={() => setDeleteTarget(t.id)} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>Delete</button>
                     </td>
                   </tr>
                 );

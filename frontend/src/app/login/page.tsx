@@ -26,15 +26,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--bg)' }}>
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">PM</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-          <p className="text-gray-500 mt-1">Sign in to your PropManager account</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Welcome back</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>Sign in to your PropManager account</p>
         </div>
 
         <div className="card">
@@ -46,7 +46,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Username</label>
               <input
                 type="text"
                 value={username}
@@ -57,7 +57,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Password</label>
               <input
                 type="password"
                 value={password}
@@ -78,7 +78,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-500">
+          <div className="mt-6 text-center text-sm" style={{ color: 'var(--text-light)' }}>
             Don&apos;t have an account?{' '}
             <Link href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
               Create one

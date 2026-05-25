@@ -47,14 +47,14 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--bg)' }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">PM</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
-          <p className="text-gray-500 mt-1">Start managing your properties today</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Create your account</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>Start managing your properties today</p>
         </div>
 
         <div className="card">
@@ -67,33 +67,33 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>First Name</label>
                 <input name="first_name" value={form.first_name} onChange={handleChange} placeholder="John" />
-                {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>}
+                {errors.first_name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.first_name}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Last Name</label>
                 <input name="last_name" value={form.last_name} onChange={handleChange} placeholder="Doe" />
-                {errors.last_name && <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>}
+                {errors.last_name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.last_name}</p>}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Username</label>
               <input name="username" value={form.username} onChange={handleChange} required placeholder="johndoe" />
-              {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
+              {errors.username && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.username}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Email</label>
               <input name="email" type="email" value={form.email} onChange={handleChange} required placeholder="john@example.com" />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Password</label>
               <input name="password" type="password" value={form.password} onChange={handleChange} required placeholder="Min 8 characters" minLength={8} />
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+              {errors.password && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.password}</p>}
             </div>
 
             <button type="submit" disabled={loading} className="btn btn-primary w-full justify-center py-3 disabled:opacity-50">
@@ -103,7 +103,7 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-500">
+          <div className="mt-6 text-center text-sm" style={{ color: 'var(--text-light)' }}>
             Already have an account?{' '}
             <Link href="/login" className="text-primary-600 hover:text-primary-700 font-medium">
               Sign in

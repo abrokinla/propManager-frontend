@@ -111,8 +111,8 @@ export default function UnitsPage() {
     <DashboardLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Units</h1>
-          <p className="text-gray-500 mt-1">{units.length} unit{units.length === 1 ? '' : 's'} · Units are auto-created from property total_units</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Units</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{units.length} unit{units.length === 1 ? '' : 's'} · Units are auto-created from property total_units</p>
         </div>
       </div>
 
@@ -120,25 +120,25 @@ export default function UnitsPage() {
         <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
       ) : units.length === 0 ? (
         <div className="card text-center py-12">
-          <h3 className="font-semibold text-lg mb-2">No units yet</h3>
-          <p className="text-gray-500 mb-4">Units are created automatically when you set total_units on a property.</p>
+          <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No units yet</h3>
+          <p className="mb-4" style={{ color: 'var(--text-light)' }}>Units are created automatically when you set total_units on a property.</p>
         </div>
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Unit</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Property</th>
-                <th className="text-center py-3 px-4 font-medium text-gray-500">Beds</th>
-                <th className="text-center py-3 px-4 font-medium text-gray-500">Baths</th>
-                <th className="text-center py-3 px-4 font-medium text-gray-500">Toilets</th>
-                <th className="text-center py-3 px-4 font-medium text-gray-500">Sqft</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Rent</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Sale</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-500">Tenant</th>
-                <th className="text-right py-3 px-4 font-medium text-gray-500">Actions</th>
+              <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Unit</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Property</th>
+                <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Beds</th>
+                <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Baths</th>
+                <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Toilets</th>
+                <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Sqft</th>
+                <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Rent</th>
+                <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Sale</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Status</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Tenant</th>
+                <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -147,9 +147,9 @@ export default function UnitsPage() {
                 const vals = editValues[unit.id];
                 const isSaving = savingId === unit.id;
                 return (
-                  <tr key={unit.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="py-3 px-4 font-medium">{unit.unit_number}</td>
-                    <td className="py-3 px-4 text-gray-600">{propName(unit)}</td>
+                  <tr key={unit.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td className="py-3 px-4 font-medium" style={{ color: 'var(--text)' }}>{unit.unit_number}</td>
+                    <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{propName(unit)}</td>
 
                     {isEditing && vals ? (
                       <>
@@ -174,30 +174,30 @@ export default function UnitsPage() {
                       </>
                     ) : (
                       <>
-                        <td className="py-3 px-4 text-center text-gray-600">{unit.bedrooms}</td>
-                        <td className="py-3 px-4 text-center text-gray-600">{unit.bathrooms}</td>
-                        <td className="py-3 px-4 text-center text-gray-600">{unit.toilets}</td>
-                        <td className="py-3 px-4 text-center text-gray-600">{unit.size_sqft ?? '—'}</td>
+                        <td className="py-3 px-4 text-center" style={{ color: 'var(--text-light)' }}>{unit.bedrooms}</td>
+                        <td className="py-3 px-4 text-center" style={{ color: 'var(--text-light)' }}>{unit.bathrooms}</td>
+                        <td className="py-3 px-4 text-center" style={{ color: 'var(--text-light)' }}>{unit.toilets}</td>
+                        <td className="py-3 px-4 text-center" style={{ color: 'var(--text-light)' }}>{unit.size_sqft ?? '—'}</td>
                         <td className="py-3 px-4 text-right">{unit.price_rent ? `₦${Number(unit.price_rent).toLocaleString()}` : '—'}</td>
                         <td className="py-3 px-4 text-right">{unit.price_sale ? `₦${Number(unit.price_sale).toLocaleString()}` : '—'}</td>
                       </>
                     )}
 
                     <td className="py-3 px-4"><span className={`badge ${statusColor(unit.status)}`}>{unit.status}</span></td>
-                    <td className="py-3 px-4 text-gray-600 text-xs">{unit.tenant_name || '—'}</td>
+                    <td className="py-3 px-4 text-xs" style={{ color: 'var(--text-light)' }}>{unit.tenant_name || '—'}</td>
 
                     <td className="py-3 px-4 text-right whitespace-nowrap">
                       {isEditing ? (
                         <span className="flex gap-1 justify-end">
-                          <button onClick={() => saveUnit(unit)} disabled={isSaving} className="text-green-600 hover:text-green-700 text-sm font-medium disabled:opacity-50">
+                          <button onClick={() => saveUnit(unit)} disabled={isSaving} className="text-sm font-medium disabled:opacity-50" style={{ color: 'var(--success)' }}>
                             {isSaving ? 'Saving...' : 'Save'}
                           </button>
-                          <button onClick={cancelEdit} className="text-gray-500 hover:text-gray-700 text-sm font-medium ml-2">Cancel</button>
+                          <button onClick={cancelEdit} className="text-sm font-medium ml-2" style={{ color: 'var(--text-light)' }}>Cancel</button>
                         </span>
                       ) : (
                         <span className="flex gap-1 justify-end">
                           <button onClick={() => startEdit(unit)} className="text-primary-600 hover:text-primary-700 text-sm font-medium">Edit</button>
-                          <button onClick={() => setDeleteTarget(unit.id)} className="text-red-600 hover:text-red-700 text-sm font-medium ml-2">Delete</button>
+                          <button onClick={() => setDeleteTarget(unit.id)} className="text-sm font-medium ml-2" style={{ color: 'var(--danger)' }}>Delete</button>
                         </span>
                       )}
                     </td>
