@@ -251,7 +251,7 @@ export default function UnitsPage() {
               <p className="text-sm mb-3" style={{ color: 'var(--text-light)' }}>{prop.address}</p>
               <div className="flex items-center justify-between">
                 <span className="text-sm" style={{ color: 'var(--text-light)' }}>
-                  {prop.total_units ?? prop.units_count ?? 0} unit{(prop.total_units ?? prop.units_count ?? 0) === 1 ? '' : 's'}
+                  {prop.units_count ?? 0} unit{(prop.units_count ?? 0) === 1 ? '' : 's'}
                 </span>
                 <span className="text-sm font-medium text-primary-600">Edit Units →</span>
               </div>
