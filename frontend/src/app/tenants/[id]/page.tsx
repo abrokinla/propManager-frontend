@@ -13,7 +13,7 @@ import UploadSignedDocumentModal from '../../../components/UploadSignedDocumentM
 import api from '../../../lib/api';
 import { useToast } from '../../../context/ToastContext';
 import type {
-  Tenant, Unit, Payment, PaginatedResponse,
+  Tenant, Unit, Property, Payment, PaginatedResponse,
   TenancyDocument, Reminder, QuitNotice, TenancyStatus,
 } from '../../../types';
 
@@ -45,7 +45,7 @@ export default function TenantDetailPage() {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editing, setEditing] = useState<Tenant | null>(null);
   const [editForm, setEditForm] = useState({
-    unit_id: '', name: '', phone: '', email: '', address: '',
+    property_id: '', unit_id: '', name: '', phone: '', email: '', address: '',
     annual_rent: '', tenancy_status: 'pending_document' as TenancyStatus,
     lease_start_date: '', lease_renewal_date: '', lease_expiry_date: '',
     move_in_date: '', is_active: 'true',
@@ -60,17 +60,20 @@ export default function TenantDetailPage() {
   const [sendingReminder, setSendingReminder] = useState(false);
   const [sendingDocument, setSendingDocument] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
 
   const fetchTenant = async () => {
     try {
-      const [tRes, pRes, uRes] = await Promise.all([
+      const [tRes, pRes, uRes, propRes] = await Promise.all([
         api.get<Tenant>(`/tenants/${tenantId}/`),
         api.get<PaginatedResponse<Payment>>(`/payments/?tenant=${tenantId}`),
         api.get<PaginatedResponse<Unit>>('/units/'),
+        api.get<PaginatedResponse<Property>>('/properties/'),
       ]);
       setTenant(tRes.data);
       setPayments(pRes.data.results);
       setUnits(uRes.data.results);
+      setProperties(propRes.data.results);
     } catch {
       toast('Failed to load tenant data', 'error');
     } finally {
@@ -162,9 +165,12 @@ export default function TenantDetailPage() {
 
   const handleEdit = () => {
     if (!tenant) return;
+    const unitId = tenant.unit?.id || tenant.unit_id;
+    const unit = units.find(u => u.id === unitId);
     setEditing(tenant);
     setEditForm({
-      unit_id: String(tenant.unit?.id || tenant.unit_id || ''),
+      property_id: unit?.property_id ? String(unit.property_id) : '',
+      unit_id: String(unitId || ''),
       name: tenant.name, phone: tenant.phone, email: tenant.email, address: tenant.address || '',
       annual_rent: tenant.annual_rent ? String(tenant.annual_rent) : '',
       tenancy_status: tenant.tenancy_status,
@@ -207,8 +213,9 @@ export default function TenantDetailPage() {
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-    if (editFormErrors[e.target.name]) setEditFormErrors({ ...editFormErrors, [e.target.name]: '' });
+    const { name, value } = e.target;
+    setEditForm(prev => ({ ...prev, [name]: value, ...(name === 'property_id' ? { unit_id: '' } : {}) }));
+    if (editFormErrors[name]) setEditFormErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleDelete = async () => {
@@ -465,10 +472,20 @@ export default function TenantDetailPage() {
             <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Edit Tenant</h2>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property *</label>
+                <select name="property_id" value={editForm.property_id} onChange={handleEditChange} required>
+                  <option value="">Select property...</option>
+                  {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Unit *</label>
                 <select name="unit_id" value={editForm.unit_id} onChange={handleEditChange} required>
-                  <option value="">Select unit...</option>
-                  {units.map(u => <option key={u.id} value={u.id}>{u.property?.name || u.property_name} - {u.unit_number}</option>)}
+                  <option value="">{editForm.property_id ? 'Select unit...' : 'Select a property first'}</option>
+                  {editForm.property_id && units
+                    .filter(u => u.property_id === Number(editForm.property_id))
+                    .map(u => <option key={u.id} value={u.id}>{u.unit_number}</option>)
+                  }
                 </select>
                 {editFormErrors.unit_id && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{editFormErrors.unit_id}</p>}
               </div>
