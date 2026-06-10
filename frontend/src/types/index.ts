@@ -105,6 +105,8 @@ export interface Tenant {
   updated_at?: string;
 }
 
+export type PaymentStatus = 'pending' | 'approved' | 'rejected';
+
 export interface Payment {
   id: number;
   tenant?: { id: number; name: string; unit?: { unit_number: string } };
@@ -119,6 +121,11 @@ export interface Payment {
   years_covered: number;
   reference?: string;
   notes?: string;
+  status: PaymentStatus;
+  proof_url?: string;
+  approved_by?: number;
+  approved_at?: string;
+  rejection_reason?: string;
   created_at?: string;
 }
 

@@ -15,6 +15,9 @@ export default function PaymentsPage() {
   const [form, setForm] = useState({ tenant_id: '', amount: '', payment_date: '', period_start: '', period_end: '', years_covered: '1', payment_method: 'Bank Transfer', reference: '', notes: '' });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [rejecting, setRejecting] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -65,9 +68,49 @@ export default function PaymentsPage() {
     }
   };
 
+  const handleApprove = async (id: number) => {
+    setActionLoading(id);
+    try {
+      await api.post(`/payments/${id}/approve/`);
+      toast('Payment approved', 'success');
+      const { data } = await api.get<PaginatedResponse<Payment>>('/payments/');
+      setPayments(data.results);
+    } catch {
+      toast('Failed to approve payment', 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (id: number) => {
+    if (!rejectReason.trim()) return;
+    setActionLoading(id);
+    try {
+      await api.post(`/payments/${id}/reject/`, { reason: rejectReason });
+      toast('Payment rejected', 'success');
+      setRejecting(null);
+      setRejectReason('');
+      const { data } = await api.get<PaginatedResponse<Payment>>('/payments/');
+      setPayments(data.results);
+    } catch {
+      toast('Failed to reject payment', 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const methodIcon = (m: string) => {
     const icons: Record<string, string> = { 'Bank Transfer': '🏦', 'Cash': '💵', 'Credit Card': '💳', 'Mobile Money': '📱', 'Cheque': '📝' };
     return icons[m] || '💰';
+  };
+
+  const statusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      pending: 'badge badge-warning',
+      approved: 'badge badge-success',
+      rejected: 'badge badge-danger',
+    };
+    return <span className={styles[status] || 'badge'}>{status}</span>;
   };
 
   return (
@@ -171,6 +214,9 @@ export default function PaymentsPage() {
                 <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Date</th>
                 <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Method</th>
                 <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Reference</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Status</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Proof</th>
+                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -186,10 +232,62 @@ export default function PaymentsPage() {
                   <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{p.payment_date}</td>
                   <td className="py-3 px-4"><span className="badge badge-info">{methodIcon(p.payment_method)} {p.payment_method}</span></td>
                   <td className="py-3 px-4 text-xs" style={{ color: 'var(--text-light)' }}>{p.reference || '—'}</td>
+                  <td className="py-3 px-4">{statusBadge(p.status)}</td>
+                  <td className="py-3 px-4">
+                    {p.proof_url ? (
+                      <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline text-xs">View</a>
+                    ) : '—'}
+                  </td>
+                  <td className="py-3 px-4">
+                    {p.status === 'pending' && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApprove(p.id)}
+                          disabled={actionLoading === p.id}
+                          className="btn btn-primary text-xs disabled:opacity-50"
+                        >
+                          {actionLoading === p.id ? '...' : 'Approve'}
+                        </button>
+                        <button
+                          onClick={() => { setRejecting(p.id); setRejectReason(''); }}
+                          disabled={actionLoading === p.id}
+                          className="btn btn-secondary text-xs disabled:opacity-50"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {rejecting !== null && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+            <h3 className="font-semibold text-lg mb-2">Reject Payment</h3>
+            <p className="text-sm text-gray-500 mb-4">Provide a reason for rejecting this payment.</p>
+            <textarea
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              rows={3}
+              className="w-full border rounded-lg px-3 py-2 text-sm mb-4"
+              placeholder="Reason for rejection..."
+            />
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setRejecting(null)} className="btn btn-secondary">Cancel</button>
+              <button
+                onClick={() => handleReject(rejecting)}
+                disabled={!rejectReason.trim() || actionLoading === rejecting}
+                className="btn btn-primary disabled:opacity-50"
+              >
+                {actionLoading === rejecting ? 'Rejecting...' : 'Reject'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </DashboardLayout>
