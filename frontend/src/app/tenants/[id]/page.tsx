@@ -214,7 +214,13 @@ export default function TenantDetailPage() {
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setEditForm(prev => ({ ...prev, [name]: value, ...(name === 'property_id' ? { unit_id: '' } : {}) }));
+    setEditForm(prev => {
+      const updates: Record<string, string> = { [name]: value };
+      if (name === 'property_id') updates.unit_id = '';
+      if (name === 'lease_start_date') updates.move_in_date = value;
+      if (name === 'lease_expiry_date') updates.lease_renewal_date = value;
+      return { ...prev, ...updates };
+    });
     if (editFormErrors[name]) setEditFormErrors(prev => ({ ...prev, [name]: '' }));
   };
 
