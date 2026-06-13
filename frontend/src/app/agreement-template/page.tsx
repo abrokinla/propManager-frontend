@@ -8,21 +8,66 @@ import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import type { Property, TenancyAgreementTemplate } from '../../types';
 
-const EMPTY_TEMPLATE = {
-  landlord_name: '',
-  landlord_address: '',
-  landlord_phone: '',
-  security_deposit: "One month's rent",
-  payment_due_date: 'On or before the 28th day of each month',
-  late_fee: '₦10,000',
-  duration: '1 year',
-  obligations_landlord: '',
-  obligations_tenant: '',
-  notice_period: '3 months',
-  early_termination_fee: '₦50,000',
-  termination_conditions: '',
-  additional_clauses: '',
+const EMPTY_TEMPLATE: Record<string, any> = {
+  agent: { name: '', description: 'Estate Surveyors, Managers and Valuers', address: '', mobile: '', email: '' },
+  landlord: { name: '', address: '', legal_note: 'Includes Successors in Title, Executors and Assigns' },
+  tenants_legal_note: 'Includes Successors in Title, Executors and Assigns',
+  property: { description: '', address: '', referred_to_as: 'The Demised Premises', ownership_note: 'Bona fide property of the landlord' },
+  tenancy_terms: {
+    type: 'Yearly Tenancy', currency: 'NGN', payment: 'Payable in advance',
+    due_by: 'Not later than thirty (30) days after commencement of each rental year',
+    duration_years: 1,
+    caution_fee: { amount: '', currency: 'NGN', type: 'Refundable', deducted_for: '', refunded_if: '', top_up: '' },
+  },
+  tenants_covenants: '',
+  landlords_covenants: '',
+  special_provisions: {
+    notice_to_quit_months: 3, termination_notice_months: 3, holding_over_days: 7,
+    communication_methods: 'Personal service, Service at party\'s apartment, Registered post, Courier Service',
+    renewal_request_months: 3, rent_review_notice_months: 2, rent_review_reply_weeks: 2,
+    extra_clauses: '',
+  },
+  execution: { landlord_label: 'Signed by the within-named LANDLORD', tenant_label: 'Signed by the within-named TENANT' },
 };
+
+function setNested(obj: Record<string, any>, path: string, value: any) {
+  const keys = path.split('.');
+  let cur = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (!cur[keys[i]] || typeof cur[keys[i]] !== 'object') cur[keys[i]] = {};
+    cur = cur[keys[i]];
+  }
+  cur[keys[keys.length - 1]] = value;
+}
+
+function getNested(obj: Record<string, any>, path: string): any {
+  const keys = path.split('.');
+  let cur = obj;
+  for (const k of keys) {
+    if (cur === null || cur === undefined || typeof cur !== 'object') return '';
+    cur = cur[k];
+  }
+  return cur ?? '';
+}
+
+function CollapsibleSection({ title, defaultOpen = false, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="card">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex items-center justify-between w-full text-left"
+      >
+        <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>{title}</h2>
+        <svg className={`w-5 h-5 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--text-light)' }}>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && <div className="mt-4 space-y-4">{children}</div>}
+    </div>
+  );
+}
 
 export default function AgreementTemplatePage() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -36,7 +81,7 @@ export default function AgreementTemplatePage() {
   const [logoUrl, setLogoUrl] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [templateId, setTemplateId] = useState<number | null>(null);
-  const [data, setData] = useState<Record<string, string>>({ ...EMPTY_TEMPLATE });
+  const [data, setData] = useState<Record<string, any>>(JSON.parse(JSON.stringify(EMPTY_TEMPLATE)));
 
   useEffect(() => {
     Promise.all([
@@ -56,14 +101,26 @@ export default function AgreementTemplatePage() {
       setTemplateId(existing.id);
       setTitle(existing.title);
       setLogoUrl(existing.logo_url || '');
-      setData({ ...EMPTY_TEMPLATE, ...existing.template_data });
+      const merged = JSON.parse(JSON.stringify(EMPTY_TEMPLATE));
+      deepMerge(merged, existing.template_data);
+      setData(merged);
     } else {
       setTemplateId(null);
       setTitle('Tenancy Agreement');
       setLogoUrl('');
-      setData({ ...EMPTY_TEMPLATE });
+      setData(JSON.parse(JSON.stringify(EMPTY_TEMPLATE)));
     }
   }, [selectedPropertyId, templates]);
+
+  function deepMerge(base: any, override: any) {
+    for (const k of Object.keys(override)) {
+      if (override[k] && typeof override[k] === 'object' && !Array.isArray(override[k]) && base[k]) {
+        deepMerge(base[k], override[k]);
+      } else if (override[k] !== undefined && override[k] !== null) {
+        base[k] = override[k];
+      }
+    }
+  }
 
   const handleSave = async () => {
     if (!selectedPropertyId) { toast('Select a property first', 'error'); return; }
@@ -103,7 +160,11 @@ export default function AgreementTemplatePage() {
     }
   };
 
-  const setField = (key: string, value: string) => setData(prev => ({ ...prev, [key]: value }));
+  const setF = (path: string, value: any) => {
+    const copy = JSON.parse(JSON.stringify(data));
+    setNested(copy, path, value);
+    setData(copy);
+  };
 
   if (loading) {
     return (
@@ -115,8 +176,6 @@ export default function AgreementTemplatePage() {
     );
   }
 
-  const selectedProp = properties.find(p => p.id === selectedPropertyId);
-
   return (
     <ErrorBoundary>
       <DashboardLayout>
@@ -124,18 +183,14 @@ export default function AgreementTemplatePage() {
           <div>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Tenancy Agreement Template</h1>
             <p className="mt-1 text-sm" style={{ color: 'var(--text-light)' }}>
-              Set up the tenancy agreement for each property. Tenants will see this agreement on their dashboard.
+              Set up the tenancy agreement for each property. All sections below match the legal document structure.
             </p>
           </div>
         </div>
 
         <div className="card mb-6">
           <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property *</label>
-          <select
-            value={selectedPropertyId}
-            onChange={e => setSelectedPropertyId(Number(e.target.value) || '')}
-            className="w-full"
-          >
+          <select value={selectedPropertyId} onChange={e => setSelectedPropertyId(Number(e.target.value) || '')} className="w-full">
             <option value="">Select a property...</option>
             {properties.map(p => (
               <option key={p.id} value={p.id}>
@@ -156,94 +211,195 @@ export default function AgreementTemplatePage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Logo</label>
-                  {logoUrl && (
-                    <div className="mb-2">
-                      <img src={logoUrl} alt="Logo preview" className="h-16 object-contain border rounded" />
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={e => setLogoFile(e.target.files?.[0] || null)}
-                    className="text-sm"
-                  />
+                  {logoUrl && <div className="mb-2"><img src={logoUrl} alt="Logo preview" className="h-16 object-contain border rounded" /></div>}
+                  <input type="file" accept="image/*" onChange={e => setLogoFile(e.target.files?.[0] || null)} className="text-sm" />
                   <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>
-                    {logoUrl ? 'Upload a new file to replace, or leave blank to keep current.' : 'Upload your property/company logo (optional).'}
+                    {logoUrl ? 'Upload new file to replace.' : 'Upload your company logo (optional).'}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="card">
-              <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Landlord Info</h2>
+            <CollapsibleSection title="1. Agent / Management Company">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Landlord / Property Owner Name</label>
-                  <input value={data.landlord_name} onChange={e => setField('landlord_name', e.target.value)} className="w-full" placeholder={selectedProp?.owner?.first_name ? `${selectedProp.owner.first_name} ${selectedProp.owner.last_name}` : ''} />
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Company Name</label>
+                  <input value={data.agent?.name || ''} onChange={e => setF('agent.name', e.target.value)} className="w-full" placeholder="e.g. Falobi Solid Rock and Associates" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Description</label>
+                  <input value={data.agent?.description || ''} onChange={e => setF('agent.description', e.target.value)} className="w-full" placeholder="Estate Surveyors, Managers and Valuers" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Address</label>
+                  <textarea value={data.agent?.address || ''} onChange={e => setF('agent.address', e.target.value)} rows={2} className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Mobile</label>
+                  <input value={data.agent?.mobile || ''} onChange={e => setF('agent.mobile', e.target.value)} className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Email</label>
+                  <input value={data.agent?.email || ''} onChange={e => setF('agent.email', e.target.value)} className="w-full" />
+                </div>
+              </div>
+            </CollapsibleSection>
+
+            <CollapsibleSection title="2. Landlord">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Landlord Name</label>
+                  <input value={data.landlord?.name || ''} onChange={e => setF('landlord.name', e.target.value)} className="w-full" placeholder="e.g. Ropedam Enterprises" />
                 </div>
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Landlord Address</label>
-                  <textarea value={data.landlord_address} onChange={e => setField('landlord_address', e.target.value)} rows={2} className="w-full" />
+                  <textarea value={data.landlord?.address || ''} onChange={e => setF('landlord.address', e.target.value)} rows={2} className="w-full" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Landlord Phone</label>
-                  <input value={data.landlord_phone} onChange={e => setField('landlord_phone', e.target.value)} className="w-full" />
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Legal Note</label>
+                  <input value={data.landlord?.legal_note || ''} onChange={e => setF('landlord.legal_note', e.target.value)} className="w-full" placeholder="Includes Successors in Title, Executors and Assigns" />
                 </div>
               </div>
-            </div>
+            </CollapsibleSection>
 
-            <div className="card">
-              <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Financial Terms</h2>
+            <CollapsibleSection title="3. Property Description">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Description</label>
+                  <textarea value={data.property?.description || ''} onChange={e => setF('property.description', e.target.value)} rows={2} className="w-full" placeholder="e.g. Two (2) bedroom apartment with appurtenances..." />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Address</label>
+                  <textarea value={data.property?.address || ''} onChange={e => setF('property.address', e.target.value)} rows={2} className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Referred to As</label>
+                  <input value={data.property?.referred_to_as || ''} onChange={e => setF('property.referred_to_as', e.target.value)} className="w-full" placeholder="The Demised Premises" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Ownership Note</label>
+                  <input value={data.property?.ownership_note || ''} onChange={e => setF('property.ownership_note', e.target.value)} className="w-full" placeholder="Bona fide property of the landlord" />
+                </div>
+              </div>
+            </CollapsibleSection>
+
+            <CollapsibleSection title="4. Tenancy Terms">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Security Deposit</label>
-                  <input value={data.security_deposit} onChange={e => setField('security_deposit', e.target.value)} className="w-full" />
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Type</label>
+                  <input value={data.tenancy_terms?.type || ''} onChange={e => setF('tenancy_terms.type', e.target.value)} className="w-full" placeholder="Yearly Tenancy" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Payment Due Date</label>
-                  <input value={data.payment_due_date} onChange={e => setField('payment_due_date', e.target.value)} className="w-full" />
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Currency</label>
+                  <input value={data.tenancy_terms?.currency || ''} onChange={e => setF('tenancy_terms.currency', e.target.value)} className="w-full" placeholder="NGN" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Late Payment Fee</label>
-                  <input value={data.late_fee} onChange={e => setField('late_fee', e.target.value)} className="w-full" />
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Duration (years)</label>
+                  <input type="number" min="1" value={data.tenancy_terms?.duration_years || 1} onChange={e => setF('tenancy_terms.duration_years', Number(e.target.value))} className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Payment Terms</label>
+                  <input value={data.tenancy_terms?.payment || ''} onChange={e => setF('tenancy_terms.payment', e.target.value)} className="w-full" placeholder="Payable in advance" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Due By</label>
+                  <input value={data.tenancy_terms?.due_by || ''} onChange={e => setF('tenancy_terms.due_by', e.target.value)} className="w-full" />
                 </div>
               </div>
-            </div>
 
-            <div className="card">
-              <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Term</h2>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Duration</label>
-                <input value={data.duration} onChange={e => setField('duration', e.target.value)} className="w-full max-w-xs" />
+              <div className="border-t pt-4 mt-4">
+                <h3 className="font-medium text-sm mb-3" style={{ color: 'var(--text)' }}>Caution Fee</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Amount</label>
+                    <input value={data.tenancy_terms?.caution_fee?.amount || ''} onChange={e => setF('tenancy_terms.caution_fee.amount', e.target.value)} className="w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Type</label>
+                    <input value={data.tenancy_terms?.caution_fee?.type || ''} onChange={e => setF('tenancy_terms.caution_fee.type', e.target.value)} className="w-full" placeholder="Refundable" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Currency</label>
+                    <input value={data.tenancy_terms?.caution_fee?.currency || ''} onChange={e => setF('tenancy_terms.caution_fee.currency', e.target.value)} className="w-full" placeholder="NGN" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Deducted For</label>
+                    <textarea value={data.tenancy_terms?.caution_fee?.deducted_for || ''} onChange={e => setF('tenancy_terms.caution_fee.deducted_for', e.target.value)} rows={2} className="w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Refunded If</label>
+                    <textarea value={data.tenancy_terms?.caution_fee?.refunded_if || ''} onChange={e => setF('tenancy_terms.caution_fee.refunded_if', e.target.value)} rows={2} className="w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Top Up</label>
+                    <textarea value={data.tenancy_terms?.caution_fee?.top_up || ''} onChange={e => setF('tenancy_terms.caution_fee.top_up', e.target.value)} rows={2} className="w-full" />
+                  </div>
+                </div>
               </div>
+            </CollapsibleSection>
+
+            <div className="card">
+              <RichTextEditor label="5. Tenant's Covenants" value={data.tenants_covenants || ''} onChange={v => setF('tenants_covenants', v)} minHeight={250} />
             </div>
 
             <div className="card">
-              <RichTextEditor label="Landlord Obligations" value={data.obligations_landlord} onChange={v => setField('obligations_landlord', v)} minHeight={200} />
+              <RichTextEditor label="6. Landlord's Covenants" value={data.landlords_covenants || ''} onChange={v => setF('landlords_covenants', v)} minHeight={150} />
             </div>
 
-            <div className="card">
-              <RichTextEditor label="Tenant Obligations" value={data.obligations_tenant} onChange={v => setField('obligations_tenant', v)} minHeight={200} />
-            </div>
-
-            <div className="card">
-              <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Termination</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <CollapsibleSection title="7. Special Provisions">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Notice Period</label>
-                  <input value={data.notice_period} onChange={e => setField('notice_period', e.target.value)} className="w-full" />
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Notice to Quit (months)</label>
+                  <input type="number" min="1" value={data.special_provisions?.notice_to_quit_months ?? 3} onChange={e => setF('special_provisions.notice_to_quit_months', Number(e.target.value))} className="w-full" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Early Termination Fee</label>
-                  <input value={data.early_termination_fee} onChange={e => setField('early_termination_fee', e.target.value)} className="w-full" />
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Termination Notice (months)</label>
+                  <input type="number" min="1" value={data.special_provisions?.termination_notice_months ?? 3} onChange={e => setF('special_provisions.termination_notice_months', Number(e.target.value))} className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Holding Over (days)</label>
+                  <input type="number" min="1" value={data.special_provisions?.holding_over_days ?? 7} onChange={e => setF('special_provisions.holding_over_days', Number(e.target.value))} className="w-full" />
                 </div>
               </div>
-              <RichTextEditor label="Termination Conditions" value={data.termination_conditions} onChange={v => setField('termination_conditions', v)} minHeight={150} />
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Communication Methods</label>
+                  <textarea value={data.special_provisions?.communication_methods || ''} onChange={e => setF('special_provisions.communication_methods', e.target.value)} rows={2} className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Renewal Request (months before expiry)</label>
+                  <input type="number" min="1" value={data.special_provisions?.renewal_request_months ?? 3} onChange={e => setF('special_provisions.renewal_request_months', Number(e.target.value))} className="w-full" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Rent Review Notice (months)</label>
+                  <input type="number" min="1" value={data.special_provisions?.rent_review_notice_months ?? 2} onChange={e => setF('special_provisions.rent_review_notice_months', Number(e.target.value))} className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Reply to Rent Review (weeks)</label>
+                  <input type="number" min="1" value={data.special_provisions?.rent_review_reply_weeks ?? 2} onChange={e => setF('special_provisions.rent_review_reply_weeks', Number(e.target.value))} className="w-full" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <RichTextEditor label="Extra Clauses" value={data.special_provisions?.extra_clauses || ''} onChange={v => setF('special_provisions.extra_clauses', v)} minHeight={120} />
+              </div>
+            </CollapsibleSection>
 
-            <div className="card">
-              <RichTextEditor label="Additional Clauses" value={data.additional_clauses} onChange={v => setField('additional_clauses', v)} minHeight={200} />
-            </div>
+            <CollapsibleSection title="8. Execution / Signature">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Landlord Signature Label</label>
+                  <input value={data.execution?.landlord_label || ''} onChange={e => setF('execution.landlord_label', e.target.value)} className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Tenant Signature Label</label>
+                  <input value={data.execution?.tenant_label || ''} onChange={e => setF('execution.tenant_label', e.target.value)} className="w-full" />
+                </div>
+              </div>
+            </CollapsibleSection>
 
             <div className="flex justify-end gap-3 pb-8">
               <button onClick={handleSave} disabled={saving} className="btn btn-primary disabled:opacity-50">

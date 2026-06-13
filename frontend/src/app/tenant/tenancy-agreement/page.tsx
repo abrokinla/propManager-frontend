@@ -12,6 +12,30 @@ function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--text)' }}>{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function Field({ label, value }: { label: string; value?: string | number | null }) {
+  if (!value) return null;
+  return (
+    <div>
+      <p className="text-sm" style={{ color: 'var(--text-light)' }}>{label}</p>
+      <p className="font-medium" style={{ color: 'var(--text)' }}>{value}</p>
+    </div>
+  );
+}
+
+function renderRichText(html?: string) {
+  if (!html) return null;
+  return <div className="prose prose-sm max-w-none mt-2" style={{ color: 'var(--text)' }} dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
 export default function TenancyAgreementPage() {
   const router = useRouter();
   const [agreement, setAgreement] = useState<TenancyDocument | null>(null);
@@ -64,54 +88,63 @@ export default function TenancyAgreementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white border-b">
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+        <nav className="border-b" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">PM</span>
                 </div>
-                <span className="font-bold text-lg">PropManager</span>
+                <span className="font-bold text-lg" style={{ color: 'var(--text)' }}>PropManager</span>
               </div>
               <button onClick={() => router.push('/tenant/dashboard')} className="text-sm text-primary-600 font-medium">Back to Dashboard</button>
             </div>
           </div>
         </nav>
         <main className="max-w-3xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">Tenancy Agreement</h1>
-          <p className="text-gray-500">{error}</p>
+          <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--text)' }}>Tenancy Agreement</h1>
+          <p style={{ color: 'var(--text-light)' }}>{error}</p>
         </main>
       </div>
     );
   }
 
-  const data = agreement?.document_data as Record<string, any> || {};
-  const parties = data?.parties || {};
-  const property = data?.property || {};
-  const financial = data?.financial_terms || {};
-  const obligations = data?.obligations || {};
-  const termination = data?.termination || {};
+  const d = agreement?.document_data as Record<string, any> || {};
+  const agent = d?.agent || {};
+  const landlord = d?.landlord || {};
+  const property = d?.property || {};
+  const tt = d?.tenancy_terms || {};
+  const cf = tt?.caution_fee || {};
+  const sp = d?.special_provisions || {};
+  const exec = d?.execution || {};
+  const tenantName = d?.tenant_name || d?.tenant?.name || 'Tenant';
+  const tenantPhone = d?.tenant_phone || d?.tenant?.phone || '';
+  const annualRent = d?.annual_rent || d?.tenant?.annual_rent || '';
+  const leaseStart = d?.lease_start || d?.lease_start_date || '';
+  const leaseExpiry = d?.lease_expiry || d?.lease_expiry_date || '';
   const isSigned = agreement?.status === 'signed';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
+      <nav className="border-b" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">PM</span>
               </div>
-              <span className="font-bold text-lg">PropManager</span>
+              <span className="font-bold text-lg" style={{ color: 'var(--text)' }}>PropManager</span>
             </div>
             <button onClick={() => router.push('/tenant/dashboard')} className="text-sm text-primary-600 font-medium">Back to Dashboard</button>
           </div>
@@ -120,140 +153,120 @@ export default function TenancyAgreementPage() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {message && message !== 'signed' && (
-          <div className="px-4 py-3 rounded-lg text-sm mb-6 bg-red-50 text-red-700">{message}</div>
+          <div className="px-4 py-3 rounded-lg text-sm mb-6" style={{ backgroundColor: '#fef2f2', color: '#991b1b' }}>{message}</div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm border p-6 sm:p-8 space-y-8">
-          <div className="text-center border-b pb-6">
-            <h1 className="text-2xl font-bold">{agreement?.document_type === 'tenancy_agreement' ? 'TENANCY AGREEMENT' : 'Agreement'}</h1>
-            <p className="text-gray-500 text-sm mt-1">
-              This agreement is made on {agreement?.sent_at ? new Date(agreement.sent_at).toLocaleDateString() : '...'}
-            </p>
+        <div className="rounded-xl shadow-sm border p-6 sm:p-8 space-y-8" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
+          <div className="text-center border-b pb-6" style={{ borderColor: 'var(--border)' }}>
+            {agreement?.document_type === 'tenancy_agreement' && (
+              <>
+                {agent.name && <p className="font-bold text-base" style={{ color: 'var(--text)' }}>{agent.name}</p>}
+                {agent.description && <p className="text-sm" style={{ color: 'var(--text-light)' }}>{agent.description}</p>}
+                {agent.address && <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>{agent.address}</p>}
+                <div className="h-4" />
+              </>
+            )}
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{agreement?.document_type === 'tenancy_agreement' ? 'TENANCY AGREEMENT' : 'Agreement'}</h1>
+            {agreement?.sent_at && (
+              <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>
+                This agreement is made on {new Date(agreement.sent_at).toLocaleDateString()}
+              </p>
+            )}
           </div>
 
-          <section>
-            <h2 className="text-lg font-semibold mb-3">Parties</h2>
+          <Section title="1. Parties">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Landlord</p>
-                <p className="font-medium">{parties.landlord_name || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Tenant</p>
-                <p className="font-medium">{parties.tenant_name || 'N/A'}</p>
-              </div>
+              <Field label="Landlord" value={landlord.name} />
+              <Field label="Tenant" value={tenantName} />
             </div>
-            {parties.landlord_address && (
+            {landlord.address && (
               <div className="mt-2">
-                <p className="text-sm text-gray-500">Landlord Address</p>
-                <p className="font-medium">{parties.landlord_address}</p>
+                <Field label="Landlord Address" value={landlord.address} />
               </div>
             )}
-            {parties.landlord_phone && (
-              <div className="mt-1">
-                <p className="text-sm text-gray-500">Landlord Phone</p>
-                <p className="font-medium">{parties.landlord_phone}</p>
-              </div>
+            {landlord.legal_note && (
+              <p className="text-xs mt-1 italic" style={{ color: 'var(--text-light)' }}>{landlord.legal_note}</p>
             )}
-          </section>
+            <p className="text-xs mt-2 italic" style={{ color: 'var(--text-light)' }}>{d.tenants_legal_note || 'Includes Successors in Title, Executors and Assigns'}</p>
+          </Section>
 
-          <section>
-            <h2 className="text-lg font-semibold mb-3">Property</h2>
+          <Section title="2. Property">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Address</p>
-                <p className="font-medium">{property.address || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Unit</p>
-                <p className="font-medium">{property.unit_number || 'N/A'}</p>
-              </div>
+              <Field label="Description" value={property.description} />
+              <Field label="Address" value={property.address} />
             </div>
-          </section>
+            {property.referred_to_as && <Field label="Referred to As" value={property.referred_to_as} />}
+            {property.ownership_note && <Field label="Ownership" value={property.ownership_note} />}
+          </Section>
 
-          <section>
-            <h2 className="text-lg font-semibold mb-3">Financial Terms</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <tbody>
-                  {[
-                    ['Annual Rent', financial.annual_rent ? `₦${Number(financial.annual_rent).toLocaleString()}` : 'N/A'],
-                    ['Security Deposit', financial.security_deposit || 'N/A'],
-                    ['Payment Due Date', financial.payment_due_date || 'N/A'],
-                    ['Late Payment Fee', financial.late_fee || 'N/A'],
-                  ].map(([label, value]) => (
-                    <tr key={label} className="border-b">
-                      <td className="py-2 pr-8 font-medium text-gray-600">{label}</td>
-                      <td className="py-2">{value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold mb-3">Term</h2>
+          <Section title="3. Tenancy Terms">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Start Date</p>
-                <p className="font-medium">{financial.lease_start || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Expiry Date</p>
-                <p className="font-medium">{financial.lease_expiry || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Duration</p>
-                <p className="font-medium">{financial.duration || 'N/A'}</p>
-              </div>
+              <Field label="Type" value={tt.type} />
+              <Field label="Duration" value={tt.duration_years ? `${tt.duration_years} year(s)` : undefined} />
+              <Field label="Payment" value={tt.payment} />
             </div>
-          </section>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <Field label="Annual Rent" value={annualRent ? `NGN ${Number(annualRent).toLocaleString()}` : undefined} />
+              <Field label="Due By" value={tt.due_by} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+              <Field label="Lease Start" value={leaseStart} />
+              <Field label="Lease Expiry" value={leaseExpiry} />
+              <Field label="Tenant Phone" value={tenantPhone} />
+            </div>
 
-          {obligations.landlord && (
-            <section>
-              <h2 className="text-lg font-semibold mb-3">Landlord Obligations</h2>
-              <div className="prose prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: obligations.landlord }} />
-            </section>
-          )}
-
-          {obligations.tenant && (
-            <section>
-              <h2 className="text-lg font-semibold mb-3">Tenant Obligations</h2>
-              <div className="prose prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: obligations.tenant }} />
-            </section>
-          )}
-
-          {termination && Object.keys(termination).length > 0 && (
-            <section>
-              <h2 className="text-lg font-semibold mb-3">Termination</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
-                <div>
-                  <p className="text-sm text-gray-500">Notice Period</p>
-                  <p className="font-medium">{termination.notice_period || 'N/A'}</p>
+            {cf.amount && (
+              <div className="border-t mt-4 pt-4" style={{ borderColor: 'var(--border)' }}>
+                <h3 className="font-medium text-sm mb-3" style={{ color: 'var(--text)' }}>Caution Fee</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Field label="Amount" value={cf.currency ? `${cf.currency} ${cf.amount}` : cf.amount} />
+                  <Field label="Type" value={cf.type} />
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Early Termination Fee</p>
-                  <p className="font-medium">{termination.early_termination_fee || 'N/A'}</p>
+                <div className="grid grid-cols-1 gap-4 mt-2">
+                  <Field label="Deducted For" value={cf.deducted_for} />
+                  <Field label="Refunded If" value={cf.refunded_if} />
+                  <Field label="Top Up" value={cf.top_up} />
                 </div>
               </div>
-              {termination.conditions && (
-                <div className="prose prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: termination.conditions }} />
-              )}
-            </section>
-          )}
+            )}
+          </Section>
 
-          {data.additional_clauses && (
-            <section>
-              <h2 className="text-lg font-semibold mb-3">Additional Clauses</h2>
-              <div className="prose prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: data.additional_clauses }} />
-            </section>
-          )}
+          <Section title="4. Tenant's Covenants">
+            {renderRichText(d.tenants_covenants)}
+            {!d.tenants_covenants && <p className="text-sm" style={{ color: 'var(--text-light)' }}>The tenant agrees to the covenants set forth in this agreement.</p>}
+          </Section>
 
-          <div className="border-t pt-6">
+          <Section title="5. Landlord's Covenants">
+            {renderRichText(d.landlords_covenants)}
+            {!d.landlords_covenants && <p className="text-sm" style={{ color: 'var(--text-light)' }}>The landlord agrees to the covenants set forth in this agreement.</p>}
+          </Section>
+
+          <Section title="6. Special Provisions">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Field label="Notice to Quit" value={sp.notice_to_quit_months ? `${sp.notice_to_quit_months} month(s)` : undefined} />
+              <Field label="Termination Notice" value={sp.termination_notice_months ? `${sp.termination_notice_months} month(s)` : undefined} />
+              <Field label="Holding Over" value={sp.holding_over_days ? `${sp.holding_over_days} day(s)` : undefined} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <Field label="Renewal Request" value={sp.renewal_request_months ? `${sp.renewal_request_months} month(s) before expiry` : undefined} />
+              <Field label="Communication" value={sp.communication_methods} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <Field label="Rent Review Notice" value={sp.rent_review_notice_months ? `${sp.rent_review_notice_months} month(s)` : undefined} />
+              <Field label="Rent Review Reply" value={sp.rent_review_reply_weeks ? `${sp.rent_review_reply_weeks} week(s)` : undefined} />
+            </div>
+            {sp.extra_clauses && (
+              <div className="mt-4">
+                <h3 className="font-medium text-sm" style={{ color: 'var(--text)' }}>Extra Clauses</h3>
+                {renderRichText(sp.extra_clauses)}
+              </div>
+            )}
+          </Section>
+
+          <div className="border-t pt-6" style={{ borderColor: 'var(--border)' }}>
             {isSigned ? (
               <div className="text-center space-y-4">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full" style={{ backgroundColor: '#f0fdf4', color: '#166534' }}>
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                   <span className="font-medium">Signed on {agreement?.signed_at ? new Date(agreement.signed_at).toLocaleDateString() : 'N/A'}</span>
                 </div>
@@ -266,7 +279,7 @@ export default function TenancyAgreementPage() {
                   </div>
                 )}
                 {agreement?.file_url && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm" style={{ color: 'var(--text-light)' }}>
                     You may also <a href={agreement.file_url} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">view the unsigned version</a>.
                   </p>
                 )}
@@ -278,9 +291,10 @@ export default function TenancyAgreementPage() {
                     type="checkbox"
                     checked={agreed}
                     onChange={e => setAgreed(e.target.checked)}
-                    className="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded"
+                    className="mt-1 h-4 w-4 text-primary-600 rounded"
+                    style={{ borderColor: 'var(--border)' }}
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm" style={{ color: 'var(--text)' }}>
                     I have read and agree to the terms and conditions of this tenancy agreement. I understand that this constitutes my electronic signature.
                   </span>
                 </label>
@@ -293,11 +307,48 @@ export default function TenancyAgreementPage() {
                 </button>
               </div>
             )}
+
+            {exec.landlord_label && (
+              <div className="mt-8 border-t pt-6 grid grid-cols-1 sm:grid-cols-2 gap-8" style={{ borderColor: 'var(--border)' }}>
+                <div>
+                  <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.landlord_label}</p>
+                  <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>Signature: ______________________________</p>
+                    <p className="text-xs mt-4" style={{ color: 'var(--text-light)' }}>Date: ______________________________</p>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Landlord)</p>
+                    <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
+                      Name: ______________________________<br />
+                      Address: ______________________________<br />
+                      Signature: ______________________________<br />
+                      Date: ______________________________
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.tenant_label}</p>
+                  <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>Signature: ______________________________</p>
+                    <p className="text-xs mt-4" style={{ color: 'var(--text-light)' }}>Date: ______________________________</p>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Tenant)</p>
+                    <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
+                      Name: ______________________________<br />
+                      Address: ______________________________<br />
+                      Signature: ______________________________<br />
+                      Date: ______________________________
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
         {message === 'signed' && (
-          <div className="mt-4 px-4 py-3 rounded-lg text-sm bg-green-50 text-green-700">
+          <div className="mt-4 px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: '#f0fdf4', color: '#166534' }}>
             Agreement signed successfully!{' '}
             <button onClick={() => router.push('/tenant/dashboard')} className="underline font-medium">Return to Dashboard</button>
           </div>

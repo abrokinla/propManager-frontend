@@ -177,7 +177,7 @@ export default function TenantDashboardPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Annual Rent</p>
-              <p className="font-medium">${tenant.annual_rent?.toLocaleString() || 'N/A'}</p>
+              <p className="font-medium">NGN {tenant.annual_rent?.toLocaleString() || 'N/A'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Status</p>
