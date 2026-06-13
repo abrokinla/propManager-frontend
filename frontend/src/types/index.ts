@@ -298,3 +298,15 @@ export interface QuitNotice {
   created_at: string;
   updated_at: string;
 }
+
+export interface TenancyAgreementTemplate {
+  id: number;
+  property: number;
+  property_id?: number;
+  property_name: string;
+  title: string;
+  logo_url: string;
+  template_data: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}

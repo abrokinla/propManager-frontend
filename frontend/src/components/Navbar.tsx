@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,7 @@ const navItems = [
   { href: '/tenants', label: 'Tenants' },
   { href: '/payments', label: 'Payments' },
   { href: '/maintenance', label: 'Maintenance' },
+  { href: '/agreement-template', label: 'Agreement' },
 ];
 
 export default function Navbar() {
@@ -20,6 +21,18 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 border-b" style={{ background: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}>
@@ -56,7 +69,6 @@ export default function Navbar() {
 
           {/* Right section */}
           <div className="hidden md:flex items-center gap-2">
-            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg transition-colors"
@@ -76,13 +88,59 @@ export default function Navbar() {
               )}
             </button>
 
-            <Link href="/profile" className="text-sm font-medium" style={{ color: 'var(--text-light)' }}>
-              {user?.first_name || user?.username}
-            </Link>
-            <span className="badge badge-info">{user?.profile.role}</span>
-            <button onClick={logout} className="btn btn-secondary text-sm">
-              Logout
-            </button>
+            {/* User dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100"
+                style={{ color: 'var(--text-light)' }}
+              >
+                <span>{user?.first_name || user?.username}</span>
+                <svg className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {dropdownOpen && (
+                <div
+                  className="absolute right-0 mt-1 w-56 rounded-xl shadow-lg border py-1 z-50"
+                  style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                >
+                  <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
+                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{user?.first_name || user?.username}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>{user?.profile.role === 'owner' ? 'Property Owner' : 'Property Manager'}</p>
+                  </div>
+                  <Link
+                    href="/agreement-template"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-gray-50"
+                    style={{ color: 'var(--text)' }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    Agreement Template
+                  </Link>
+                  <Link
+                    href="/profile"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-gray-50"
+                    style={{ color: 'var(--text)' }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    Profile
+                  </Link>
+                  <div className="border-t" style={{ borderColor: 'var(--border)' }}>
+                    <button
+                      onClick={logout}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm transition-colors hover:bg-gray-50"
+                      style={{ color: 'var(--danger)' }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Mobile toggle */}

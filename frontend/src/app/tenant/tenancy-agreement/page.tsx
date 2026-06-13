@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import type { TenantSelf, TenancyDocument } from '../../../types';
+import type { TenancyDocument } from '../../../types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -14,9 +14,9 @@ function getAuthHeaders() {
 
 export default function TenancyAgreementPage() {
   const router = useRouter();
-  const [tenant, setTenant] = useState<TenantSelf | null>(null);
-  const [documents, setDocuments] = useState<TenancyDocument[]>([]);
+  const [agreement, setAgreement] = useState<TenancyDocument | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [signing, setSigning] = useState(false);
   const [message, setMessage] = useState('');
@@ -25,33 +25,36 @@ export default function TenancyAgreementPage() {
     const token = localStorage.getItem('tenant_access_token');
     if (!token) { router.push('/tenant/login'); return; }
     const headers = { Authorization: `Bearer ${token}` };
-    Promise.all([
-      axios.get<TenantSelf>(`${API_URL}/tenant/me/`, { headers }),
-      axios.get<TenancyDocument[]>(`${API_URL}/tenant/me/documents/`, { headers }),
-    ]).then(([meRes, docsRes]) => {
-      setTenant(meRes.data);
-      setDocuments(docsRes.data);
-    }).catch(() => {
-      localStorage.removeItem('tenant_access_token');
-      router.push('/tenant/login');
-    }).finally(() => setLoading(false));
+
+    axios.get<TenancyDocument>(`${API_URL}/tenant/me/agreement/`, { headers })
+      .then(res => setAgreement(res.data))
+      .catch(err => {
+        if (err.response?.status === 404) {
+          setError('Your agent has not set up a tenancy agreement for your property yet. Please contact them.');
+        } else {
+          localStorage.removeItem('tenant_access_token');
+          router.push('/tenant/login');
+        }
+      })
+      .finally(() => setLoading(false));
   }, [router]);
 
-  const agreement = documents.find(d => d.document_type === 'tenancy_agreement' && (d.status === 'sent' || d.status === 'signed'));
-
   const handleSign = async () => {
-    if (!agreement || !tenant) return;
+    if (!agreement) return;
     setSigning(true);
     setMessage('');
     try {
+      const token = localStorage.getItem('tenant_access_token');
+      const meRes = await axios.get(`${API_URL}/tenant/me/`, { headers: { Authorization: `Bearer ${token}` } });
+      const tenantName = meRes.data.name;
       await axios.post(
         `${API_URL}/tenant/me/documents/${agreement.id}/sign/`,
-        { signature_name: tenant.name },
+        { signature_name: tenantName },
         { headers: getAuthHeaders() }
       );
       setMessage('signed');
-      const { data } = await axios.get<TenancyDocument[]>(`${API_URL}/tenant/me/documents/`, { headers: getAuthHeaders() });
-      setDocuments(data);
+      const { data } = await axios.get<TenancyDocument>(`${API_URL}/tenant/me/agreement/`, { headers: getAuthHeaders() });
+      setAgreement(data);
     } catch {
       setMessage('Failed to sign agreement. Please try again.');
     } finally {
@@ -67,7 +70,7 @@ export default function TenancyAgreementPage() {
     );
   }
 
-  if (!agreement) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
         <nav className="bg-white border-b">
@@ -85,20 +88,19 @@ export default function TenancyAgreementPage() {
         </nav>
         <main className="max-w-3xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Tenancy Agreement</h1>
-          <p className="text-gray-500">No tenancy agreement yet. Contact your agent to send one.</p>
+          <p className="text-gray-500">{error}</p>
         </main>
       </div>
     );
   }
 
-  const data = agreement.document_data as Record<string, any>;
+  const data = agreement?.document_data as Record<string, any> || {};
   const parties = data?.parties || {};
   const property = data?.property || {};
   const financial = data?.financial_terms || {};
   const obligations = data?.obligations || {};
   const termination = data?.termination || {};
-  const isSigned = agreement.status === 'signed';
-  const signedDoc = documents.find(d => d.id === agreement.id);
+  const isSigned = agreement?.status === 'signed';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -123,8 +125,10 @@ export default function TenancyAgreementPage() {
 
         <div className="bg-white rounded-xl shadow-sm border p-6 sm:p-8 space-y-8">
           <div className="text-center border-b pb-6">
-            <h1 className="text-2xl font-bold">TENANCY AGREEMENT</h1>
-            <p className="text-gray-500 text-sm mt-1">This agreement is made on {agreement.sent_at ? new Date(agreement.sent_at).toLocaleDateString() : '...'}</p>
+            <h1 className="text-2xl font-bold">{agreement?.document_type === 'tenancy_agreement' ? 'TENANCY AGREEMENT' : 'Agreement'}</h1>
+            <p className="text-gray-500 text-sm mt-1">
+              This agreement is made on {agreement?.sent_at ? new Date(agreement.sent_at).toLocaleDateString() : '...'}
+            </p>
           </div>
 
           <section>
@@ -136,9 +140,21 @@ export default function TenancyAgreementPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Tenant</p>
-                <p className="font-medium">{parties.tenant_name || tenant?.name || 'N/A'}</p>
+                <p className="font-medium">{parties.tenant_name || 'N/A'}</p>
               </div>
             </div>
+            {parties.landlord_address && (
+              <div className="mt-2">
+                <p className="text-sm text-gray-500">Landlord Address</p>
+                <p className="font-medium">{parties.landlord_address}</p>
+              </div>
+            )}
+            {parties.landlord_phone && (
+              <div className="mt-1">
+                <p className="text-sm text-gray-500">Landlord Phone</p>
+                <p className="font-medium">{parties.landlord_phone}</p>
+              </div>
+            )}
           </section>
 
           <section>
@@ -146,11 +162,11 @@ export default function TenancyAgreementPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Address</p>
-                <p className="font-medium">{property.address || tenant?.property_name || 'N/A'}</p>
+                <p className="font-medium">{property.address || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Unit</p>
-                <p className="font-medium">{property.unit_number || tenant?.unit_number || 'N/A'}</p>
+                <p className="font-medium">{property.unit_number || 'N/A'}</p>
               </div>
             </div>
           </section>
@@ -162,9 +178,9 @@ export default function TenancyAgreementPage() {
                 <tbody>
                   {[
                     ['Annual Rent', financial.annual_rent ? `₦${Number(financial.annual_rent).toLocaleString()}` : 'N/A'],
-                    ['Security Deposit', financial.security_deposit ? `₦${Number(financial.security_deposit).toLocaleString()}` : 'N/A'],
+                    ['Security Deposit', financial.security_deposit || 'N/A'],
                     ['Payment Due Date', financial.payment_due_date || 'N/A'],
-                    ['Late Payment Fee', financial.late_fee ? `₦${Number(financial.late_fee).toLocaleString()}` : 'N/A'],
+                    ['Late Payment Fee', financial.late_fee || 'N/A'],
                   ].map(([label, value]) => (
                     <tr key={label} className="border-b">
                       <td className="py-2 pr-8 font-medium text-gray-600">{label}</td>
@@ -194,24 +210,24 @@ export default function TenancyAgreementPage() {
             </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-semibold mb-3">Obligations</h2>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Landlord Obligations</p>
-                <p className="text-sm">{obligations.landlord || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Tenant Obligations</p>
-                <p className="text-sm">{obligations.tenant || 'N/A'}</p>
-              </div>
-            </div>
-          </section>
+          {obligations.landlord && (
+            <section>
+              <h2 className="text-lg font-semibold mb-3">Landlord Obligations</h2>
+              <div className="prose prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: obligations.landlord }} />
+            </section>
+          )}
+
+          {obligations.tenant && (
+            <section>
+              <h2 className="text-lg font-semibold mb-3">Tenant Obligations</h2>
+              <div className="prose prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: obligations.tenant }} />
+            </section>
+          )}
 
           {termination && Object.keys(termination).length > 0 && (
             <section>
               <h2 className="text-lg font-semibold mb-3">Termination</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
                 <div>
                   <p className="text-sm text-gray-500">Notice Period</p>
                   <p className="font-medium">{termination.notice_period || 'N/A'}</p>
@@ -222,11 +238,15 @@ export default function TenancyAgreementPage() {
                 </div>
               </div>
               {termination.conditions && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-500">Conditions</p>
-                  <p className="text-sm">{termination.conditions}</p>
-                </div>
+                <div className="prose prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: termination.conditions }} />
               )}
+            </section>
+          )}
+
+          {data.additional_clauses && (
+            <section>
+              <h2 className="text-lg font-semibold mb-3">Additional Clauses</h2>
+              <div className="prose prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: data.additional_clauses }} />
             </section>
           )}
 
@@ -235,17 +255,21 @@ export default function TenancyAgreementPage() {
               <div className="text-center space-y-4">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                  <span className="font-medium">Signed on {signedDoc?.signed_at ? new Date(signedDoc.signed_at).toLocaleDateString() : 'N/A'}</span>
+                  <span className="font-medium">Signed on {agreement?.signed_at ? new Date(agreement.signed_at).toLocaleDateString() : 'N/A'}</span>
                 </div>
-                {signedDoc?.signed_file_url && (
+                {agreement?.signed_file_url && (
                   <div>
-                    <a href={signedDoc.signed_file_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
+                    <a href={agreement.signed_file_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                       Download Signed Agreement (PDF)
                     </a>
                   </div>
                 )}
-                <p className="text-sm text-gray-500">You may also <a href={agreement.file_url || '#'} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">view the unsigned version</a>.</p>
+                {agreement?.file_url && (
+                  <p className="text-sm text-gray-500">
+                    You may also <a href={agreement.file_url} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">view the unsigned version</a>.
+                  </p>
+                )}
               </div>
             ) : (
               <div className="space-y-4">

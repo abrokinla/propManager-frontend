@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import type { TenantSelf, TenancyDocument, TenantProfile, Payment } from '../../../types';
+import type { TenantSelf, TenancyDocument, TenantProfile, Payment, DocumentStatus } from '../../../types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -21,6 +21,7 @@ export default function TenantDashboardPage() {
   const router = useRouter();
   const [tenant, setTenant] = useState<TenantSelf | null>(null);
   const [documents, setDocuments] = useState<TenancyDocument[]>([]);
+  const [agreement, setAgreement] = useState<TenancyDocument | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -40,13 +41,15 @@ export default function TenantDashboardPage() {
         return;
       }
       const headers = { Authorization: `Bearer ${token}` };
-      const [meRes, docsRes, payRes] = await Promise.all([
+      const [meRes, docsRes, agrRes, payRes] = await Promise.all([
         axios.get<TenantSelf>(`${API_URL}/tenant/me/`, { headers }),
         axios.get<TenancyDocument[]>(`${API_URL}/tenant/me/documents/`, { headers }),
+        axios.get<TenancyDocument>(`${API_URL}/tenant/me/agreement/`, { headers }).catch(() => null),
         axios.get<Payment[]>(`${API_URL}/tenant/me/payments/`, { headers }),
       ]);
       setTenant(meRes.data);
       setDocuments(docsRes.data);
+      setAgreement(agrRes?.data || null);
       setPayments(payRes.data);
     } catch {
       localStorage.removeItem('tenant_access_token');
@@ -210,10 +213,10 @@ export default function TenantDashboardPage() {
             <button onClick={() => router.push('/tenant/tenancy-agreement')} className="btn btn-secondary text-sm">View Agreement</button>
           </div>
           <p className="text-sm text-gray-500">
-            Status: <span className={`badge ${documents.some(d => d.status === 'signed') ? 'badge-success' : documents.some(d => d.status === 'sent') ? 'badge-info' : 'badge-warning'}`}>
-              {documents.some(d => d.status === 'signed') ? 'Signed' : documents.some(d => d.status === 'sent') ? 'Awaiting Signature' : 'Not Sent'}
+            Status: <span className={`badge ${agreement?.status === 'signed' ? 'badge-success' : agreement?.status === 'sent' ? 'badge-info' : 'badge-warning'}`}>
+              {agreement?.status === 'signed' ? 'Signed' : agreement?.status === 'sent' ? 'Awaiting Signature' : 'Not Available'}
             </span>
-            {documents.find(d => d.signed_at) && <> &middot; Signed {new Date(documents.find(d => d.signed_at)!.signed_at!).toLocaleDateString()}</>}
+            {agreement?.signed_at && <> &middot; Signed {new Date(agreement.signed_at).toLocaleDateString()}</>}
           </p>
         </div>
 
