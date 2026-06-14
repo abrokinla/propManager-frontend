@@ -12,7 +12,7 @@ const EMPTY_TEMPLATE: Record<string, any> = {
   agent: { name: '', description: 'Estate Surveyors, Managers and Valuers', address: '', mobile: '', email: '' },
   landlord: { name: '', address: '', legal_note: 'Includes Successors in Title, Executors and Assigns' },
   tenants_legal_note: 'Includes Successors in Title, Executors and Assigns',
-  property: { description: '', address: '', referred_to_as: 'The Demised Premises', ownership_note: 'Bona fide property of the landlord' },
+  property: { referred_to_as: 'The Demised Premises', ownership_note: 'Bona fide property of the landlord' },
   tenancy_terms: {
     type: 'Yearly Tenancy', currency: 'NGN', payment: 'Payable in advance',
     due_by: 'Not later than thirty (30) days after commencement of each rental year',
@@ -262,28 +262,22 @@ export default function AgreementTemplatePage() {
               </div>
             </CollapsibleSection>
 
-            <CollapsibleSection title="3. Property Description">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Description</label>
-                  <textarea value={data.property?.description || ''} onChange={e => setF('property.description', e.target.value)} rows={2} className="w-full" placeholder="e.g. Two (2) bedroom apartment with appurtenances..." />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Address</label>
-                  <textarea value={data.property?.address || ''} onChange={e => setF('property.address', e.target.value)} rows={2} className="w-full" />
-                </div>
+            <div className="card p-4" style="background-color: var(--bg); border: 1px solid var(--border);">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 mt-0.5 flex-shrink-0" style="color: var(--text-light);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Referred to As</label>
-                  <input value={data.property?.referred_to_as || ''} onChange={e => setF('property.referred_to_as', e.target.value)} className="w-full" placeholder="The Demised Premises" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Ownership Note</label>
-                  <input value={data.property?.ownership_note || ''} onChange={e => setF('property.ownership_note', e.target.value)} className="w-full" placeholder="Bona fide property of the landlord" />
+                  <p className="font-medium text-sm" style="color: var(--text);">Property details are automatically populated</p>
+                  <p className="text-xs mt-1" style="color: var(--text-light);">
+                    The property name, description, address, and type are pulled from your Property settings.
+                    Each tenant&apos;s assigned unit number is added automatically.
+                  </p>
                 </div>
               </div>
-            </CollapsibleSection>
+            </div>
 
-            <CollapsibleSection title="4. Tenancy Terms">
+            <CollapsibleSection title="3. Tenancy Terms">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Type</label>
@@ -304,6 +298,20 @@ export default function AgreementTemplatePage() {
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Due By</label>
                   <input value={data.tenancy_terms?.due_by || ''} onChange={e => setF('tenancy_terms.due_by', e.target.value)} className="w-full" />
+                </div>
+              </div>
+
+              <div className="border-t pt-4 mt-4">
+                <h3 className="font-medium text-sm mb-3" style={{ color: 'var(--text)' }}>Legal References</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property Referred to As</label>
+                    <input value={data.property?.referred_to_as || ''} onChange={e => setF('property.referred_to_as', e.target.value)} className="w-full" placeholder="The Demised Premises" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Ownership Note</label>
+                    <input value={data.property?.ownership_note || ''} onChange={e => setF('property.ownership_note', e.target.value)} className="w-full" placeholder="Bona fide property of the landlord" />
+                  </div>
                 </div>
               </div>
 
@@ -341,14 +349,14 @@ export default function AgreementTemplatePage() {
             </CollapsibleSection>
 
             <div className="card">
-              <RichTextEditor label="5. Tenant's Covenants" value={data.tenants_covenants || ''} onChange={v => setF('tenants_covenants', v)} minHeight={250} />
+              <RichTextEditor label="4. Tenant's Covenants" value={data.tenants_covenants || ''} onChange={v => setF('tenants_covenants', v)} minHeight={250} />
             </div>
 
             <div className="card">
-              <RichTextEditor label="6. Landlord's Covenants" value={data.landlords_covenants || ''} onChange={v => setF('landlords_covenants', v)} minHeight={150} />
+              <RichTextEditor label="5. Landlord's Covenants" value={data.landlords_covenants || ''} onChange={v => setF('landlords_covenants', v)} minHeight={150} />
             </div>
 
-            <CollapsibleSection title="7. Special Provisions">
+            <CollapsibleSection title="6. Special Provisions">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Notice to Quit (months)</label>
@@ -388,7 +396,7 @@ export default function AgreementTemplatePage() {
               </div>
             </CollapsibleSection>
 
-            <CollapsibleSection title="8. Execution / Signature">
+            <CollapsibleSection title="7. Execution / Signature">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Landlord Signature Label</label>
