@@ -33,6 +33,7 @@ export default function TenantsPage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Tenant | null>(null);
   const [form, setForm] = useState(defaultForm);
@@ -54,6 +55,8 @@ export default function TenantsPage() {
     }).catch(() => toast('Failed to load data', 'error'))
       .finally(() => setLoading(false));
   }, []);
+
+  const unitMap = new Map(units.map(u => [u.id, u]));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -146,175 +149,328 @@ export default function TenantsPage() {
 
   const canResend = (status: TenancyStatus) => status === 'invited' || status === 'profile_pending';
 
+  const propertyTenants = selectedProperty
+    ? tenants.filter(t => {
+        const uid = t.unit?.id ?? t.unit_id;
+        return uid ? (unitMap.get(uid)?.property_id === selectedProperty) : false;
+      })
+    : [];
+
+  const propertyUnits = selectedProperty
+    ? units.filter(u => u.property_id === selectedProperty)
+    : [];
+
+  const occupiedUnitIds = new Set(
+    propertyTenants.map(t => t.unit?.id ?? t.unit_id).filter(Boolean) as number[]
+  );
+
+  const availableUnits = propertyUnits.filter(u => !occupiedUnitIds.has(u.id));
+  const selectedPropData = selectedProperty
+    ? properties.find(p => p.id === selectedProperty)
+    : null;
+
+  const tenantCountsByProperty = new Map<number, number>();
+  tenants.forEach(t => {
+    const uid = t.unit?.id ?? t.unit_id;
+    const u = uid ? unitMap.get(uid) : undefined;
+    if (u?.property_id) {
+      tenantCountsByProperty.set(u.property_id, (tenantCountsByProperty.get(u.property_id) ?? 0) + 1);
+    }
+  });
+
+  if (loading) {
+    return (
+      <ErrorBoundary>
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        </div>
+      </DashboardLayout>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Tenants</h1>
-          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{tenants.length} tenant{tenants.length === 1 ? '' : 's'}</p>
-        </div>
-        <button onClick={() => setShowForm(true)} className="btn btn-primary">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-          Add Tenant
-        </button>
-      </div>
-
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{editing ? 'Edit Tenant' : 'Add New Tenant'}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property *</label>
-                <select name="property_id" value={form.property_id} onChange={handleChange} required>
-                  <option value="">Select property...</option>
-                  {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Unit *</label>
-                <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
-                  <option value="">{form.property_id ? 'Select unit...' : 'Select a property first'}</option>
-                  {form.property_id && units
-                    .filter(u => u.property_id === Number(form.property_id))
-                    .map(u => <option key={u.id} value={u.id}>{u.unit_number}</option>)
-                  }
-                </select>
-                {formErrors.unit_id && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.unit_id}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Full Name *</label>
-                <input name="name" value={form.name} onChange={handleChange} required placeholder="John Doe" />
-                {formErrors.name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.name}</p>}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Phone</label>
-                  <input name="phone" value={form.phone} onChange={handleChange} placeholder="+234..." />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Email</label>
-                  <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="john@example.com" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Address</label>
-                <input name="address" value={form.address} onChange={handleChange} placeholder="Home address" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Annual Rent (₦)</label>
-                  <input name="annual_rent" type="number" value={form.annual_rent} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Active</label>
-                  <select name="is_active" value={form.is_active} onChange={handleChange}>
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Start</label>
-                  <input name="lease_start_date" type="date" value={form.lease_start_date} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Expiry</label>
-                  <input name="lease_expiry_date" type="date" value={form.lease_expiry_date} onChange={handleChange} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Renewal</label>
-                  <input name="lease_renewal_date" type="date" value={form.lease_renewal_date} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Move-in Date</label>
-                  <input name="move_in_date" type="date" value={form.move_in_date} onChange={handleChange} />
-                </div>
-              </div>
-              <div className="flex gap-3 justify-end">
-                <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); setForm(defaultForm); }} className="btn btn-secondary">Cancel</button>
-                <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : editing ? 'Update' : 'Create Tenant'}</button>
-              </div>
-            </form>
+      {!selectedProperty ? (
+        <>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Tenants</h1>
+              <p className="mt-1" style={{ color: 'var(--text-light)' }}>
+                {tenants.length} tenant{tenants.length === 1 ? '' : 's'} across {properties.length} {properties.length === 1 ? 'property' : 'properties'}
+              </p>
+            </div>
           </div>
-        </div>
-      )}
 
-      {loading ? (
-        <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
-      ) : tenants.length === 0 ? (
-        <div className="card text-center py-12">
-          <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No tenants yet</h3>
-          <p className="mb-4" style={{ color: 'var(--text-light)' }}>Add tenants to your units</p>
-          <button onClick={() => setShowForm(true)} className="btn btn-primary">Add Tenant</button>
-        </div>
-      ) : (
-        <div className="card overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Name</th>
-                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Unit</th>
-                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Property</th>
-                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Annual Rent</th>
-                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Lease Expiry</th>
-                <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Status</th>
-                <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tenants.map((t) => {
-                const statusCfg = tenancyStatusConfig[t.tenancy_status] || tenancyStatusConfig.active;
+          {properties.length === 0 ? (
+            <div className="card text-center py-12">
+              <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No properties yet</h3>
+              <p className="mb-4" style={{ color: 'var(--text-light)' }}>Create a property first before adding tenants.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {properties.map(prop => {
+                const count = tenantCountsByProperty.get(prop.id) ?? 0;
+                const total = prop.total_units ?? units.filter(u => u.property_id === prop.id).length;
                 return (
-                  <tr key={t.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td className="py-3 px-4">
-                      <Link href={`/tenants/${t.id}`} className="font-medium text-primary-600 hover:text-primary-700">
-                        {t.name}
-                      </Link>
-                      <div className="text-xs" style={{ color: 'var(--text-light)' }}>{t.email}</div>
-                    </td>
-                    <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.unit?.unit_number || t.unit_number || '—'}</td>
-                    <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.unit?.property_name || t.property_name || '—'}</td>
-                    <td className="py-3 px-4" style={{ color: 'var(--text)' }}>{t.annual_rent ? `₦${Number(t.annual_rent).toLocaleString()}/yr` : '—'}</td>
-                    <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.lease_expiry_date || '—'}</td>
-                    <td className="py-3 px-4"><span className={`badge ${statusCfg.className}`}>{statusCfg.label}</span></td>
-                    <td className="py-3 px-4 text-right whitespace-nowrap">
-                      <button onClick={() => handleEdit(t)} className="text-primary-600 hover:text-primary-700 text-sm font-medium mr-3">Edit</button>
-                      {canResend(t.tenancy_status) && (
-                        <button
-                          onClick={() => handleResendInvite(t.id)}
-                          disabled={sendingInvite === t.id}
-                          className="text-sm font-medium mr-3 disabled:opacity-50"
-                          style={{ color: 'var(--success)' }}
-                        >
-                          {sendingInvite === t.id ? 'Sending...' : 'Resend Invite'}
-                        </button>
+                  <button
+                    key={prop.id}
+                    onClick={() => setSelectedProperty(prop.id)}
+                    className="card text-left hover:shadow-lg transition-shadow cursor-pointer"
+                  >
+                    <div className="w-full h-40 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: 'var(--bg)' }}>
+                      {prop.image_url ? (
+                        <img src={prop.image_url} alt={prop.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg className="w-12 h-12" style={{ color: 'var(--text-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                          </svg>
+                        </div>
                       )}
-                      <button onClick={() => setDeleteTarget(t.id)} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>Delete</button>
-                    </td>
-                  </tr>
+                    </div>
+                    <h3 className="font-semibold text-base" style={{ color: 'var(--text)' }}>{prop.name}</h3>
+                    <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>{prop.address}</p>
+                    <p className="text-xs mt-2 font-medium" style={{ color: 'var(--text-light)' }}>
+                      {count} tenant{count === 1 ? '' : 's'} / {total} unit{total === 1 ? '' : 's'}
+                    </p>
+                  </button>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSelectedProperty(null)}
+                className="btn btn-secondary"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Properties
+              </button>
+            </div>
+          </div>
 
-      <ConfirmDialog
-        open={!!deleteTarget}
-        title="Delete Tenant"
-        message="Are you sure you want to remove this tenant? The associated unit will become available."
-        onConfirm={() => {
-          const id = deleteTarget!;
-          setDeleteTarget(null);
-          return handleDelete(id);
-        }}
-        onCancel={() => setDeleteTarget(null)}
-      />
+          <div className="card mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>{selectedPropData?.name || 'Property'}</h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>{selectedPropData?.address}</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>
+                  {propertyTenants.length} of {propertyUnits.length} unit{propertyUnits.length === 1 ? '' : 's'} occupied
+                </p>
+              </div>
+              {availableUnits.length > 0 && (
+                <button
+                  onClick={() => {
+                    setEditing(null);
+                    setForm({ ...defaultForm, property_id: String(selectedProperty) });
+                    setShowForm(true);
+                  }}
+                  className="btn btn-primary"
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Tenant
+                </button>
+              )}
+            </div>
+          </div>
+
+          {showForm && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{editing ? 'Edit Tenant' : 'Add New Tenant'}</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property *</label>
+                    {editing || !selectedProperty ? (
+                      <select name="property_id" value={form.property_id} onChange={handleChange} required>
+                        <option value="">Select property...</option>
+                        {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    ) : (
+                      <select name="property_id" value={form.property_id} disabled className="w-full opacity-60 cursor-not-allowed">
+                        <option value="">Select property...</option>
+                        {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Unit *</label>
+                    {editing ? (
+                      <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
+                        <option value="">Select unit...</option>
+                        {(form.property_id ? units.filter(u => u.property_id === Number(form.property_id)) : [])
+                          .map(u => <option key={u.id} value={u.id}>{u.unit_number}</option>)
+                        }
+                      </select>
+                    ) : (
+                      <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
+                        <option value="">{form.property_id ? 'Select unit...' : 'Select a property first'}</option>
+                        {(form.property_id ? units
+                          .filter(u => u.property_id === Number(form.property_id))
+                          .filter(u => editing || !occupiedUnitIds.has(u.id) || u.id === Number(form.unit_id))
+                          : [])
+                          .map(u => <option key={u.id} value={u.id}>{u.unit_number}</option>)
+                        }
+                      </select>
+                    )}
+                    {formErrors.unit_id && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.unit_id}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Full Name *</label>
+                    <input name="name" value={form.name} onChange={handleChange} required placeholder="John Doe" />
+                    {formErrors.name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.name}</p>}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Phone</label>
+                      <input name="phone" value={form.phone} onChange={handleChange} placeholder="+234..." />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Email</label>
+                      <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="john@example.com" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Address</label>
+                    <input name="address" value={form.address} onChange={handleChange} placeholder="Home address" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Annual Rent (₦)</label>
+                      <input name="annual_rent" type="number" value={form.annual_rent} onChange={handleChange} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Active</label>
+                      <select name="is_active" value={form.is_active} onChange={handleChange}>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Start</label>
+                      <input name="lease_start_date" type="date" value={form.lease_start_date} onChange={handleChange} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Expiry</label>
+                      <input name="lease_expiry_date" type="date" value={form.lease_expiry_date} onChange={handleChange} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Renewal</label>
+                      <input name="lease_renewal_date" type="date" value={form.lease_renewal_date} onChange={handleChange} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Move-in Date</label>
+                      <input name="move_in_date" type="date" value={form.move_in_date} onChange={handleChange} />
+                    </div>
+                  </div>
+                  <div className="flex gap-3 justify-end">
+                    <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); setForm(defaultForm); }} className="btn btn-secondary">Cancel</button>
+                    <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : editing ? 'Update' : 'Create Tenant'}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {propertyTenants.length === 0 ? (
+            <div className="card text-center py-12">
+              <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No tenants yet</h3>
+              <p className="mb-4" style={{ color: 'var(--text-light)' }}>
+                {availableUnits.length > 0
+                  ? `There ${availableUnits.length === 1 ? 'is' : 'are'} ${availableUnits.length} available unit${availableUnits.length === 1 ? '' : 's'} in this property.`
+                  : 'All units in this property are occupied.'}
+              </p>
+              {availableUnits.length > 0 && (
+                <button
+                  onClick={() => {
+                    setEditing(null);
+                    setForm({ ...defaultForm, property_id: String(selectedProperty) });
+                    setShowForm(true);
+                  }}
+                  className="btn btn-primary"
+                >
+                  Add Tenant
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="card overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Name</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Unit</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Annual Rent</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Lease Expiry</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Status</th>
+                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {propertyTenants.map((t) => {
+                    const statusCfg = tenancyStatusConfig[t.tenancy_status] || tenancyStatusConfig.active;
+                    return (
+                      <tr key={t.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td className="py-3 px-4">
+                          <Link href={`/tenants/${t.id}`} className="font-medium text-primary-600 hover:text-primary-700">
+                            {t.name}
+                          </Link>
+                          <div className="text-xs" style={{ color: 'var(--text-light)' }}>{t.email}</div>
+                        </td>
+                        <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.unit?.unit_number || t.unit_number || '—'}</td>
+                        <td className="py-3 px-4" style={{ color: 'var(--text)' }}>{t.annual_rent ? `₦${Number(t.annual_rent).toLocaleString()}/yr` : '—'}</td>
+                        <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.lease_expiry_date || '—'}</td>
+                        <td className="py-3 px-4"><span className={`badge ${statusCfg.className}`}>{statusCfg.label}</span></td>
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <button onClick={() => handleEdit(t)} className="text-primary-600 hover:text-primary-700 text-sm font-medium mr-3">Edit</button>
+                          {canResend(t.tenancy_status) && (
+                            <button
+                              onClick={() => handleResendInvite(t.id)}
+                              disabled={sendingInvite === t.id}
+                              className="text-sm font-medium mr-3 disabled:opacity-50"
+                              style={{ color: 'var(--success)' }}
+                            >
+                              {sendingInvite === t.id ? 'Sending...' : 'Resend Invite'}
+                            </button>
+                          )}
+                          <button onClick={() => setDeleteTarget(t.id)} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>Delete</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <ConfirmDialog
+            open={!!deleteTarget}
+            title="Delete Tenant"
+            message="Are you sure you want to remove this tenant? The associated unit will become available."
+            onConfirm={() => {
+              const id = deleteTarget!;
+              setDeleteTarget(null);
+              return handleDelete(id);
+            }}
+            onCancel={() => setDeleteTarget(null)}
+          />
+        </>
+      )}
     </DashboardLayout>
     </ErrorBoundary>
   );

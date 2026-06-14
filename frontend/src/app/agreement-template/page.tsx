@@ -262,14 +262,14 @@ export default function AgreementTemplatePage() {
               </div>
             </CollapsibleSection>
 
-            <div className="card p-4" style="background-color: var(--bg); border: 1px solid var(--border);">
+            <div className="card p-4" style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--border)' }}>
               <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 mt-0.5 flex-shrink-0" style="color: var(--text-light);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: 'var(--text-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <p className="font-medium text-sm" style="color: var(--text);">Property details are automatically populated</p>
-                  <p className="text-xs mt-1" style="color: var(--text-light);">
+                  <p className="font-medium text-sm" style={{ color: 'var(--text)' }}>Property details are automatically populated</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>
                     The property name, description, address, and type are pulled from your Property settings.
                     Each tenant&apos;s assigned unit number is added automatically.
                   </p>
