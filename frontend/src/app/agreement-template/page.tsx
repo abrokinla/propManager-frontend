@@ -69,6 +69,75 @@ function CollapsibleSection({ title, defaultOpen = false, children }: { title: s
   );
 }
 
+function FieldPreview({ label, value }: { label: string; value?: string | number | null }) {
+  if (!value) return null;
+  return <div><p className="text-sm" style={{ color: 'var(--text-light)' }}>{label}</p><p className="font-medium" style={{ color: 'var(--text)' }}>{value}</p></div>;
+}
+
+function SectionPreview({ title, children }: { title: string; children: React.ReactNode }) {
+  return <section><h2 className="text-lg font-semibold mb-3" style={{ color: 'var(--text)' }}>{title}</h2>{children}</section>;
+}
+
+function HeaderPreview({ logoUrl, title, agent }: { logoUrl: string; title: string; agent: Record<string, any> }) {
+  return <div className="text-center border-b pb-6" style={{ borderColor: 'var(--border)' }}>
+    {logoUrl && <img src={logoUrl} alt="Logo" className="h-16 mx-auto mb-4 object-contain" />}
+    {agent.name && <p className="font-bold text-base" style={{ color: 'var(--text)' }}>{agent.name}</p>}
+    {agent.description && <p className="text-sm" style={{ color: 'var(--text-light)' }}>{agent.description}</p>}
+    {agent.address && <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>{agent.address}</p>}
+    <div className="h-4" />
+    <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{title || 'TENANCY AGREEMENT'}</h1>
+  </div>;
+}
+
+function RichTextPreview({ html }: { html?: string }) {
+  if (!html) return <p className="text-sm italic" style={{ color: 'var(--text-light)' }}>Not configured</p>;
+  return <div className="prose prose-sm max-w-none mt-2" style={{ color: 'var(--text)' }} dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+function CautionFeePreview({ cf }: { cf: Record<string, any> }) {
+  return <div className="border-t mt-4 pt-4" style={{ borderColor: 'var(--border)' }}>
+    <h3 className="font-medium text-sm mb-3" style={{ color: 'var(--text)' }}>Caution Fee</h3>
+    <FieldPreview label="Amount" value={cf.currency ? `${cf.currency} ${cf.amount}` : cf.amount} />
+    <FieldPreview label="Type" value={cf.type} />
+    <FieldPreview label="Deducted For" value={cf.deducted_for} />
+    <FieldPreview label="Refunded If" value={cf.refunded_if} />
+    <FieldPreview label="Top Up" value={cf.top_up} />
+  </div>;
+}
+
+function SignaturePreview({ exec }: { exec: Record<string, any> }) {
+  return <div className="border-t pt-6" style={{ borderColor: 'var(--border)' }}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+      <div>
+        <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.landlord_label || 'Signed by the within-named LANDLORD'}</p>
+        <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
+          <p className="text-xs" style={{ color: 'var(--text-light)' }}>Signature: ______________________________</p>
+          <p className="text-xs mt-4" style={{ color: 'var(--text-light)' }}>Date: ______________________________</p>
+        </div>
+        <div className="mt-4">
+          <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Landlord)</p>
+          <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
+            Name: ______________________________<br />Address: ______________________________<br />Signature: ______________________________<br />Date: ______________________________
+          </p>
+        </div>
+      </div>
+      <div>
+        <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.tenant_label || 'Signed by the within-named TENANT'}</p>
+        <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
+          <p className="text-xs" style={{ color: 'var(--text-light)' }}>Signature: ______________________________</p>
+          <p className="text-xs mt-4" style={{ color: 'var(--text-light)' }}>Date: ______________________________</p>
+        </div>
+        <div className="mt-4">
+          <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Tenant)</p>
+          <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
+            Name: ______________________________<br />Address: ______________________________<br />Signature: ______________________________<br />Date: ______________________________
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
 export default function AgreementTemplatePage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [templates, setTemplates] = useState<TenancyAgreementTemplate[]>([]);
@@ -82,6 +151,7 @@ export default function AgreementTemplatePage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [templateId, setTemplateId] = useState<number | null>(null);
   const [data, setData] = useState<Record<string, any>>(JSON.parse(JSON.stringify(EMPTY_TEMPLATE)));
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -165,6 +235,17 @@ export default function AgreementTemplatePage() {
     setNested(copy, path, value);
     setData(copy);
   };
+
+  const previewProps = showPreview ? {
+    prop: properties.find(p => p.id === selectedPropertyId),
+    agent: data.agent || {},
+    landlord: data.landlord || {},
+    pty: data.property || {},
+    tt: data.tenancy_terms || {},
+    cf: (data.tenancy_terms || {}).caution_fee || {},
+    sp: data.special_provisions || {},
+    exec: data.execution || {},
+  } : null;
 
   if (loading) {
     return (
@@ -410,6 +491,13 @@ export default function AgreementTemplatePage() {
             </CollapsibleSection>
 
             <div className="flex justify-end gap-3 pb-8">
+              <button type="button" onClick={() => setShowPreview(true)} className="btn btn-secondary">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Preview
+              </button>
               <button onClick={handleSave} disabled={saving} className="btn btn-primary disabled:opacity-50">
                 {saving ? 'Saving...' : templateId ? 'Update Template' : 'Create Template'}
               </button>
@@ -424,6 +512,69 @@ export default function AgreementTemplatePage() {
           </div>
         )}
       </DashboardLayout>
+
+      {showPreview && previewProps && (
+        <div className="fixed inset-0 z-50 overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+          <div className="min-h-full flex items-start justify-center p-4">
+            <div className="w-full max-w-4xl rounded-xl shadow-2xl border p-6 sm:p-8 my-8 space-y-8" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
+              <div className="flex items-center justify-between sticky top-0 pb-4 border-b z-10" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
+                <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>Preview — {title || 'Tenancy Agreement'}</h2>
+                <button onClick={() => setShowPreview(false)} className="btn btn-secondary text-sm">Close Preview</button>
+              </div>
+              <div className="space-y-8">
+                <HeaderPreview logoUrl={logoUrl} title={title} agent={previewProps.agent} />
+                <SectionPreview title="1. Parties">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FieldPreview label="Landlord" value={previewProps.landlord.name || '—'} />
+                    <FieldPreview label="Tenant" value="Tenant Name (auto-populated)" />
+                  </div>
+                  <FieldPreview label="Landlord Address" value={previewProps.landlord.address} />
+                  <FieldPreview label="Legal Note" value={previewProps.landlord.legal_note} />
+                </SectionPreview>
+                <SectionPreview title="2. Property">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FieldPreview label="Name" value={previewProps.prop?.name} />
+                    <FieldPreview label="Type" value={previewProps.prop?.property_type} />
+                  </div>
+                  <FieldPreview label="Description" value={previewProps.prop?.description} />
+                  <FieldPreview label="Address" value={previewProps.prop?.address} />
+                  <FieldPreview label="Unit" value="Auto-populated from tenant's assigned unit" />
+                  <FieldPreview label="Referred to As" value={previewProps.pty.referred_to_as} />
+                  <FieldPreview label="Ownership Note" value={previewProps.pty.ownership_note} />
+                </SectionPreview>
+                <SectionPreview title="3. Tenancy Terms">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <FieldPreview label="Type" value={previewProps.tt.type} />
+                    <FieldPreview label="Duration" value={previewProps.tt.duration_years ? `${previewProps.tt.duration_years} year(s)` : undefined} />
+                    <FieldPreview label="Payment" value={previewProps.tt.payment} />
+                  </div>
+                  <FieldPreview label="Due By" value={previewProps.tt.due_by} />
+                  {previewProps.cf.amount && <CautionFeePreview cf={previewProps.cf} />}
+                </SectionPreview>
+                <SectionPreview title="4. Tenant's Covenants">
+                  <RichTextPreview html={data.tenants_covenants} />
+                </SectionPreview>
+                <SectionPreview title="5. Landlord's Covenants">
+                  <RichTextPreview html={data.landlords_covenants} />
+                </SectionPreview>
+                <SectionPreview title="6. Special Provisions">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <FieldPreview label="Notice to Quit" value={previewProps.sp.notice_to_quit_months ? `${previewProps.sp.notice_to_quit_months} month(s)` : undefined} />
+                    <FieldPreview label="Termination Notice" value={previewProps.sp.termination_notice_months ? `${previewProps.sp.termination_notice_months} month(s)` : undefined} />
+                    <FieldPreview label="Holding Over" value={previewProps.sp.holding_over_days ? `${previewProps.sp.holding_over_days} day(s)` : undefined} />
+                  </div>
+                  <FieldPreview label="Renewal Request" value={previewProps.sp.renewal_request_months ? `${previewProps.sp.renewal_request_months} month(s) before expiry` : undefined} />
+                  <FieldPreview label="Communication" value={previewProps.sp.communication_methods} />
+                  <FieldPreview label="Rent Review Notice" value={previewProps.sp.rent_review_notice_months ? `${previewProps.sp.rent_review_notice_months} month(s)` : undefined} />
+                  <FieldPreview label="Rent Review Reply" value={previewProps.sp.rent_review_reply_weeks ? `${previewProps.sp.rent_review_reply_weeks} week(s)` : undefined} />
+                  {previewProps.sp.extra_clauses && <div className="mt-4"><h3 className="font-medium text-sm" style={{ color: 'var(--text)' }}>Extra Clauses</h3><RichTextPreview html={previewProps.sp.extra_clauses} /></div>}
+                </SectionPreview>
+                <SignaturePreview exec={previewProps.exec} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </ErrorBoundary>
   );
 }
