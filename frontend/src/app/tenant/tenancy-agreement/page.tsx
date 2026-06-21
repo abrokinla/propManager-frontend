@@ -313,8 +313,8 @@ export default function TenancyAgreementPage() {
                 <div>
                   <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.landlord_label}</p>
                   <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
-                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>Signature: ______________________________</p>
-                    <p className="text-xs mt-4" style={{ color: 'var(--text-light)' }}>Date: ______________________________</p>
+                    <p className="text-xs" style={{ color: 'var(--text)' }}>Signature: <span className="font-medium">{landlord.name || '________________________'}</span></p>
+                    <p className="text-xs mt-4" style={{ color: 'var(--text)' }}>Date: <span className="font-medium">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span></p>
                   </div>
                   <div className="mt-4">
                     <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Landlord)</p>

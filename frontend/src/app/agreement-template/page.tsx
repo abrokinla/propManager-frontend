@@ -105,14 +105,15 @@ function CautionFeePreview({ cf }: { cf: Record<string, any> }) {
   </div>;
 }
 
-function SignaturePreview({ exec }: { exec: Record<string, any> }) {
+function SignaturePreview({ exec, landlordName }: { exec: Record<string, any>; landlordName?: string }) {
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   return <div className="border-t pt-6" style={{ borderColor: 'var(--border)' }}>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
       <div>
         <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.landlord_label || 'Signed by the within-named LANDLORD'}</p>
         <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
-          <p className="text-xs" style={{ color: 'var(--text-light)' }}>Signature: ______________________________</p>
-          <p className="text-xs mt-4" style={{ color: 'var(--text-light)' }}>Date: ______________________________</p>
+          <p className="text-xs" style={{ color: 'var(--text)' }}>Signature: <span className="font-medium">{landlordName || '________________________'}</span></p>
+          <p className="text-xs mt-4" style={{ color: 'var(--text)' }}>Date: <span className="font-medium">{today}</span></p>
         </div>
         <div className="mt-4">
           <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Landlord)</p>
@@ -514,7 +515,7 @@ export default function AgreementTemplatePage() {
       </DashboardLayout>
 
       {showPreview && previewProps && (
-        <div className="fixed inset-0 z-50 overflow-y-auto" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+        <div className="fixed inset-0 z-50 overflow-y-auto" style={{ backgroundColor: 'var(--bg)' }}>
           <div className="min-h-full flex items-start justify-center p-4">
             <div className="w-full max-w-4xl rounded-xl shadow-2xl border p-6 sm:p-8 my-8 space-y-8" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
               <div className="flex items-center justify-between sticky top-0 pb-4 border-b z-10" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
@@ -569,7 +570,7 @@ export default function AgreementTemplatePage() {
                   <FieldPreview label="Rent Review Reply" value={previewProps.sp.rent_review_reply_weeks ? `${previewProps.sp.rent_review_reply_weeks} week(s)` : undefined} />
                   {previewProps.sp.extra_clauses && <div className="mt-4"><h3 className="font-medium text-sm" style={{ color: 'var(--text)' }}>Extra Clauses</h3><RichTextPreview html={previewProps.sp.extra_clauses} /></div>}
                 </SectionPreview>
-                <SignaturePreview exec={previewProps.exec} />
+                <SignaturePreview exec={previewProps.exec} landlordName={previewProps.landlord.name} />
               </div>
             </div>
           </div>
