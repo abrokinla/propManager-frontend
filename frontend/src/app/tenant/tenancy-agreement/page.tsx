@@ -42,6 +42,10 @@ export default function TenancyAgreementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [agreed, setAgreed] = useState(false);
+  const [confirmedTruthful, setConfirmedTruthful] = useState(false);
+  const [witnessName, setWitnessName] = useState('');
+  const [witnessAddress, setWitnessAddress] = useState('');
+  const [witnessOccupation, setWitnessOccupation] = useState('');
   const [signing, setSigning] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -73,7 +77,12 @@ export default function TenancyAgreementPage() {
       const tenantName = meRes.data.name;
       await axios.post(
         `${API_URL}/tenant/me/documents/${agreement.id}/sign/`,
-        { signature_name: tenantName },
+        {
+          signature_name: tenantName,
+          witness_name: witnessName,
+          witness_address: witnessAddress,
+          witness_occupation: witnessOccupation,
+        },
         { headers: getAuthHeaders() }
       );
       setMessage('signed');
@@ -298,9 +307,21 @@ export default function TenancyAgreementPage() {
                     I have read and agree to the terms and conditions of this tenancy agreement. I understand that this constitutes my electronic signature.
                   </span>
                 </label>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={confirmedTruthful}
+                    onChange={e => setConfirmedTruthful(e.target.checked)}
+                    className="mt-1 h-4 w-4 text-primary-600 rounded"
+                    style={{ borderColor: 'var(--border)' }}
+                  />
+                  <span className="text-sm" style={{ color: 'var(--text)' }}>
+                    I confirm that all information provided in this tenancy agreement is true and correct to the best of my knowledge, and I understand that I am liable for any defaults arising from any misrepresentation.
+                  </span>
+                </label>
                 <button
                   onClick={handleSign}
-                  disabled={!agreed || signing}
+                  disabled={!agreed || !confirmedTruthful || signing}
                   className="btn btn-primary w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {signing ? 'Signing...' : 'Sign Agreement'}
@@ -308,42 +329,67 @@ export default function TenancyAgreementPage() {
               </div>
             )}
 
-            {exec.landlord_label && (
-              <div className="mt-8 border-t pt-6 grid grid-cols-1 sm:grid-cols-2 gap-8" style={{ borderColor: 'var(--border)' }}>
-                <div>
-                  <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.landlord_label}</p>
-                  <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
-                    <p className="text-xs" style={{ color: 'var(--text)' }}>Signature: <span className="font-medium">{landlord.name || '________________________'}</span></p>
-                    <p className="text-xs mt-4" style={{ color: 'var(--text)' }}>Date: <span className="font-medium">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span></p>
-                  </div>
-                  <div className="mt-4">
-                    <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Landlord)</p>
-                    <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
-                      Name: ______________________________<br />
-                      Address: ______________________________<br />
-                      Signature: ______________________________<br />
-                      Date: ______________________________
-                    </p>
-                  </div>
+            <div className="mt-8 border-t pt-6 grid grid-cols-1 sm:grid-cols-2 gap-8" style={{ borderColor: 'var(--border)' }}>
+              <div>
+                <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.landlord_label || 'Signed by the within-named LANDLORD'}</p>
+                <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
+                  <p className="text-xs" style={{ color: 'var(--text)' }}>Signature: <span className="font-medium">{landlord.name || '________________________'}</span></p>
+                  <p className="text-xs mt-4" style={{ color: 'var(--text)' }}>Date: <span className="font-medium">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span></p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.tenant_label}</p>
-                  <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
-                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>Signature: ______________________________</p>
-                    <p className="text-xs mt-4" style={{ color: 'var(--text-light)' }}>Date: ______________________________</p>
-                  </div>
-                  <div className="mt-4">
-                    <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Tenant)</p>
-                    <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
-                      Name: ______________________________<br />
-                      Address: ______________________________<br />
-                      Signature: ______________________________<br />
-                      Date: ______________________________
-                    </p>
-                  </div>
+                <div className="mt-4">
+                  <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Landlord)</p>
+                  <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
+                    Name: {exec.witness_landlord_name || '______________________________'}<br />
+                    Address: {exec.witness_landlord_address || '____________________________'}<br />
+                    Signature: ______________________________<br />
+                    Date: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
                 </div>
               </div>
-            )}
+              <div>
+                <p className="text-sm font-medium mb-6" style={{ color: 'var(--text)' }}>{exec.tenant_label || 'Signed by the within-named TENANT'}</p>
+                <div className="border-b pb-6 mb-2" style={{ borderColor: 'var(--border)' }}>
+                  {isSigned ? (
+                    <>
+                      <p className="text-xs" style={{ color: 'var(--text)' }}>Signature: <span className="font-medium">{tenantName}</span></p>
+                      <p className="text-xs mt-4" style={{ color: 'var(--text)' }}>Date: <span className="font-medium">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span></p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs" style={{ color: 'var(--text-light)' }}>Signature: ______________________________</p>
+                      <p className="text-xs mt-4" style={{ color: 'var(--text-light)' }}>Date: ______________________________</p>
+                    </>
+                  )}
+                </div>
+                <div className="mt-4">
+                  <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Tenant)</p>
+                  {isSigned ? (
+                    <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
+                      Name: {witnessName || '______________________________'}<br />
+                      Address: {witnessAddress || '____________________________'}<br />
+                      Occupation: {witnessOccupation || '____________________________'}<br />
+                      Signature: ______________________________<br />
+                      Date: {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </p>
+                  ) : (
+                    <div className="mt-2 space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text)' }}>Witness Name</label>
+                        <input value={witnessName} onChange={e => setWitnessName(e.target.value)} className="w-full text-sm" placeholder="Full name of your witness" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text)' }}>Witness Address</label>
+                        <input value={witnessAddress} onChange={e => setWitnessAddress(e.target.value)} className="w-full text-sm" placeholder="Address of your witness" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text)' }}>Witness Occupation</label>
+                        <input value={witnessOccupation} onChange={e => setWitnessOccupation(e.target.value)} className="w-full text-sm" placeholder="Occupation of your witness" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

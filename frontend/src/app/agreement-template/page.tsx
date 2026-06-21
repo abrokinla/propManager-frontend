@@ -27,7 +27,7 @@ const EMPTY_TEMPLATE: Record<string, any> = {
     renewal_request_months: 3, rent_review_notice_months: 2, rent_review_reply_weeks: 2,
     extra_clauses: '',
   },
-  execution: { landlord_label: 'Signed by the within-named LANDLORD', tenant_label: 'Signed by the within-named TENANT' },
+  execution: { landlord_label: 'Signed by the within-named LANDLORD', tenant_label: 'Signed by the within-named TENANT', witness_landlord_name: '', witness_landlord_address: '' },
 };
 
 function setNested(obj: Record<string, any>, path: string, value: any) {
@@ -118,7 +118,10 @@ function SignaturePreview({ exec, landlordName }: { exec: Record<string, any>; l
         <div className="mt-4">
           <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Landlord)</p>
           <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
-            Name: ______________________________<br />Address: ______________________________<br />Signature: ______________________________<br />Date: ______________________________
+            Name: {exec.witness_landlord_name || '______________________________'}<br />
+            Address: {exec.witness_landlord_address || '____________________________'}<br />
+            Signature: ______________________________<br />
+            Date: {today}
           </p>
         </div>
       </div>
@@ -131,7 +134,7 @@ function SignaturePreview({ exec, landlordName }: { exec: Record<string, any>; l
         <div className="mt-4">
           <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>Witness (Tenant)</p>
           <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
-            Name: ______________________________<br />Address: ______________________________<br />Signature: ______________________________<br />Date: ______________________________
+            Name: ______________________________<br />Address: ______________________________<br />Occupation: ______________________________<br />Signature: ______________________________<br />Date: ______________________________
           </p>
         </div>
       </div>
@@ -487,6 +490,20 @@ export default function AgreementTemplatePage() {
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Tenant Signature Label</label>
                   <input value={data.execution?.tenant_label || ''} onChange={e => setF('execution.tenant_label', e.target.value)} className="w-full" />
+                </div>
+              </div>
+              <div className="border-t pt-4 mt-4">
+                <h3 className="font-medium text-sm mb-3" style={{ color: 'var(--text)' }}>Landlord's Witness</h3>
+                <p className="text-xs mb-3" style={{ color: 'var(--text-light)' }}>These details appear in the signed document. The witness date is auto-populated.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Witness Name</label>
+                    <input value={data.execution?.witness_landlord_name || ''} onChange={e => setF('execution.witness_landlord_name', e.target.value)} className="w-full" placeholder="Witness full name" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Witness Address</label>
+                    <input value={data.execution?.witness_landlord_address || ''} onChange={e => setF('execution.witness_landlord_address', e.target.value)} className="w-full" placeholder="Witness address" />
+                  </div>
                 </div>
               </div>
             </CollapsibleSection>
