@@ -231,7 +231,7 @@ export default function TenancyAgreementPage() {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                     <span className="font-medium">Verified as signed on {agreement?.signed_at ? new Date(agreement.signed_at).toLocaleDateString() : 'N/A'}</span>
                   </div>
-                  <a href={agreement.signed_file_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
+                  <a href={agreement.signed_file_url} target="_blank" rel="noopener noreferrer" download="signed_agreement.pdf" className="btn btn-primary inline-flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     Download Signed Agreement (PDF)
                   </a>
@@ -384,7 +384,7 @@ export default function TenancyAgreementPage() {
                 </div>
                 {agreement?.signed_file_url && (
                   <div>
-                    <a href={agreement.signed_file_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
+                    <a href={agreement.signed_file_url} target="_blank" rel="noopener noreferrer" download="signed_agreement.pdf" className="btn btn-primary inline-flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                       Download Signed Agreement (PDF)
                     </a>
