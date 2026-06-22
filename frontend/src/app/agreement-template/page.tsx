@@ -154,6 +154,9 @@ export default function AgreementTemplatePage() {
   const [logoUrl, setLogoUrl] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [templateId, setTemplateId] = useState<number | null>(null);
+  const [mode, setMode] = useState<'template' | 'uploaded_pdf'>('template');
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [uploadedPdfUrl, setUploadedPdfUrl] = useState('');
   const [data, setData] = useState<Record<string, any>>(JSON.parse(JSON.stringify(EMPTY_TEMPLATE)));
   const [showPreview, setShowPreview] = useState(false);
 
@@ -175,6 +178,8 @@ export default function AgreementTemplatePage() {
       setTemplateId(existing.id);
       setTitle(existing.title);
       setLogoUrl(existing.logo_url || '');
+      setMode(existing.mode || 'template');
+      setUploadedPdfUrl(existing.uploaded_pdf_url || '');
       const merged = JSON.parse(JSON.stringify(EMPTY_TEMPLATE));
       deepMerge(merged, existing.template_data);
       setData(merged);
@@ -182,6 +187,9 @@ export default function AgreementTemplatePage() {
       setTemplateId(null);
       setTitle('Tenancy Agreement');
       setLogoUrl('');
+      setMode('template');
+      setUploadedPdfUrl('');
+      setPdfFile(null);
       setData(JSON.parse(JSON.stringify(EMPTY_TEMPLATE)));
     }
   }, [selectedPropertyId, templates]);
@@ -210,12 +218,32 @@ export default function AgreementTemplatePage() {
         logo_url = uploadRes.image_url;
       }
 
-      const payload = {
+      let pdf_url = uploadedPdfUrl;
+      if (mode === 'uploaded_pdf' && pdfFile) {
+        if (templateId) {
+          const fd = new FormData();
+          fd.append('file', pdfFile);
+          const { data: pdfRes } = await api.post(`/agreement-templates/${templateId}/upload-pdf/`, fd, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          pdf_url = pdfRes.uploaded_pdf_url;
+          setUploadedPdfUrl(pdf_url);
+        }
+      }
+
+      const payload: Record<string, any> = {
         property_id: selectedPropertyId,
         title,
         logo_url,
-        template_data: data,
+        mode,
       };
+
+      if (mode === 'uploaded_pdf') {
+        payload.template_data = {};
+        payload.uploaded_pdf_url = pdf_url;
+      } else {
+        payload.template_data = data;
+      }
 
       if (templateId) {
         await api.put(`/agreement-templates/${templateId}/`, payload);
@@ -223,6 +251,14 @@ export default function AgreementTemplatePage() {
       } else {
         const res = await api.post('/agreement-templates/', payload);
         setTemplateId(res.data.id);
+        if (mode === 'uploaded_pdf' && pdfFile && !pdf_url) {
+          const fd = new FormData();
+          fd.append('file', pdfFile);
+          const { data: pdfRes } = await api.post(`/agreement-templates/${res.data.id}/upload-pdf/`, fd, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          setUploadedPdfUrl(pdfRes.uploaded_pdf_url);
+        }
         toast('Agreement template created', 'success');
       }
       const { data: tRes } = await api.get('/agreement-templates/');
@@ -287,6 +323,58 @@ export default function AgreementTemplatePage() {
 
         {selectedPropertyId && (
           <div className="space-y-6">
+            <div className="card">
+              <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Agreement Mode</h2>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="agreement-mode"
+                    checked={mode === 'template'}
+                    onChange={() => setMode('template')}
+                    className="h-4 w-4 text-primary-600"
+                  />
+                  <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>Use Agreement Template</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="agreement-mode"
+                    checked={mode === 'uploaded_pdf'}
+                    onChange={() => setMode('uploaded_pdf')}
+                    className="h-4 w-4 text-primary-600"
+                  />
+                  <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>Upload Scanned PDF</span>
+                </label>
+              </div>
+            </div>
+
+            {mode === 'uploaded_pdf' ? (
+              <div className="card">
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Uploaded PDF Agreement</h2>
+                <p className="text-sm mb-4" style={{ color: 'var(--text-light)' }}>
+                  Upload a scanned PDF of your tenancy agreement. Tenants will download, sign manually, and upload the signed copy back.
+                </p>
+                <div>
+                  <input type="file" accept=".pdf" onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    setPdfFile(file);
+                    if (!file) {
+                      setUploadedPdfUrl(uploadedPdfUrl);
+                    }
+                  }} className="text-sm" />
+                  <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>
+                    {uploadedPdfUrl ? `Current file: ${uploadedPdfUrl}` : 'Upload a PDF file.'}
+                  </p>
+                </div>
+                {uploadedPdfUrl && (
+                  <div className="mt-4">
+                    <a href={uploadedPdfUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline text-sm">View current uploaded PDF</a>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
             <div className="card">
               <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Header</h2>
               <div className="space-y-4">
@@ -520,10 +608,13 @@ export default function AgreementTemplatePage() {
                 {saving ? 'Saving...' : templateId ? 'Update Template' : 'Create Template'}
               </button>
             </div>
-          </div>
-        )}
 
-        {!selectedPropertyId && (
+            </>
+          )}
+        </div>
+      )}
+
+      {!selectedPropertyId && (
           <div className="card text-center py-12">
             <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>Select a Property</h3>
             <p style={{ color: 'var(--text-light)' }}>Choose a property above to set up its tenancy agreement template.</p>
@@ -531,7 +622,7 @@ export default function AgreementTemplatePage() {
         )}
       </DashboardLayout>
 
-      {showPreview && previewProps && (
+      {showPreview && previewProps && mode === 'template' && (
         <div className="fixed inset-0 z-50 overflow-y-auto" style={{ backgroundColor: 'var(--bg)' }}>
           <div className="min-h-full flex items-start justify-center p-4">
             <div className="w-full max-w-4xl rounded-xl shadow-2xl border p-6 sm:p-8 my-8 space-y-8" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>

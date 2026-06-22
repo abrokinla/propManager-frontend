@@ -257,18 +257,26 @@ export interface TenantSelf {
   created_at: string;
 }
 
-export type DocumentStatus = 'draft' | 'sent' | 'viewed' | 'signed' | 'completed';
+export type DocumentStatus = 'draft' | 'sent' | 'viewed' | 'signed' | 'completed' | 'pending_verification';
+
+export type AgreementMode = 'template' | 'uploaded_pdf';
 
 export interface TenancyDocument {
   id: number;
   tenant: number;
+  tenant_name?: string;
+  property_name?: string;
+  unit_number?: string;
   document_type: 'tenancy_agreement';
   status: DocumentStatus;
+  mode?: AgreementMode;
   document_data: Record<string, unknown>;
   sent_at?: string;
   signed_at?: string;
   file_url?: string;
   signed_file_url?: string;
+  uploaded_pdf_url?: string;
+  verification_note?: string;
   created_at: string;
   updated_at: string;
 }
@@ -306,6 +314,8 @@ export interface TenancyAgreementTemplate {
   property_name: string;
   title: string;
   logo_url: string;
+  mode?: AgreementMode;
+  uploaded_pdf_url?: string;
   template_data: Record<string, any>;
   created_at: string;
   updated_at: string;

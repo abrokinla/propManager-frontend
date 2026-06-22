@@ -9,13 +9,14 @@ import api from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
 import type { Unit, Tenant, Property, PaginatedResponse, TenancyStatus } from '../../types';
 
-const tenancyStatusConfig: Record<TenancyStatus, { label: string; className: string }> = {
+const tenancyStatusConfig: Record<string, { label: string; className: string }> = {
   invited: { label: 'Invited', className: 'badge-warning' },
   profile_pending: { label: 'Profile Pending', className: 'badge-warning' },
   document_pending: { label: 'Document Pending', className: 'badge-info' },
   pending_document: { label: 'Pending Document', className: 'badge-warning' },
   document_sent: { label: 'Document Sent', className: 'badge-info' },
   document_signed: { label: 'Document Signed', className: 'badge-info' },
+  pending_verification: { label: 'Pending Verification', className: 'badge-warning' },
   active: { label: 'Active', className: 'badge-success' },
   expired: { label: 'Expired', className: 'badge-danger' },
   quit_notice_issued: { label: 'Quit Notice', className: 'badge-danger' },
@@ -41,6 +42,11 @@ export default function TenantsPage() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [sendingInvite, setSendingInvite] = useState<number | null>(null);
+  const [pendingVerifications, setPendingVerifications] = useState<Record<number, { document_id: number; signed_file_url: string; tenant_name: string }>>({});
+  const [verifyTarget, setVerifyTarget] = useState<{ tenantId: number; tenantName: string; docId: number; signedUrl: string } | null>(null);
+  const [verifyAction, setVerifyAction] = useState<'verify' | 'reject' | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [verifying, setVerifying] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -48,10 +54,16 @@ export default function TenantsPage() {
       api.get<PaginatedResponse<Tenant>>('/tenants/'),
       api.get<PaginatedResponse<Unit>>('/units/'),
       api.get<PaginatedResponse<Property>>('/properties/'),
-    ]).then(([tRes, uRes, pRes]) => {
+      api.get<{ tenant_id: number; tenant_name: string; document_id: number; signed_file_url: string }[]>('/pending-verifications/').catch(() => ({ data: [] })),
+    ]).then(([tRes, uRes, pRes, vRes]) => {
       setTenants(tRes.data.results);
       setUnits(uRes.data.results);
       setProperties(pRes.data.results);
+      const vMap: Record<number, { document_id: number; signed_file_url: string; tenant_name: string }> = {};
+      for (const v of vRes.data) {
+        vMap[v.tenant_id] = { document_id: v.document_id, signed_file_url: v.signed_file_url, tenant_name: v.tenant_name };
+      }
+      setPendingVerifications(vMap);
     }).catch(() => toast('Failed to load data', 'error'))
       .finally(() => setLoading(false));
   }, []);
@@ -448,6 +460,20 @@ export default function TenantsPage() {
                               {sendingInvite === t.id ? 'Sending...' : 'Resend Invite'}
                             </button>
                           )}
+                          {pendingVerifications[t.id] && (
+                            <button
+                              onClick={() => setVerifyTarget({
+                                tenantId: t.id,
+                                tenantName: t.name,
+                                docId: pendingVerifications[t.id].document_id,
+                                signedUrl: pendingVerifications[t.id].signed_file_url,
+                              })}
+                              className="text-sm font-medium mr-3"
+                              style={{ color: '#a16207' }}
+                            >
+                              Review
+                            </button>
+                          )}
                           <button onClick={() => setDeleteTarget(t.id)} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>Delete</button>
                         </td>
                       </tr>
@@ -469,6 +495,92 @@ export default function TenantsPage() {
             }}
             onCancel={() => setDeleteTarget(null)}
           />
+
+          {verifyTarget && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="card w-full max-w-md">
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Verify Signed Agreement</h2>
+                <p className="text-sm mb-1" style={{ color: 'var(--text)' }}><b>Tenant:</b> {verifyTarget.tenantName}</p>
+                <div className="mb-4">
+                  <a href={verifyTarget.signedUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline text-sm">View signed document</a>
+                </div>
+
+                {!verifyAction ? (
+                  <div className="flex gap-3 justify-end">
+                    <button onClick={() => setVerifyTarget(null)} className="btn btn-secondary">Cancel</button>
+                    <button onClick={() => setVerifyAction('reject')} className="btn btn-danger" style={{ backgroundColor: 'var(--danger)' }}>Reject</button>
+                    <button
+                      onClick={async () => {
+                        setVerifying(true);
+                        try {
+                          await api.post(`/tenants/${verifyTarget.tenantId}/documents/${verifyTarget.docId}/verify/`, { action: 'verify' });
+                          toast('Agreement verified as signed', 'success');
+                          setVerifyTarget(null);
+                          setVerifyAction(null);
+                          const { data: vRes } = await api.get('/pending-verifications/').catch(() => ({ data: [] }));
+                          const vMap: Record<number, { document_id: number; signed_file_url: string; tenant_name: string }> = {};
+                          for (const v of (vRes as any).data || vRes) {
+                            vMap[v.tenant_id] = { document_id: v.document_id, signed_file_url: v.signed_file_url, tenant_name: v.tenant_name };
+                          }
+                          setPendingVerifications(vMap);
+                        } catch {
+                          toast('Failed to verify', 'error');
+                        } finally {
+                          setVerifying(false);
+                        }
+                      }}
+                      disabled={verifying}
+                      className="btn btn-primary disabled:opacity-50"
+                    >
+                      {verifying ? 'Verifying...' : 'Verify'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Rejection Reason</p>
+                    <textarea
+                      value={rejectReason}
+                      onChange={e => setRejectReason(e.target.value)}
+                      className="w-full"
+                      rows={3}
+                      placeholder="Explain why the signed document was not accepted..."
+                    />
+                    <div className="flex gap-3 justify-end">
+                      <button onClick={() => { setVerifyAction(null); setRejectReason(''); }} className="btn btn-secondary">Back</button>
+                      <button
+                        onClick={async () => {
+                          if (!rejectReason.trim()) { toast('Please provide a reason', 'error'); return; }
+                          setVerifying(true);
+                          try {
+                            await api.post(`/tenants/${verifyTarget.tenantId}/documents/${verifyTarget.docId}/verify/`, { action: 'reject', reason: rejectReason });
+                            toast('Agreement rejected', 'success');
+                            setVerifyTarget(null);
+                            setVerifyAction(null);
+                            setRejectReason('');
+                            const { data: vRes } = await api.get('/pending-verifications/').catch(() => ({ data: [] }));
+                            const vMap: Record<number, { document_id: number; signed_file_url: string; tenant_name: string }> = {};
+                            for (const v of (vRes as any).data || vRes) {
+                              vMap[v.tenant_id] = { document_id: v.document_id, signed_file_url: v.signed_file_url, tenant_name: v.tenant_name };
+                            }
+                            setPendingVerifications(vMap);
+                          } catch {
+                            toast('Failed to reject', 'error');
+                          } finally {
+                            setVerifying(false);
+                          }
+                        }}
+                        disabled={verifying}
+                        className="btn btn-primary disabled:opacity-50"
+                        style={{ backgroundColor: 'var(--danger)' }}
+                      >
+                        {verifying ? 'Rejecting...' : 'Confirm Reject'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </>
       )}
     </DashboardLayout>
