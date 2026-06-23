@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import NotificationBell from './NotificationBell';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -69,6 +70,8 @@ export default function Navbar() {
 
           {/* Right section */}
           <div className="hidden md:flex items-center gap-2">
+            <NotificationBell basePath="" />
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg transition-colors"

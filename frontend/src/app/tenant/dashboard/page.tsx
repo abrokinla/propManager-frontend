@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import type { TenantSelf, TenancyDocument, TenantProfile, Payment, DocumentStatus } from '../../../types';
+import NotificationBell from '../../../components/NotificationBell';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -168,6 +169,7 @@ export default function TenantDashboardPage() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">{tenant.name}</span>
+              <NotificationBell basePath="/tenant" />
               <button onClick={handleLogout} className="text-sm text-red-600 hover:text-red-700 font-medium">Logout</button>
             </div>
           </div>
@@ -244,6 +246,32 @@ export default function TenantDashboardPage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Express Interest */}
+        <div className="card mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Buy This Property</h2>
+              <p className="text-sm text-gray-500 mt-1">Interested in purchasing {tenant.property_name}?</p>
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  const token = getTenantToken();
+                  // property_id isn't directly available via tenant endpoint, but we can infer from tenant.unit
+                  // We use a placeholder; the backend will find the property from tenant context
+                  await axios.post(`${API_URL}/tenant/me/express-interest/`, {}, { headers: { Authorization: `Bearer ${token}` } });
+                  setMessage('Your interest has been sent to the property owner.');
+                } catch {
+                  setMessage('Failed to send interest. Please try again.');
+                }
+              }}
+              className="btn btn-primary text-sm"
+            >
+              Express Interest
+            </button>
+          </div>
         </div>
 
         {/* Tenancy Agreement */}
