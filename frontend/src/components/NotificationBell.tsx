@@ -62,7 +62,8 @@ export default function NotificationBell({ basePath }: { basePath: string }) {
 
   const goTo = (link: string) => {
     setOpen(false);
-    router.push(basePath + link);
+    const clean = link.startsWith(basePath) ? link.slice(basePath.length) : link;
+    router.push(basePath + clean);
   };
 
   return (

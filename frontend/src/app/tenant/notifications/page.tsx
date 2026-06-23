@@ -98,7 +98,7 @@ export default function TenantNotificationsPage() {
             {notifications.map(n => (
               <button
                 key={n.id}
-                onClick={() => { if (!n.is_read) markRead(n.id); if (n.link) router.push('/tenant' + n.link); }}
+                onClick={() => { if (!n.is_read) markRead(n.id); if (n.link) { const clean = n.link.startsWith('/tenant') ? n.link : '/tenant' + n.link; router.push(clean); } }}
                 className="w-full text-left card p-4 transition-colors hover:bg-gray-50"
                 style={{
                   borderLeft: n.is_read ? '3px solid transparent' : '3px solid var(--primary)',
