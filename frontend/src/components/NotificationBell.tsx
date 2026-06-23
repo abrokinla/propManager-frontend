@@ -88,7 +88,7 @@ export default function NotificationBell({ basePath }: { basePath: string }) {
       {open && (
         <div
           className="absolute right-0 mt-1 w-80 rounded-xl shadow-lg border py-1 z-50"
-          style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}
+          style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
         >
           <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
             <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Notifications</p>
