@@ -77,7 +77,7 @@ export default function MaintenancePage() {
   const handleEdit = (req: MaintenanceRequest) => {
     setEditing(req);
     setForm({
-      unit_id: String(req.unit?.id || req.unit_id || ''),
+      unit_id: '',
       title: req.title,
       description: req.description,
       priority: req.priority,
@@ -117,53 +117,128 @@ export default function MaintenancePage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="card w-full max-w-lg">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{editing ? 'Edit Request' : 'New Maintenance Request'}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Unit *</label>
-                <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
-                  <option value="">Select unit...</option>
-                  {units.map(u => <option key={u.id} value={u.id}>{(u.property?.name || u.property_name || '—')} — {u.unit_number}</option>)}
-                </select>
-                {formErrors.unit_id && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.unit_id}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Title *</label>
-                <input name="title" value={form.title} onChange={handleChange} required placeholder="e.g. Leaking pipe in Unit A" />
-                {formErrors.title && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.title}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Description *</label>
-                <textarea name="description" value={form.description} onChange={handleChange} required rows={3} placeholder="Describe the issue..." />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Reported By *</label>
-                <input name="reported_by" value={form.reported_by} onChange={handleChange} required placeholder="e.g. John Doe" />
-                {formErrors.reported_by && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.reported_by}</p>}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Priority</label>
-                  <select name="priority" value={form.priority} onChange={handleChange}>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </select>
+            {editing ? (
+              <>
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Maintenance Request</h2>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Property</p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{editing.property_name || editing.unit?.property_name || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Unit</p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{editing.unit_number || editing.unit?.unit_number || '—'}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Title</p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{editing.title}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Description</p>
+                    <p className="text-sm" style={{ color: 'var(--text)' }}>{editing.description}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Reported By</p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{editing.reported_by || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Date</p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{new Date(editing.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Priority</p>
+                      <span className={`badge ${priorityColor(editing.priority)}`}>{editing.priority}</span>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium mb-0.5 block" style={{ color: 'var(--text-light)' }}>Status</label>
+                      <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full">
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 justify-end pt-2">
+                    <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="btn btn-secondary">Close</button>
+                    <button
+                      onClick={async () => {
+                        setSaving(true);
+                        try {
+                          await api.patch(`/maintenance/${editing.id}/`, { status: form.status });
+                          toast('Status updated successfully', 'success');
+                          setShowForm(false);
+                          setEditing(null);
+                          await fetchData();
+                        } catch {
+                          toast('Failed to update status', 'error');
+                        } finally {
+                          setSaving(false);
+                        }
+                      }}
+                      disabled={saving}
+                      className="btn btn-primary disabled:opacity-50"
+                    >
+                      {saving ? 'Saving...' : 'Save Status'}
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Status</label>
-                  <select name="status" value={form.status} onChange={handleChange}>
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex gap-3 justify-end">
-                <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); }} className="btn btn-secondary">Cancel</button>
-                <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
-              </div>
-            </form>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>New Maintenance Request</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Unit *</label>
+                    <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
+                      <option value="">Select unit...</option>
+                      {units.map(u => <option key={u.id} value={u.id}>{(u.property?.name || u.property_name || '—')} — {u.unit_number}</option>)}
+                    </select>
+                    {formErrors.unit_id && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.unit_id}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Title *</label>
+                    <input name="title" value={form.title} onChange={handleChange} required placeholder="e.g. Leaking pipe in Unit A" />
+                    {formErrors.title && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.title}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Description *</label>
+                    <textarea name="description" value={form.description} onChange={handleChange} required rows={3} placeholder="Describe the issue..." />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Reported By *</label>
+                    <input name="reported_by" value={form.reported_by} onChange={handleChange} required placeholder="e.g. John Doe" />
+                    {formErrors.reported_by && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.reported_by}</p>}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Priority</label>
+                      <select name="priority" value={form.priority} onChange={handleChange}>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Status</label>
+                      <select name="status" value={form.status} onChange={handleChange}>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 justify-end">
+                    <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="btn btn-secondary">Cancel</button>
+                    <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : 'Create'}</button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}
