@@ -59,19 +59,19 @@ export default function TenantNotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b">
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <nav className="sticky top-0 z-50 border-b" style={{ background: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">PM</span>
               </div>
-              <span className="font-bold text-lg">PropManager</span>
+              <span className="font-bold text-lg" style={{ color: 'var(--text)' }}>PropManager</span>
             </div>
             <div className="flex items-center gap-4">
-              <button onClick={() => router.push('/tenant/dashboard')} className="text-sm text-primary-600 hover:underline">Dashboard</button>
-              <button onClick={handleLogout} className="text-sm text-red-600 hover:text-red-700 font-medium">Logout</button>
+              <button onClick={() => router.push('/tenant/dashboard')} className="text-sm font-medium" style={{ color: 'var(--text-light)' }}>Dashboard</button>
+              <button onClick={handleLogout} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>Logout</button>
             </div>
           </div>
         </div>

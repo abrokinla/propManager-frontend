@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import type { TenantSelf, TenancyDocument, TenantProfile, Payment, DocumentStatus } from '../../../types';
-import NotificationBell from '../../../components/NotificationBell';
+import TenantNavbar from '../../../components/TenantNavbar';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -35,6 +35,12 @@ export default function TenantDashboardPage() {
   const [paySaving, setPaySaving] = useState(false);
   const [editingMoveIn, setEditingMoveIn] = useState(false);
   const [moveInForm, setMoveInForm] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ current_password: '', new_password: '', confirm_password: '' });
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+  const [maintenanceForm, setMaintenanceForm] = useState({ title: '', description: '', priority: 'Medium' });
+  const [maintenanceSaving, setMaintenanceSaving] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -157,24 +163,8 @@ export default function TenantDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">PM</span>
-              </div>
-              <span className="font-bold text-lg">PropManager</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500">{tenant.name}</span>
-              <NotificationBell basePath="/tenant" />
-              <button onClick={handleLogout} className="text-sm text-red-600 hover:text-red-700 font-medium">Logout</button>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <TenantNavbar tenantName={tenant.name} onLogout={handleLogout} onOpenPasswordModal={() => setShowPasswordModal(true)} />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {message && (
@@ -248,29 +238,40 @@ export default function TenantDashboardPage() {
           )}
         </div>
 
-        {/* Express Interest */}
-        <div className="card mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold">Buy This Property</h2>
-              <p className="text-sm text-gray-500 mt-1">Interested in purchasing {tenant.property_name}?</p>
+        {/* Actions */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <div className="card">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Buy This Property</h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>Interested in purchasing {tenant.property_name}?</p>
+              </div>
+              <button
+                onClick={async () => {
+                  try {
+                    const token = getTenantToken();
+                    await axios.post(`${API_URL}/tenant/me/express-interest/`, {}, { headers: { Authorization: `Bearer ${token}` } });
+                    setMessage('Your interest has been sent to the property owner.');
+                  } catch {
+                    setMessage('Failed to send interest. Please try again.');
+                  }
+                }}
+                className="btn btn-primary text-sm"
+              >
+                Express Interest
+              </button>
             </div>
-            <button
-              onClick={async () => {
-                try {
-                  const token = getTenantToken();
-                  // property_id isn't directly available via tenant endpoint, but we can infer from tenant.unit
-                  // We use a placeholder; the backend will find the property from tenant context
-                  await axios.post(`${API_URL}/tenant/me/express-interest/`, {}, { headers: { Authorization: `Bearer ${token}` } });
-                  setMessage('Your interest has been sent to the property owner.');
-                } catch {
-                  setMessage('Failed to send interest. Please try again.');
-                }
-              }}
-              className="btn btn-primary text-sm"
-            >
-              Express Interest
-            </button>
+          </div>
+          <div className="card">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Report an Issue</h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>Submit a maintenance request for your unit.</p>
+              </div>
+              <button onClick={() => setShowMaintenanceModal(true)} className="btn btn-primary text-sm">
+                Report Issue
+              </button>
+            </div>
           </div>
         </div>
 
@@ -509,6 +510,94 @@ export default function TenantDashboardPage() {
                   <div className="flex gap-3 justify-end">
                     <button type="button" onClick={() => { setShowPayForm(false); setPayFile(null); }} className="btn btn-secondary">Cancel</button>
                     <button type="submit" disabled={paySaving} className="btn btn-primary disabled:opacity-50">{paySaving ? 'Submitting...' : 'Submit Payment'}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Password Change Modal */}
+          {showPasswordModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="rounded-xl shadow-xl p-6 w-full max-w-md" style={{ background: 'var(--card)' }}>
+                <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>Change Password</h3>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (passwordForm.new_password !== passwordForm.confirm_password) {
+                    setMessage('Passwords do not match.');
+                    return;
+                  }
+                  setPasswordSaving(true);
+                  try {
+                    await axios.post(`${API_URL}/tenant/me/change-password/`, passwordForm, { headers: getAuthHeaders() });
+                    setMessage('Password updated successfully.');
+                    setShowPasswordModal(false);
+                    setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
+                  } catch (err: any) {
+                    setMessage(err.response?.data?.error || 'Failed to update password.');
+                  } finally {
+                    setPasswordSaving(false);
+                  }
+                }} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Current Password</label>
+                    <input type="password" value={passwordForm.current_password} onChange={e => setPasswordForm({ ...passwordForm, current_password: e.target.value })} required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>New Password</label>
+                    <input type="password" value={passwordForm.new_password} onChange={e => setPasswordForm({ ...passwordForm, new_password: e.target.value })} required minLength={8} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Confirm New Password</label>
+                    <input type="password" value={passwordForm.confirm_password} onChange={e => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })} required />
+                  </div>
+                  <div className="flex gap-3 justify-end">
+                    <button type="button" onClick={() => { setShowPasswordModal(false); setMessage(''); }} className="btn btn-secondary">Cancel</button>
+                    <button type="submit" disabled={passwordSaving} className="btn btn-primary disabled:opacity-50">{passwordSaving ? 'Updating...' : 'Update Password'}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Maintenance Request Modal */}
+          {showMaintenanceModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="rounded-xl shadow-xl p-6 w-full max-w-md" style={{ background: 'var(--card)' }}>
+                <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>Report an Issue</h3>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setMaintenanceSaving(true);
+                  try {
+                    await axios.post(`${API_URL}/tenant/me/maintenance/`, maintenanceForm, { headers: getAuthHeaders() });
+                    setMessage('Maintenance request submitted successfully.');
+                    setShowMaintenanceModal(false);
+                    setMaintenanceForm({ title: '', description: '', priority: 'Medium' });
+                  } catch (err: any) {
+                    setMessage(err.response?.data?.error || 'Failed to submit maintenance request.');
+                  } finally {
+                    setMaintenanceSaving(false);
+                  }
+                }} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Title</label>
+                    <input type="text" value={maintenanceForm.title} onChange={e => setMaintenanceForm({ ...maintenanceForm, title: e.target.value })} required placeholder="e.g., Leaking faucet" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Description</label>
+                    <textarea value={maintenanceForm.description} onChange={e => setMaintenanceForm({ ...maintenanceForm, description: e.target.value })} required rows={3} placeholder="Describe the issue in detail" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Priority</label>
+                    <select value={maintenanceForm.priority} onChange={e => setMaintenanceForm({ ...maintenanceForm, priority: e.target.value })}>
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-3 justify-end">
+                    <button type="button" onClick={() => { setShowMaintenanceModal(false); setMessage(''); }} className="btn btn-secondary">Cancel</button>
+                    <button type="submit" disabled={maintenanceSaving} className="btn btn-primary disabled:opacity-50">{maintenanceSaving ? 'Submitting...' : 'Submit'}</button>
                   </div>
                 </form>
               </div>
