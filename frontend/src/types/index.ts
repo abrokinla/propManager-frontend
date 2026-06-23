@@ -148,6 +148,8 @@ export interface MaintenanceRequest {
 }
 
 export interface DashboardStats {
+  public_slug: string;
+  company_name: string;
   total_properties: number;
   total_units: number;
   occupied_units: number;
@@ -167,6 +169,11 @@ export interface DashboardStats {
     period_end: string;
   }>;
   open_maintenance: number;
+}
+
+export interface AgentPropertiesResponse {
+  agent: { company_name: string };
+  properties: PublicProperty[];
 }
 
 export interface PaginatedResponse<T> {

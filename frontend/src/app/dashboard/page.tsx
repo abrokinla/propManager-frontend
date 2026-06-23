@@ -10,6 +10,8 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     api.get<DashboardStats>('/dashboard/stats/')
@@ -95,6 +97,69 @@ export default function DashboardPage() {
           ]}
         />
       </div>
+
+      {stats?.public_slug && (
+        <div className="mb-8">
+          <div
+            onClick={() => setShowShareModal(true)}
+            className="card cursor-pointer hover:shadow-md transition-shadow flex items-center gap-4"
+          >
+            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center shrink-0">
+              <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold" style={{ color: 'var(--text)' }}>Share Your Listings</p>
+              <p className="text-sm" style={{ color: 'var(--text-light)' }}>Get a unique link to share your properties with potential clients.</p>
+            </div>
+            <svg className="w-5 h-5 ml-auto shrink-0" style={{ color: 'var(--text-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+      )}
+
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => { setShowShareModal(false); setCopied(false); }}>
+          <div className="card w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold mb-2" style={{ color: 'var(--text)' }}>Share Your Listings</h2>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-light)' }}>
+              Share this link with potential clients to show them your available properties.
+            </p>
+            <div className="flex gap-2">
+              <input
+                readOnly
+                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/listings/agent/${stats?.public_slug}`}
+                className="flex-1 text-sm px-3 py-2 border rounded"
+                onClick={e => (e.target as HTMLInputElement).select()}
+              />
+              <button
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(
+                      `${window.location.origin}/listings/agent/${stats?.public_slug}`
+                    );
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  } catch {
+                    /* fallback */
+                  }
+                }}
+                className="btn btn-primary text-sm shrink-0"
+              >
+                {copied ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            <button
+              onClick={() => { setShowShareModal(false); setCopied(false); }}
+              className="btn btn-secondary w-full mt-4"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Activity + Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
