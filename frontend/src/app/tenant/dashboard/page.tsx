@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import type { TenantSelf, TenancyDocument, TenantProfile, Payment, DocumentStatus } from '../../../types';
+import type { TenantSelf, TenancyDocument, TenantProfile, Payment, MaintenanceRequest, DocumentStatus } from '../../../types';
 import TenantNavbar from '../../../components/TenantNavbar';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -41,6 +41,7 @@ export default function TenantDashboardPage() {
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   const [maintenanceForm, setMaintenanceForm] = useState({ title: '', description: '', priority: 'Medium' });
   const [maintenanceSaving, setMaintenanceSaving] = useState(false);
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -50,16 +51,18 @@ export default function TenantDashboardPage() {
         return;
       }
       const headers = { Authorization: `Bearer ${token}` };
-      const [meRes, docsRes, agrRes, payRes] = await Promise.all([
+      const [meRes, docsRes, agrRes, payRes, maintRes] = await Promise.all([
         axios.get<TenantSelf>(`${API_URL}/tenant/me/`, { headers }),
         axios.get<TenancyDocument[]>(`${API_URL}/tenant/me/documents/`, { headers }),
         axios.get<TenancyDocument>(`${API_URL}/tenant/me/agreement/`, { headers }).catch(() => null),
         axios.get<Payment[]>(`${API_URL}/tenant/me/payments/`, { headers }),
+        axios.get<MaintenanceRequest[]>(`${API_URL}/tenant/me/maintenance/`, { headers }),
       ]);
       setTenant(meRes.data);
       setDocuments(docsRes.data);
       setAgreement(agrRes?.data || null);
       setPayments(payRes.data);
+      setMaintenanceRequests(maintRes.data);
     } catch {
       localStorage.removeItem('tenant_access_token');
       localStorage.removeItem('tenant_refresh_token');
@@ -635,6 +638,48 @@ export default function TenantDashboardPage() {
                         {p.proof_url ? (
                           <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline text-xs">View</a>
                         ) : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-4">Maintenance Requests</h2>
+          {maintenanceRequests.length === 0 ? (
+            <p className="text-gray-500 text-sm">No maintenance requests.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Date</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Title</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Priority</th>
+                    <th className="text-left py-2 font-medium text-gray-500">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {maintenanceRequests.map(r => (
+                    <tr key={r.id} className="border-b">
+                      <td className="py-2 pr-4 text-xs">{new Date(r.created_at).toLocaleDateString()}</td>
+                      <td className="py-2 pr-4">{r.title}</td>
+                      <td className="py-2 pr-4">
+                        <span className={`badge ${
+                          r.priority === 'High' ? 'badge-danger' :
+                          r.priority === 'Medium' ? 'badge-warning' :
+                          'badge-success'
+                        }`}>{r.priority}</span>
+                      </td>
+                      <td className="py-2">
+                        <span className={`badge ${
+                          r.status === 'Completed' ? 'badge-success' :
+                          r.status === 'In Progress' ? 'badge-warning' :
+                          'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                        }`}>{r.status}</span>
                       </td>
                     </tr>
                   ))}
