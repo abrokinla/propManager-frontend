@@ -146,7 +146,7 @@ export default function ListingDetailPage() {
                           </p>
                         </div>
                         <div className="text-right">
-                          {unit.price_rent && <p className="font-bold text-primary-600">${unit.price_rent.toLocaleString()}/year</p>}
+                          {unit.price_rent && <p className="font-bold text-primary-600">${unit.price_rent.toLocaleString()}/{unit.rent_cycle === 'daily' ? 'day' : unit.rent_cycle === 'monthly' ? 'mo' : 'yr'}</p>}
                           {unit.price_sale && unit.price_sale > 0 && <p className="text-sm text-gray-500">${unit.price_sale.toLocaleString()} sale</p>}
                         </div>
                       </div>

@@ -32,6 +32,8 @@ export default function TenantDashboardPage() {
   const [payForm, setPayForm] = useState({ amount: '', payment_method: 'Bank Transfer', payment_date: '' });
   const [payFile, setPayFile] = useState<File | null>(null);
   const [paySaving, setPaySaving] = useState(false);
+  const [editingMoveIn, setEditingMoveIn] = useState(false);
+  const [moveInForm, setMoveInForm] = useState('');
 
   const fetchData = useCallback(async () => {
     try {
@@ -111,6 +113,22 @@ export default function TenantDashboardPage() {
     }
   };
 
+  const hasApprovedPayment = payments.some(p => p.status === 'approved');
+
+  const saveMoveInDate = async () => {
+    setSaving(true);
+    try {
+      await axios.put(`${API_URL}/tenant/me/`, { move_in_date: moveInForm }, { headers: getAuthHeaders() });
+      setMessage('Move-in date updated successfully.');
+      setEditingMoveIn(false);
+      fetchData();
+    } catch {
+      setMessage('Failed to update move-in date.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const signDocument = async (docId: number) => {
     try {
       await axios.post(`${API_URL}/tenant/me/documents/${docId}/sign/`, { signature_name: tenant?.name }, { headers: getAuthHeaders() });
@@ -163,6 +181,13 @@ export default function TenantDashboardPage() {
           </div>
         )}
 
+        {!hasApprovedPayment && tenant && (tenant.tenancy_status === 'document_pending' || tenant.tenancy_status === 'document_sent') && (
+          <div className="px-4 py-3 rounded-lg text-sm mb-6" style={{ backgroundColor: '#fef2f2', color: '#991b1b' }}>
+            You need to complete rent payment before you can sign your tenancy agreement.
+            <button onClick={() => { setPayForm({ amount: tenant.annual_rent?.toString() || '', payment_method: 'Bank Transfer', payment_date: new Date().toISOString().split('T')[0] }); setShowPayForm(true); }} className="underline font-medium ml-2">Pay Rent Now</button>
+          </div>
+        )}
+
         {/* Lease Summary */}
         <div className="card mb-8">
           <h2 className="text-lg font-semibold mb-4">Your Lease</h2>
@@ -202,6 +227,21 @@ export default function TenantDashboardPage() {
                   <p className="font-medium">{new Date(tenant.lease_expiry_date).toLocaleDateString()}</p>
                 </div>
               )}
+              <div>
+                <p className="text-sm text-gray-500">Move-in Date</p>
+                {editingMoveIn ? (
+                  <div className="flex gap-2 items-center">
+                    <input type="date" value={moveInForm} onChange={e => setMoveInForm(e.target.value)} className="text-sm border rounded px-2 py-1" />
+                    <button onClick={saveMoveInDate} disabled={saving} className="btn btn-primary text-xs disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+                    <button onClick={() => setEditingMoveIn(false)} className="btn btn-secondary text-xs">Cancel</button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{tenant.move_in_date ? new Date(tenant.move_in_date).toLocaleDateString() : 'Not set'}</p>
+                    <button onClick={() => { setMoveInForm(tenant.move_in_date || ''); setEditingMoveIn(true); }} className="text-primary-600 text-xs underline">Edit</button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

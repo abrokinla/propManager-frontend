@@ -93,8 +93,9 @@ export default function TenancyAgreementPage() {
       setMessage('signed');
       const { data } = await axios.get<TenancyDocument>(`${API_URL}/tenant/me/agreement/`, { headers: getAuthHeaders() });
       setAgreement(data);
-    } catch {
-      setMessage('Failed to sign agreement. Please try again.');
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { error?: string } } };
+      setMessage(axiosError.response?.data?.error || 'Failed to sign agreement. Please try again.');
     } finally {
       setSigning(false);
     }
@@ -217,8 +218,8 @@ export default function TenancyAgreementPage() {
                 <p className="text-sm mb-4" style={{ color: 'var(--text-light)' }}>
                   Your agent has uploaded a tenancy agreement as a PDF document. Please download it, print it, sign it manually, and upload the signed copy back.
                 </p>
-                {agreement?.uploaded_pdf_url && (
-                  <a href={agreement.uploaded_pdf_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
+                {agreement?.id && (
+                  <a href={`${API_URL}/tenant/me/documents/${agreement.id}/download-unsigned/`} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     Download Agreement (PDF)
                   </a>
@@ -231,7 +232,7 @@ export default function TenancyAgreementPage() {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                     <span className="font-medium">Verified as signed on {agreement?.signed_at ? new Date(agreement.signed_at).toLocaleDateString() : 'N/A'}</span>
                   </div>
-                  <a href={agreement.signed_file_url} target="_blank" rel="noopener noreferrer" download="signed_agreement.pdf" className="btn btn-primary inline-flex items-center gap-2">
+                  <a href={`${API_URL}/tenant/me/documents/${agreement.id}/download-signed/`} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     Download Signed Agreement (PDF)
                   </a>
@@ -382,17 +383,17 @@ export default function TenancyAgreementPage() {
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                   <span className="font-medium">Signed on {agreement?.signed_at ? new Date(agreement.signed_at).toLocaleDateString() : 'N/A'}</span>
                 </div>
-                {agreement?.signed_file_url && (
+                {agreement?.id && (
                   <div>
-                    <a href={agreement.signed_file_url} target="_blank" rel="noopener noreferrer" download="signed_agreement.pdf" className="btn btn-primary inline-flex items-center gap-2">
+                    <a href={`${API_URL}/tenant/me/documents/${agreement.id}/download-signed/`} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                       Download Signed Agreement (PDF)
                     </a>
                   </div>
                 )}
-                {agreement?.file_url && (
+                {agreement?.id && (
                   <p className="text-sm" style={{ color: 'var(--text-light)' }}>
-                    You may also <a href={agreement.file_url} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">view the unsigned version</a>.
+                    You may also <a href={`${API_URL}/tenant/me/documents/${agreement.id}/download-unsigned/`} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">view the unsigned version</a>.
                   </p>
                 )}
               </div>

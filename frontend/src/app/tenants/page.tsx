@@ -25,7 +25,6 @@ const tenancyStatusConfig: Record<string, { label: string; className: string }> 
 const defaultForm = {
   property_id: '', unit_id: '', name: '', phone: '', email: '', address: '',
   annual_rent: '', tenancy_status: 'invited' as TenancyStatus,
-  lease_start_date: '', lease_renewal_date: '', lease_expiry_date: '',
   move_in_date: '', is_active: 'true',
 };
 
@@ -75,8 +74,6 @@ export default function TenantsPage() {
     setForm(prev => {
       const updates: Record<string, string> = { [name]: value };
       if (name === 'property_id') updates.unit_id = '';
-      if (name === 'lease_start_date') updates.move_in_date = value;
-      if (name === 'lease_expiry_date') updates.lease_renewal_date = value;
       return { ...prev, ...updates };
     });
     if (formErrors[name]) setFormErrors(prev => ({ ...prev, [name]: '' }));
@@ -130,8 +127,7 @@ export default function TenantsPage() {
       name: t.name, phone: t.phone, email: t.email, address: t.address || '',
       annual_rent: t.annual_rent ? String(t.annual_rent) : '',
       tenancy_status: t.tenancy_status,
-      lease_start_date: t.lease_start_date || '', lease_renewal_date: t.lease_renewal_date || '',
-      lease_expiry_date: t.lease_expiry_date || '', move_in_date: t.move_in_date || '',
+      move_in_date: t.move_in_date || '',
       is_active: String(t.is_active),
     });
     setShowForm(true);
@@ -370,25 +366,9 @@ export default function TenantsPage() {
                       </select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Start</label>
-                      <input name="lease_start_date" type="date" value={form.lease_start_date} onChange={handleChange} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Expiry</label>
-                      <input name="lease_expiry_date" type="date" value={form.lease_expiry_date} onChange={handleChange} />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Renewal</label>
-                      <input name="lease_renewal_date" type="date" value={form.lease_renewal_date} onChange={handleChange} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Move-in Date</label>
-                      <input name="move_in_date" type="date" value={form.move_in_date} onChange={handleChange} />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Move-in Date</label>
+                    <input name="move_in_date" type="date" value={form.move_in_date} onChange={handleChange} />
                   </div>
                   <div className="flex gap-3 justify-end">
                     <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); setForm(defaultForm); }} className="btn btn-secondary">Cancel</button>

@@ -15,6 +15,7 @@ interface EditState {
     toilets: string;
     size_sqft: string;
     price_rent: string;
+    rent_cycle: string;
     price_sale: string;
   };
 }
@@ -50,6 +51,7 @@ export default function UnitsPage() {
         toilets: String(unit.toilets),
         size_sqft: unit.size_sqft ? String(unit.size_sqft) : '',
         price_rent: unit.price_rent ? String(unit.price_rent) : '',
+        rent_cycle: unit.rent_cycle || 'yearly',
         price_sale: unit.price_sale ? String(unit.price_sale) : '',
       },
     });
@@ -80,6 +82,7 @@ export default function UnitsPage() {
         toilets: Number(vals.toilets),
         size_sqft: vals.size_sqft ? Number(vals.size_sqft) : null,
         price_rent: vals.price_rent || null,
+        rent_cycle: vals.rent_cycle,
         price_sale: vals.price_sale || null,
         status: unit.status,
       };
@@ -149,6 +152,7 @@ export default function UnitsPage() {
                     <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Toilets</th>
                     <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Sqft</th>
                     <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Rent</th>
+                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Cycle</th>
                     <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Sale</th>
                     <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Status</th>
                     <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Tenant</th>
@@ -181,6 +185,13 @@ export default function UnitsPage() {
                             <td className="py-2 px-2 text-right">
                               <input type="number" min="0" value={vals.price_rent} onChange={e => handleEditChange(unit.id, 'price_rent', e.target.value)} className="w-20 text-right px-1 py-1 border border-gray-300 rounded text-sm" placeholder="—" />
                             </td>
+                            <td className="py-2 px-2 text-center">
+                              <select value={vals.rent_cycle} onChange={e => handleEditChange(unit.id, 'rent_cycle', e.target.value)} className="px-1 py-1 border border-gray-300 rounded text-sm">
+                                <option value="daily">Daily</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                              </select>
+                            </td>
                             <td className="py-2 px-2 text-right">
                               <input type="number" min="0" value={vals.price_sale} onChange={e => handleEditChange(unit.id, 'price_sale', e.target.value)} className="w-20 text-right px-1 py-1 border border-gray-300 rounded text-sm" placeholder="—" />
                             </td>
@@ -192,6 +203,7 @@ export default function UnitsPage() {
                             <td className="py-3 px-4 text-center" style={{ color: 'var(--text-light)' }}>{unit.toilets}</td>
                             <td className="py-3 px-4 text-center" style={{ color: 'var(--text-light)' }}>{unit.size_sqft ?? '—'}</td>
                             <td className="py-3 px-4 text-right">{unit.price_rent ? `₦${Number(unit.price_rent).toLocaleString()}` : '—'}</td>
+                            <td className="py-3 px-4 text-center"><span className="badge badge-info">{unit.rent_cycle || 'yearly'}</span></td>
                             <td className="py-3 px-4 text-right">{unit.price_sale ? `₦${Number(unit.price_sale).toLocaleString()}` : '—'}</td>
                           </>
                         )}

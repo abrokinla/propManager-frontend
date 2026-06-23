@@ -51,6 +51,7 @@ export interface Unit {
   size_sqft: number;
   price_sale: number;
   price_rent: number;
+  rent_cycle: 'daily' | 'monthly' | 'yearly';
   status: string;
   tenant_name?: string;
   created_at: string;
@@ -78,6 +79,7 @@ export interface Tenant {
   unit_number: string;
   property_name: string;
   annual_rent: number;
+  rent_cycle: 'daily' | 'monthly' | 'yearly';
   tenancy_status: TenancyStatus;
   passport_photo?: string;
   government_id?: string;
@@ -204,6 +206,7 @@ export interface PublicPropertyDetail extends PublicProperty {
     size_sqft: number | null;
     price_rent: number | null;
     price_sale: number | null;
+    rent_cycle: 'daily' | 'monthly' | 'yearly';
   }>;
 }
 
@@ -234,6 +237,7 @@ export interface TenantSelf {
   unit_number: string;
   property_name: string;
   annual_rent: number;
+  rent_cycle: 'daily' | 'monthly' | 'yearly';
   tenancy_status: TenancyStatus;
   profile_completed: boolean;
   passport_photo: string;
@@ -254,6 +258,7 @@ export interface TenantSelf {
   lease_start_date?: string;
   lease_renewal_date?: string;
   lease_expiry_date?: string;
+  move_in_date?: string;
   created_at: string;
 }
 

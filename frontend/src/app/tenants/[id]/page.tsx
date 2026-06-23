@@ -47,7 +47,6 @@ export default function TenantDetailPage() {
   const [editForm, setEditForm] = useState({
     property_id: '', unit_id: '', name: '', phone: '', email: '', address: '',
     annual_rent: '', tenancy_status: 'pending_document' as TenancyStatus,
-    lease_start_date: '', lease_renewal_date: '', lease_expiry_date: '',
     move_in_date: '', is_active: 'true',
   });
   const [editFormErrors, setEditFormErrors] = useState<Record<string, string>>({});
@@ -174,8 +173,7 @@ export default function TenantDetailPage() {
       name: tenant.name, phone: tenant.phone, email: tenant.email, address: tenant.address || '',
       annual_rent: tenant.annual_rent ? String(tenant.annual_rent) : '',
       tenancy_status: tenant.tenancy_status,
-      lease_start_date: tenant.lease_start_date || '', lease_renewal_date: tenant.lease_renewal_date || '',
-      lease_expiry_date: tenant.lease_expiry_date || '', move_in_date: tenant.move_in_date || '',
+      move_in_date: tenant.move_in_date || '',
       is_active: String(tenant.is_active),
     });
     setShowEditForm(true);
@@ -217,8 +215,6 @@ export default function TenantDetailPage() {
     setEditForm(prev => {
       const updates: Record<string, string> = { [name]: value };
       if (name === 'property_id') updates.unit_id = '';
-      if (name === 'lease_start_date') updates.move_in_date = value;
-      if (name === 'lease_expiry_date') updates.lease_renewal_date = value;
       return { ...prev, ...updates };
     });
     if (editFormErrors[name]) setEditFormErrors(prev => ({ ...prev, [name]: '' }));
@@ -527,25 +523,9 @@ export default function TenantDetailPage() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Start</label>
-                  <input name="lease_start_date" type="date" value={editForm.lease_start_date} onChange={handleEditChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Expiry</label>
-                  <input name="lease_expiry_date" type="date" value={editForm.lease_expiry_date} onChange={handleEditChange} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Lease Renewal</label>
-                  <input name="lease_renewal_date" type="date" value={editForm.lease_renewal_date} onChange={handleEditChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Move-in Date</label>
-                  <input name="move_in_date" type="date" value={editForm.move_in_date} onChange={handleEditChange} />
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Move-in Date</label>
+                <input name="move_in_date" type="date" value={editForm.move_in_date} onChange={handleEditChange} />
               </div>
               <div className="flex gap-3 justify-end">
                 <button type="button" onClick={() => { setShowEditForm(false); setEditing(null); }} className="btn btn-secondary">Cancel</button>
