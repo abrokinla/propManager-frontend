@@ -157,6 +157,7 @@ export default function AgreementTemplatePage() {
   const [mode, setMode] = useState<'template' | 'uploaded_pdf'>('template');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [uploadedPdfUrl, setUploadedPdfUrl] = useState('');
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   const [data, setData] = useState<Record<string, any>>(JSON.parse(JSON.stringify(EMPTY_TEMPLATE)));
   const [showPreview, setShowPreview] = useState(false);
 
@@ -372,6 +373,11 @@ export default function AgreementTemplatePage() {
                     <a href={uploadedPdfUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline text-sm">View current uploaded PDF</a>
                   </div>
                 )}
+                <div className="flex justify-end gap-3 pt-6">
+                  <button onClick={handleSave} disabled={saving} className="btn btn-primary disabled:opacity-50">
+                    {saving ? 'Saving...' : templateId ? 'Update Template' : 'Create Template'}
+                  </button>
+                </div>
               </div>
             ) : (
               <>

@@ -283,6 +283,7 @@ export interface TenancyDocument {
   status: DocumentStatus;
   mode?: AgreementMode;
   document_data: Record<string, unknown>;
+  access_token?: string;
   sent_at?: string;
   signed_at?: string;
   file_url?: string;
