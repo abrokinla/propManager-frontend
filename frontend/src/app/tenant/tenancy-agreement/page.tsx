@@ -50,6 +50,7 @@ export default function TenancyAgreementPage() {
   const [message, setMessage] = useState('');
   const [signedFile, setSignedFile] = useState<File | null>(null);
   const [uploadingSigned, setUploadingSigned] = useState(false);
+  const [emailing, setEmailing] = useState<string | null>(null);
   const isUploadedPdf = agreement?.mode === 'uploaded_pdf';
   const isPending = agreement?.status === 'pending_verification';
   const isSigned = agreement?.status === 'signed';
@@ -122,6 +123,24 @@ export default function TenancyAgreementPage() {
       setMessage('Failed to upload signed agreement. Please try again.');
     } finally {
       setUploadingSigned(false);
+    }
+  };
+
+  const handleEmail = async (type: 'signed' | 'unsigned') => {
+    if (!agreement) return;
+    setEmailing(type);
+    setMessage('');
+    try {
+      await axios.post(
+        `${API_URL}/tenant/me/documents/${agreement.id}/email-${type}/`,
+        {},
+        { headers: getAuthHeaders() }
+      );
+      setMessage(`${type === 'signed' ? 'Signed agreement' : 'Unsigned agreement'} sent to your email!`);
+    } catch {
+      setMessage(`Failed to send. Please try again.`);
+    } finally {
+      setEmailing(null);
     }
   };
 
@@ -219,10 +238,10 @@ export default function TenancyAgreementPage() {
                   Your agent has uploaded a tenancy agreement as a PDF document. Please download it, print it, sign it manually, and upload the signed copy back.
                 </p>
                 {agreement?.id && (
-                  <a href={`${API_URL}/public/document/${agreement.access_token}/download-unsigned/`} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    Download Agreement (PDF)
-                  </a>
+                  <button onClick={() => handleEmail('unsigned')} disabled={emailing === 'unsigned'} className="btn btn-primary inline-flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    {emailing === 'unsigned' ? 'Sending...' : 'Send to My Email'}
+                  </button>
                 )}
               </div>
 
@@ -232,10 +251,10 @@ export default function TenancyAgreementPage() {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                     <span className="font-medium">Verified as signed on {agreement?.signed_at ? new Date(agreement.signed_at).toLocaleDateString() : 'N/A'}</span>
                   </div>
-                  <a href={`${API_URL}/public/document/${agreement.access_token}/download-signed/`} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    Download Signed Agreement (PDF)
-                  </a>
+                  <button onClick={() => handleEmail('signed')} disabled={emailing === 'signed'} className="btn btn-primary inline-flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    {emailing === 'signed' ? 'Sending...' : 'Send Signed to My Email'}
+                  </button>
                 </div>
               )}
 
@@ -384,17 +403,16 @@ export default function TenancyAgreementPage() {
                   <span className="font-medium">Signed on {agreement?.signed_at ? new Date(agreement.signed_at).toLocaleDateString() : 'N/A'}</span>
                 </div>
                 {agreement?.id && (
-                  <div>
-                    <a href={`${API_URL}/public/document/${agreement.access_token}/download-signed/`} target="_blank" rel="noopener noreferrer" className="btn btn-primary inline-flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                      Download Signed Agreement (PDF)
-                    </a>
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    <button onClick={() => handleEmail('signed')} disabled={emailing === 'signed'} className="btn btn-primary inline-flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                      {emailing === 'signed' ? 'Sending...' : 'Send Signed to My Email'}
+                    </button>
+                    <button onClick={() => handleEmail('unsigned')} disabled={emailing === 'unsigned'} className="btn btn-outline inline-flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                      {emailing === 'unsigned' ? 'Sending...' : 'Send Unsigned to My Email'}
+                    </button>
                   </div>
-                )}
-                {agreement?.id && (
-                  <p className="text-sm" style={{ color: 'var(--text-light)' }}>
-                    You may also <a href={`${API_URL}/public/document/${agreement.access_token}/download-unsigned/`} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline">view the unsigned version</a>.
-                  </p>
                 )}
               </div>
             ) : (
