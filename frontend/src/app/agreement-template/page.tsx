@@ -99,9 +99,18 @@ function CautionFeePreview({ cf }: { cf: Record<string, any> }) {
     <h3 className="font-medium text-sm mb-3" style={{ color: 'var(--text)' }}>Caution Fee</h3>
     <FieldPreview label="Amount" value={cf.currency ? `${cf.currency} ${cf.amount}` : cf.amount} />
     <FieldPreview label="Type" value={cf.type} />
-    <FieldPreview label="Deducted For" value={cf.deducted_for} />
-    <FieldPreview label="Refunded If" value={cf.refunded_if} />
-    <FieldPreview label="Top Up" value={cf.top_up} />
+    <div className="mt-2">
+      <p className="text-sm font-medium" style={{ color: 'var(--text-light)' }}>Deducted For</p>
+      <RichTextPreview html={cf.deducted_for} />
+    </div>
+    <div className="mt-2">
+      <p className="text-sm font-medium" style={{ color: 'var(--text-light)' }}>Refunded If</p>
+      <RichTextPreview html={cf.refunded_if} />
+    </div>
+    <div className="mt-2">
+      <p className="text-sm font-medium" style={{ color: 'var(--text-light)' }}>Top Up</p>
+      <RichTextPreview html={cf.top_up} />
+    </div>
   </div>;
 }
 
@@ -511,18 +520,9 @@ export default function AgreementTemplatePage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Deducted For</label>
-                    <textarea value={data.tenancy_terms?.caution_fee?.deducted_for || ''} onChange={e => setF('tenancy_terms.caution_fee.deducted_for', e.target.value)} rows={2} className="w-full" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Refunded If</label>
-                    <textarea value={data.tenancy_terms?.caution_fee?.refunded_if || ''} onChange={e => setF('tenancy_terms.caution_fee.refunded_if', e.target.value)} rows={2} className="w-full" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Top Up</label>
-                    <textarea value={data.tenancy_terms?.caution_fee?.top_up || ''} onChange={e => setF('tenancy_terms.caution_fee.top_up', e.target.value)} rows={2} className="w-full" />
-                  </div>
+                  <RichTextEditor label="Deducted For" value={data.tenancy_terms?.caution_fee?.deducted_for || ''} onChange={v => setF('tenancy_terms.caution_fee.deducted_for', v)} minHeight={100} />
+                  <RichTextEditor label="Refunded If" value={data.tenancy_terms?.caution_fee?.refunded_if || ''} onChange={v => setF('tenancy_terms.caution_fee.refunded_if', v)} minHeight={100} />
+                  <RichTextEditor label="Top Up" value={data.tenancy_terms?.caution_fee?.top_up || ''} onChange={v => setF('tenancy_terms.caution_fee.top_up', v)} minHeight={100} />
                 </div>
               </div>
             </CollapsibleSection>
