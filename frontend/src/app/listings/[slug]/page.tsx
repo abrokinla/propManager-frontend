@@ -9,16 +9,16 @@ import type { PublicPropertyDetail } from '../../../types';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ListingDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [property, setProperty] = useState<PublicPropertyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!id) return;
+    if (!slug) return;
     const fetchDetail = async () => {
       try {
-        const { data } = await axios.get<PublicPropertyDetail>(`${API_URL}/public/properties/${id}/`);
+        const { data } = await axios.get<PublicPropertyDetail>(`${API_URL}/public/properties/slug/${slug}/`);
         setProperty(data);
       } catch {
         setError('Unable to load property details at this time.');
@@ -27,7 +27,7 @@ export default function ListingDetailPage() {
       }
     };
     fetchDetail();
-  }, [id]);
+  }, [slug]);
 
   if (loading) {
     return (

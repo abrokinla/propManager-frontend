@@ -169,6 +169,11 @@ export interface DashboardStats {
     period_end: string;
   }>;
   open_maintenance: number;
+  properties_with_slugs: Array<{
+    id: number;
+    name: string;
+    public_slug: string;
+  }>;
 }
 
 export interface AgentPropertiesResponse {
@@ -191,6 +196,7 @@ export interface ApiError {
 
 export interface PublicProperty {
   id: number;
+  public_slug: string;
   name: string;
   address: string;
   property_type: string;

@@ -72,7 +72,7 @@ export default function ListingsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {properties.map((prop) => (
-              <Link key={prop.id} href={`/listings/${prop.id}`} className="group">
+              <Link key={prop.id} href={`/listings/${prop.public_slug}`} className="group">
                 <div className="card overflow-hidden hover:shadow-lg transition-shadow">
                   {prop.image_url ? (
                     <div className="h-48 -mx-6 -mt-6 mb-4 overflow-hidden">
