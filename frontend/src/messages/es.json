@@ -1,0 +1,102 @@
+{
+  "Navbar": {
+    "features": "Características",
+    "pricing": "Precios",
+    "howItWorks": "Cómo Funciona",
+    "login": "Iniciar Sesión",
+    "getStarted": "Comenzar"
+  },
+  "Hero": {
+    "title": "Administra Propiedades, Inquilinos y Pagos — Todo en Un Solo Lugar",
+    "subtitle": "La plataforma moderna de gestión de propiedades diseñada para agentes inmobiliarios. Seguimiento de contratos, cobro de alquiler y mantenimiento.",
+    "cta": "Comenzar Ahora",
+    "demo": "Ver Demo en Vivo"
+  },
+  "Stats": {
+    "properties": "Propiedades Gestiónadas",
+    "agents": "Agentes Activos",
+    "uptime": "Disponibilidad",
+    "support": "Soporte"
+  },
+  "Features": {
+    "title": "Todo Lo Que Necesitas Para Gestionar Propiedades",
+    "subtitle": "Un conjunto completo para administradores de propiedades, desde la incorporación de inquilinos hasta los reportes financieros.",
+    "lease": {
+      "title": "Gestión de Contratos",
+      "desc": "Crea, envía y firma digitalmente contratos de arrendamiento. Seguimiento de vencimientos y renovaciones automáticas."
+    },
+    "payments": {
+      "title": "Cobro y Seguimiento de Alquileres",
+      "desc": "Registra pagos, fechas de vencimiento y genera recibos. Soporte para múltiples métodos de pago."
+    },
+    "maintenance": {
+      "title": "Solicitudes de Mantenimiento",
+      "desc": "Los inquilinos reportan problemas, tú haces seguimiento de la resolución. Nunca pierdas de vista lo que necesita arreglo."
+    },
+    "documents": {
+      "title": "Gestión de Documentos",
+      "desc": "Sube, almacena y comparte documentos importantes. Los inquilinos pueden enviar comprobantes de pago e identificaciones."
+    },
+    "analytics": {
+      "title": "Informes Financieros",
+      "desc": "Seguimiento de ingresos, tasas de ocupación e historial de pagos con paneles en tiempo real."
+    },
+    "multiuser": {
+      "title": "Acceso Multiusuario",
+      "desc": "Invita agentes, administradores e inquilinos. Cada usuario obtiene un panel basado en roles."
+    }
+  },
+  "HowItWorks": {
+    "title": "Cómo Funciona",
+    "subtitle": "Comienza en minutos con nuestro simple proceso de 4 pasos.",
+    "step1": { "title": "Regístrate como Agente", "desc": "Crea tu cuenta gratuita y configura el perfil de tu agencia." },
+    "step2": { "title": "Agrega Propiedades", "desc": "Publica tus propiedades con unidades, precios y detalles." },
+    "step3": { "title": "Invita Inquilinos", "desc": "Los inquilinos se registran, completan su perfil y firman contratos." },
+    "step4": { "title": "Administra y Cobra", "desc": "Seguimiento de pagos, manejo de mantenimiento y gestión de contratos — todo en un solo lugar." }
+  },
+  "Pricing": {
+    "title": "Precios Simples y Transparentes",
+    "subtitle": "Empieza gratis, upgrades cuando lo necesites. Precios en USD. Cambia a Naira Nigeriana (₦) abajo.",
+    "toggle": "Mostrar precios en Naira Nigeriana (₦)",
+    "year": "/año",
+    "month": "/mes",
+    "free": {
+      "name": "Inicial",
+      "cta": "Comenzar Gratis"
+    },
+    "growth": {
+      "name": "Crecimiento",
+      "cta": "Iniciar Plan Crecimiento",
+      "popular": "Más Popular"
+    },
+    "premium": {
+      "name": "Premium",
+      "cta": "Iniciar Plan Premium"
+    },
+    "naira": {
+      "free": { "name": "Inicial", "cta": "Comenzar Gratis" },
+      "growth": { "name": "Crecimiento", "cta": "Iniciar Plan Crecimiento" },
+      "premium": { "name": "Premium", "cta": "Iniciar Plan Premium" }
+    },
+    "features": {
+      "properties": "propiedades",
+      "unlimited": "Ilimitado",
+      "agents": "agentes",
+      "tenants": "inquilinos",
+      "agreements": "Contratos digitales",
+      "maintenance": "Seguimiento de mantenimiento",
+      "analytics": "Analíticas",
+      "support": "Soporte por email",
+      "priority": "Soporte prioritario"
+    }
+  },
+  "CTA": {
+    "title": "¿Listo Para Simplificar la Gestión de Propiedades?",
+    "subtitle": "Únete a los agentes que ya están administrando propiedades de manera inteligente con PropManager.",
+    "cta": "Crear Cuenta Gratis"
+  },
+  "Footer": {
+    "copyright": "Todos los derechos reservados.",
+    "tagline": "Gestión moderna de propiedades para profesionales inmobiliarios."
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "Navbar": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "howItWorks": "How It Works",
+    "login": "Agent Login",
+    "getStarted": "Get Started"
+  },
+  "Hero": {
+    "title": "Manage Properties, Tenants & Payments — All in One Place",
+    "subtitle": "The modern property management platform built for real estate agents. Track leases, collect rent, and manage maintenance with ease.",
+    "cta": "Start Managing Smarter",
+    "demo": "See Live Demo"
+  },
+  "Stats": {
+    "properties": "Properties Managed",
+    "agents": "Active Agents",
+    "uptime": "Uptime",
+    "support": "Support"
+  },
+  "Features": {
+    "title": "Everything You Need to Manage Properties",
+    "subtitle": "A complete toolkit for property managers, from tenant onboarding to financial reporting.",
+    "lease": {
+      "title": "Lease Management",
+      "desc": "Create, send, and e-sign tenancy agreements. Track lease expiry dates and automate renewals."
+    },
+    "payments": {
+      "title": "Rent Collection & Tracking",
+      "desc": "Record payments, track due dates, and generate receipts. Support for multiple payment methods."
+    },
+    "maintenance": {
+      "title": "Maintenance Requests",
+      "desc": "Tenants submit issues, you track resolution. Never lose sight of what needs fixing."
+    },
+    "documents": {
+      "title": "Document Management",
+      "desc": "Upload, store, and share important documents. Tenants can submit proof of payment and IDs."
+    },
+    "analytics": {
+      "title": "Financial Insights",
+      "desc": "Track revenue, occupancy rates, and payment history with real-time dashboards."
+    },
+    "multiuser": {
+      "title": "Multi-User Access",
+      "desc": "Invite agents, property managers, and tenants. Each user gets a role-based dashboard."
+    }
+  },
+  "HowItWorks": {
+    "title": "How It Works",
+    "subtitle": "Get started in minutes with our simple 4-step process.",
+    "step1": { "title": "Sign Up as Agent", "desc": "Create your free account and set up your agency profile." },
+    "step2": { "title": "Add Properties", "desc": "List your properties with units, pricing, and details." },
+    "step3": { "title": "Invite Tenants", "desc": "Tenants sign up, complete their profile, and sign agreements." },
+    "step4": { "title": "Manage & Collect", "desc": "Track payments, handle maintenance, and manage leases — all in one place." }
+  },
+  "Pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Start free, upgrade when you need to. Prices in USD. Switch to Nigerian Naira below.",
+    "toggle": "Show prices in Nigerian Naira (₦)",
+    "year": "/year",
+    "month": "/month",
+    "free": {
+      "name": "Starter",
+      "cta": "Get Started Free"
+    },
+    "growth": {
+      "name": "Growth",
+      "cta": "Start Growth Plan",
+      "popular": "Most Popular"
+    },
+    "premium": {
+      "name": "Premium",
+      "cta": "Start Premium Plan"
+    },
+    "naira": {
+      "free": { "name": "Starter", "cta": "Get Started Free" },
+      "growth": { "name": "Growth", "cta": "Start Growth Plan" },
+      "premium": { "name": "Premium", "cta": "Start Premium Plan" }
+    },
+    "features": {
+      "properties": "properties",
+      "unlimited": "Unlimited",
+      "agents": "agents",
+      "tenants": "tenants",
+      "agreements": "Digital agreements",
+      "maintenance": "Maintenance tracking",
+      "analytics": "Analytics",
+      "support": "Email support",
+      "priority": "Priority support"
+    }
+  },
+  "CTA": {
+    "title": "Ready to Simplify Property Management?",
+    "subtitle": "Join agents who are already managing properties smarter with PropManager.",
+    "cta": "Create Free Account"
+  },
+  "Footer": {
+    "copyright": "All rights reserved.",
+    "tagline": "Modern property management for real estate professionals."
+  }
+}
