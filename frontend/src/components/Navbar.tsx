@@ -16,6 +16,7 @@ const navItems = [
   { href: '/maintenance', label: 'Maintenance' },
   { href: '/dashboard/availability', label: 'Availability' },
   { href: '/dashboard/bookings', label: 'Bookings' },
+  { href: '/dashboard/analytics', label: 'Analytics' },
   { href: '/agreement-template', label: 'Agreement' },
 ];
 

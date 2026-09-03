@@ -390,3 +390,46 @@ export interface AvailableSlot {
   time: string;
   available: boolean;
 }
+
+// ── Analytics ──────────────────────────────────────────────────────────
+
+export interface PropertyViewSummary {
+  property__id: number;
+  property__name: string;
+  total_views: number;
+}
+
+export interface SourceCount {
+  utm_source: string;
+  count: number;
+}
+
+export interface ReferrerCount {
+  referrer: string;
+  count: number;
+}
+
+export interface ViewsOverTime {
+  date: string;
+  views: number;
+}
+
+export interface AnalyticsSummary {
+  period_days: number;
+  total_views: number;
+  properties: PropertyViewSummary[];
+  sources: SourceCount[];
+  referrers: ReferrerCount[];
+  views_over_time: ViewsOverTime[];
+}
+
+export interface PropertyAnalyticsDetail {
+  property_id: number;
+  property_name: string;
+  period_days: number;
+  total_views: number;
+  unique_visitors: number;
+  sources: SourceCount[];
+  referrers: ReferrerCount[];
+  views_over_time: ViewsOverTime[];
+}

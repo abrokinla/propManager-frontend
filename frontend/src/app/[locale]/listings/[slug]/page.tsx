@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import type { PublicPropertyDetail } from '../../../../types';
 
@@ -10,6 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ListingDetailPage() {
   const { slug } = useParams<{ slug: string }>();
+  const searchParams = useSearchParams();
   const [property, setProperty] = useState<PublicPropertyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -28,6 +29,20 @@ export default function ListingDetailPage() {
     };
     fetchDetail();
   }, [slug]);
+
+  // Track page view
+  useEffect(() => {
+    if (!slug) return;
+    const utmSource = searchParams.get('utm_source') || '';
+    const utmMedium = searchParams.get('utm_medium') || '';
+    const utmCampaign = searchParams.get('utm_campaign') || '';
+    axios.post(`${API_URL}/public/properties/slug/${slug}/view/`, {
+      utm_source: utmSource,
+      utm_medium: utmMedium,
+      utm_campaign: utmCampaign,
+      page_path: `/listings/${slug}`,
+    }).catch(() => { /* silent */ });
+  }, [slug, searchParams]);
 
   if (loading) {
     return (
