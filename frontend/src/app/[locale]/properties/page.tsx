@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../../../components/DashboardLayout';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import ConfirmDialog from '../../../components/ConfirmDialog';
+import AIGenerator from '../../../components/AIGenerator';
 import api from '../../../lib/api';
 import { uploadImage } from '../../../lib/upload';
 import { useToast } from '../../../context/ToastContext';
@@ -256,6 +257,17 @@ export default function PropertiesPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* AI Generator - only shown when editing an existing property */}
+      {editing && (
+        <div className="mt-6">
+          <AIGenerator
+            propertyId={editing.id}
+            propertyName={editing.name}
+            onDescriptionGenerated={(desc) => setForm(prev => ({ ...prev, description: desc }))}
+          />
         </div>
       )}
 
