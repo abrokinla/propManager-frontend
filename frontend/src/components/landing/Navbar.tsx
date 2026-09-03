@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { Link } from '../../navigation';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -34,14 +35,14 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          <a href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">PM</span>
             </div>
             <span className="font-bold text-xl" style={{ color: 'var(--text)' }}>
               PropManager
             </span>
-          </a>
+          </Link>
 
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
@@ -57,19 +58,19 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <a
+            <Link
               href="/login"
               className="px-4 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
               style={{ color: 'var(--text)' }}
             >
               {t('login')}
-            </a>
-            <a
+            </Link>
+            <Link
               href="/register"
               className="px-5 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 transition-all shadow-md hover:shadow-lg"
             >
               {t('getStarted')}
-            </a>
+            </Link>
           </div>
 
           <button
@@ -103,21 +104,21 @@ export default function Navbar() {
                 </a>
               ))}
               <hr className="border-gray-200 dark:border-gray-700" />
-              <a
+              <Link
                 href="/login"
                 onClick={() => setOpen(false)}
                 className="block text-sm font-medium py-2"
                 style={{ color: 'var(--text)' }}
               >
                 {t('login')}
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/register"
                 onClick={() => setOpen(false)}
                 className="block text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-violet-600"
               >
                 {t('getStarted')}
-              </a>
+              </Link>
             </div>
           </motion.div>
         )}

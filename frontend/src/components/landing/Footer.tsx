@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { Link } from '../../navigation';
 
 export default function Footer() {
   const t = useTranslations('Footer');
@@ -26,8 +27,8 @@ export default function Footer() {
             <ul className="space-y-3">
               <li><a href="#features" className="text-sm transition-colors hover:text-indigo-600 dark:hover:text-indigo-400" style={{ color: 'var(--text-light)' }}>{t('features')}</a></li>
               <li><a href="#pricing" className="text-sm transition-colors hover:text-indigo-600 dark:hover:text-indigo-400" style={{ color: 'var(--text-light)' }}>{t('pricing')}</a></li>
-              <li><a href="/login" className="text-sm transition-colors hover:text-indigo-600 dark:hover:text-indigo-400" style={{ color: 'var(--text-light)' }}>{t('login')}</a></li>
-              <li><a href="/register" className="text-sm transition-colors hover:text-indigo-600 dark:hover:text-indigo-400" style={{ color: 'var(--text-light)' }}>{t('register')}</a></li>
+              <li><Link href="/login" className="text-sm transition-colors hover:text-indigo-600 dark:hover:text-indigo-400" style={{ color: 'var(--text-light)' }}>{t('login')}</Link></li>
+              <li><Link href="/register" className="text-sm transition-colors hover:text-indigo-600 dark:hover:text-indigo-400" style={{ color: 'var(--text-light)' }}>{t('register')}</Link></li>
             </ul>
           </div>
 

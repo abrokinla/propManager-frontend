@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '../../navigation';
 
 export default function CTASection() {
   const [email, setEmail] = useState('');
   const t = useTranslations('CTA');
+  const locale = useLocale();
 
   return (
     <section className="relative overflow-hidden py-20 sm:py-28">
@@ -31,13 +33,13 @@ export default function CTASection() {
               placeholder={t('emailPlaceholder')}
               className="flex-1 px-5 py-3.5 rounded-xl text-sm bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
             />
-            <a
-              href={email ? `/register?email=${encodeURIComponent(email)}` : '/register'}
+            <Link
+              href={email ? `/${locale}/register?email=${encodeURIComponent(email)}` : `/${locale}/register`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-indigo-700 bg-white hover:bg-indigo-50 transition-all shadow-lg whitespace-nowrap"
             >
               {t('cta')}
               <ArrowRight className="w-4 h-4" />
-            </a>
+            </Link>
           </div>
 
           <p className="text-sm text-indigo-300 mt-4">

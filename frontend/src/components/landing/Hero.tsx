@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Building, Users, FileText } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '../../navigation';
 
 export default function Hero() {
   const [email, setEmail] = useState('');
   const t = useTranslations('Hero');
+  const locale = useLocale();
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -47,13 +49,13 @@ export default function Hero() {
                 placeholder={t('emailPlaceholder')}
                 className="flex-1 px-5 py-3.5 rounded-xl text-sm bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
               />
-              <a
-                href={email ? `/register?email=${encodeURIComponent(email)}` : '/register'}
+              <Link
+                href={email ? `/${locale}/register?email=${encodeURIComponent(email)}` : `/${locale}/register`}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 transition-all shadow-xl hover:shadow-indigo-500/25 whitespace-nowrap"
               >
                 {t('cta')}
                 <ArrowRight className="w-4 h-4" />
-              </a>
+              </Link>
             </div>
 
             <p className="text-sm text-white/50">

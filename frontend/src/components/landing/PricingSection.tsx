@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
 import { useTranslations } from 'next-intl';
+import { Link } from '../../navigation';
 
 type Region = 'ng' | 'intl';
 
@@ -150,7 +151,7 @@ function PricingCard({ plan, region }: { plan: any; region: Region }) {
         <span className="text-sm ml-1" style={{ color: 'var(--text-light)' }}>{plan.period}</span>
       </div>
 
-      <a
+      <Link
         href="/register"
         className={`block text-center py-3 rounded-xl text-sm font-semibold transition-all mb-8 ${
           plan.popular
@@ -163,7 +164,7 @@ function PricingCard({ plan, region }: { plan: any; region: Region }) {
         }}
       >
         {t('getStarted')}
-      </a>
+      </Link>
 
       {plan.buckets && (
         <div className="mb-6 p-4 rounded-xl border" style={{ borderColor: 'var(--border)', backgroundColor: 'rgba(99,102,241,0.03)' }}>
