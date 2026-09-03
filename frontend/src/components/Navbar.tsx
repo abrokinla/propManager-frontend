@@ -14,6 +14,8 @@ const navItems = [
   { href: '/tenants', label: 'Tenants' },
   { href: '/payments', label: 'Payments' },
   { href: '/maintenance', label: 'Maintenance' },
+  { href: '/dashboard/availability', label: 'Availability' },
+  { href: '/dashboard/bookings', label: 'Bookings' },
   { href: '/agreement-template', label: 'Agreement' },
 ];
 

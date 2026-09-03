@@ -349,3 +349,44 @@ export interface TenancyAgreementTemplate {
   created_at: string;
   updated_at: string;
 }
+
+// ── Visit Booking ──────────────────────────────────────────────────────
+
+export interface PropertyAvailability {
+  id: number;
+  property: number;
+  day_of_week: number;
+  day_display: string;
+  start_time: string;
+  end_time: string;
+  slot_duration_minutes: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed';
+
+export interface VisitBooking {
+  id: number;
+  property: number;
+  property_name: string;
+  property_address: string;
+  availability: number | null;
+  guest_name: string;
+  guest_email: string;
+  guest_phone: string;
+  visit_date: string;
+  visit_time: string;
+  status: BookingStatus;
+  notes: string;
+  whatsapp_enabled: boolean;
+  whatsapp_link: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AvailableSlot {
+  time: string;
+  available: boolean;
+}

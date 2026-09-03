@@ -183,6 +183,12 @@ export default function ListingDetailPage() {
                 </div>
               </div>
               <div className="mt-6">
+                <Link
+                  href={`/listings/${slug}/book`}
+                  className="btn btn-primary w-full text-center block mb-3"
+                >
+                  Book a Visit
+                </Link>
                 <p className="text-sm text-gray-500 mb-3 text-center">Interested in this property?</p>
                 <p className="text-center text-sm text-gray-400">Contact the property manager for more information.</p>
               </div>
