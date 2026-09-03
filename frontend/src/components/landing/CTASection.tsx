@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
+import { useTranslations } from 'next-intl';
 
 export default function CTASection() {
   const [email, setEmail] = useState('');
+  const t = useTranslations('CTA');
 
   return (
     <section className="relative overflow-hidden py-20 sm:py-28">
@@ -15,10 +17,10 @@ export default function CTASection() {
       <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <ScrollReveal>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 leading-tight">
-            Start Managing Properties Free
+            {t('title')}
           </h2>
           <p className="text-lg text-indigo-200 mb-8 max-w-xl mx-auto">
-            Join agents across Nigeria who are already managing their properties the smart way.
+            {t('subtitle')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
@@ -26,20 +28,20 @@ export default function CTASection() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder={t('emailPlaceholder')}
               className="flex-1 px-5 py-3.5 rounded-xl text-sm bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
             />
             <a
               href={email ? `/register?email=${encodeURIComponent(email)}` : '/register'}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-indigo-700 bg-white hover:bg-indigo-50 transition-all shadow-lg whitespace-nowrap"
             >
-              Get Started Free
+              {t('cta')}
               <ArrowRight className="w-4 h-4" />
             </a>
           </div>
 
           <p className="text-sm text-indigo-300 mt-4">
-            Free for 1 property. No credit card needed. Upgrade anytime.
+            {t('freeNote')}
           </p>
         </ScrollReveal>
       </div>

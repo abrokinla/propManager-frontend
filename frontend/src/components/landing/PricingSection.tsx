@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
+import { useTranslations } from 'next-intl';
 
 type Region = 'ng' | 'intl';
 
@@ -114,6 +115,8 @@ const intlPricing = {
 };
 
 function PricingCard({ plan, region }: { plan: any; region: Region }) {
+  const t = useTranslations('Pricing');
+
   return (
     <motion.div
       layout
@@ -133,7 +136,7 @@ function PricingCard({ plan, region }: { plan: any; region: Region }) {
     >
       {plan.popular && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 shadow-md">
-          Most Popular
+          {t('mostPopular')}
         </div>
       )}
 
@@ -159,13 +162,12 @@ function PricingCard({ plan, region }: { plan: any; region: Region }) {
           color: plan.popular ? 'white' : 'var(--text)',
         }}
       >
-        Get Started
+        {t('getStarted')}
       </a>
 
-      {/* Buckets (Nigeria Growth / Premium only) */}
       {plan.buckets && (
         <div className="mb-6 p-4 rounded-xl border" style={{ borderColor: 'var(--border)', backgroundColor: 'rgba(99,102,241,0.03)' }}>
-          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-light)' }}>Volume Pricing</p>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-light)' }}>{t('volumePricing')}</p>
           <div className="space-y-2">
             {plan.buckets.map((b: any) => (
               <div key={b.label} className="flex items-center justify-between text-sm">
@@ -197,6 +199,7 @@ function PricingCard({ plan, region }: { plan: any; region: Region }) {
 
 export default function PricingSection() {
   const [region, setRegion] = useState<Region>('ng');
+  const t = useTranslations('Pricing');
 
   const plans = region === 'ng'
     ? [nairaPricing.free, nairaPricing.growth, nairaPricing.premium]
@@ -207,12 +210,12 @@ export default function PricingSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-12">
-            <p className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm tracking-wide uppercase mb-3">Pricing</p>
+            <p className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm tracking-wide uppercase mb-3">{t('badge')}</p>
             <h2 className="text-3xl sm:text-4xl font-extrabold mb-4" style={{ color: 'var(--text)' }}>
-              Simple, transparent pricing
+              {t('title')}
             </h2>
             <p className="text-lg max-w-xl mx-auto mb-8" style={{ color: 'var(--text-light)' }}>
-              Pay based on where you operate. Nigerian pricing is annual; international is monthly.
+              {t('subtitle')}
             </p>
 
             <div className="inline-flex items-center p-1 rounded-xl border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card-bg)' }}>
@@ -258,7 +261,7 @@ export default function PricingSection() {
         </AnimatePresence>
 
         <p className="text-center text-sm mt-10" style={{ color: 'var(--text-light)' }}>
-          All plans include a 14-day free trial. No credit card required for Free tier.
+          {t('trial')}
         </p>
       </div>
     </section>

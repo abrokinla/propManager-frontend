@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Building, Users, FileText } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function Hero() {
   const [email, setEmail] = useState('');
+  const t = useTranslations('Hero');
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -26,20 +28,15 @@ export default function Hero() {
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-6 bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 text-white"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Trusted by agents across Nigeria
+              {t('badge')}
             </motion.div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.1] tracking-tight text-white mb-6">
-              Property{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-orange-400">
-                Management
-              </span>
-              , Simplified.
+              {t('title')}
             </h1>
 
             <p className="text-lg sm:text-xl text-white/70 max-w-lg mb-8 leading-relaxed">
-              From listing to lease — manage properties, track rent, handle maintenance,
-              and sign tenancy agreements digitally. One platform for agents and landlords.
+              {t('subtitle')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -47,20 +44,20 @@ export default function Hero() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder={t('emailPlaceholder')}
                 className="flex-1 px-5 py-3.5 rounded-xl text-sm bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
               />
               <a
                 href={email ? `/register?email=${encodeURIComponent(email)}` : '/register'}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 transition-all shadow-xl hover:shadow-indigo-500/25 whitespace-nowrap"
               >
-                Get Started Free
+                {t('cta')}
                 <ArrowRight className="w-4 h-4" />
               </a>
             </div>
 
             <p className="text-sm text-white/50">
-              Free for 1 property. No credit card required.
+              {t('freeNote')}
             </p>
           </motion.div>
 

@@ -3,15 +3,17 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-
-const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'Pricing', href: '#pricing' },
-];
+import { useTranslations } from 'next-intl';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const t = useTranslations('Navbar');
+
+  const navLinks = [
+    { label: t('features'), href: '#features' },
+    { label: t('pricing'), href: '#pricing' },
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -60,13 +62,13 @@ export default function Navbar() {
               className="px-4 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
               style={{ color: 'var(--text)' }}
             >
-              Login
+              {t('login')}
             </a>
             <a
               href="/register"
               className="px-5 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 transition-all shadow-md hover:shadow-lg"
             >
-              Get Started
+              {t('getStarted')}
             </a>
           </div>
 
@@ -107,14 +109,14 @@ export default function Navbar() {
                 className="block text-sm font-medium py-2"
                 style={{ color: 'var(--text)' }}
               >
-                Login
+                {t('login')}
               </a>
               <a
                 href="/register"
                 onClick={() => setOpen(false)}
                 className="block text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-violet-600"
               >
-                Get Started
+                {t('getStarted')}
               </a>
             </div>
           </motion.div>

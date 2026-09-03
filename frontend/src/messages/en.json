@@ -2,101 +2,100 @@
   "Navbar": {
     "features": "Features",
     "pricing": "Pricing",
-    "howItWorks": "How It Works",
-    "login": "Agent Login",
+    "login": "Login",
     "getStarted": "Get Started"
   },
   "Hero": {
-    "title": "Manage Properties, Tenants & Payments — All in One Place",
-    "subtitle": "The modern property management platform built for real estate agents. Track leases, collect rent, and manage maintenance with ease.",
-    "cta": "Start Managing Smarter",
-    "demo": "See Live Demo"
+    "badge": "Trusted by agents across Nigeria",
+    "title": "Property Management, Simplified.",
+    "titleHighlight": "Management",
+    "subtitle": "From listing to lease — manage properties, track rent, handle maintenance, and sign tenancy agreements digitally. One platform for agents and landlords.",
+    "cta": "Get Started Free",
+    "emailPlaceholder": "Enter your email",
+    "freeNote": "Free for 1 property. No credit card required."
   },
   "Stats": {
     "properties": "Properties Managed",
-    "agents": "Active Agents",
-    "uptime": "Uptime",
-    "support": "Support"
+    "tenants": "Tenants Onboarded",
+    "agreements": "Agreements Signed"
   },
   "Features": {
-    "title": "Everything You Need to Manage Properties",
-    "subtitle": "A complete toolkit for property managers, from tenant onboarding to financial reporting.",
-    "lease": {
-      "title": "Lease Management",
-      "desc": "Create, send, and e-sign tenancy agreements. Track lease expiry dates and automate renewals."
+    "badge": "Features",
+    "title": "Everything you need to manage properties",
+    "subtitle": "From listing to lease, PropManager gives you the tools to run your property business efficiently.",
+    "management": {
+      "title": "Property Management",
+      "desc": "Track properties, units, and tenants from a single dashboard. Organize by location, status, and rent cycle."
+    },
+    "tenantPortal": {
+      "title": "Tenant Portal",
+      "desc": "Tenants get a self-service dashboard to view agreements, pay rent, request maintenance, and update their profile."
     },
     "payments": {
-      "title": "Rent Collection & Tracking",
-      "desc": "Record payments, track due dates, and generate receipts. Support for multiple payment methods."
+      "title": "Rent Tracking & Payments",
+      "desc": "Track rent cycles (daily, monthly, yearly). Tenants submit payment proof for approval. Lease dates auto-update."
     },
     "maintenance": {
       "title": "Maintenance Requests",
-      "desc": "Tenants submit issues, you track resolution. Never lose sight of what needs fixing."
+      "desc": "Tenants submit maintenance requests with priority levels. You get notified and can track resolution progress."
     },
-    "documents": {
-      "title": "Document Management",
-      "desc": "Upload, store, and share important documents. Tenants can submit proof of payment and IDs."
+    "agreements": {
+      "title": "Digital Agreements",
+      "desc": "Create customizable tenancy agreement templates. E-sign with witnesses or upload signed PDFs for verification."
     },
-    "analytics": {
-      "title": "Financial Insights",
-      "desc": "Track revenue, occupancy rates, and payment history with real-time dashboards."
-    },
-    "multiuser": {
-      "title": "Multi-User Access",
-      "desc": "Invite agents, property managers, and tenants. Each user gets a role-based dashboard."
+    "notifications": {
+      "title": "Smart Notifications",
+      "desc": "Get notified on rent changes, quit notices, payment approvals, and document events. Email escalation for critical alerts."
     }
   },
   "HowItWorks": {
-    "title": "How It Works",
-    "subtitle": "Get started in minutes with our simple 4-step process.",
-    "step1": { "title": "Sign Up as Agent", "desc": "Create your free account and set up your agency profile." },
-    "step2": { "title": "Add Properties", "desc": "List your properties with units, pricing, and details." },
-    "step3": { "title": "Invite Tenants", "desc": "Tenants sign up, complete their profile, and sign agreements." },
-    "step4": { "title": "Manage & Collect", "desc": "Track payments, handle maintenance, and manage leases — all in one place." }
-  },
-  "Pricing": {
-    "title": "Simple, Transparent Pricing",
-    "subtitle": "Start free, upgrade when you need to. Prices in USD. Switch to Nigerian Naira below.",
-    "toggle": "Show prices in Nigerian Naira (₦)",
-    "year": "/year",
-    "month": "/month",
-    "free": {
-      "name": "Starter",
-      "cta": "Get Started Free"
+    "badge": "How It Works",
+    "title": "Get started in three simple steps",
+    "step1": {
+      "title": "List Your Property",
+      "desc": "Add your property details, set rent prices, configure units, and publish your listing — all in minutes."
     },
-    "growth": {
-      "name": "Growth",
-      "cta": "Start Growth Plan",
-      "popular": "Most Popular"
+    "step2": {
+      "title": "Invite Tenants",
+      "desc": "Send automated invitations. Tenants create their own profiles, submit payments, and sign agreements digitally."
     },
-    "premium": {
-      "name": "Premium",
-      "cta": "Start Premium Plan"
-    },
-    "naira": {
-      "free": { "name": "Starter", "cta": "Get Started Free" },
-      "growth": { "name": "Growth", "cta": "Start Growth Plan" },
-      "premium": { "name": "Premium", "cta": "Start Premium Plan" }
-    },
-    "features": {
-      "properties": "properties",
-      "unlimited": "Unlimited",
-      "agents": "agents",
-      "tenants": "tenants",
-      "agreements": "Digital agreements",
-      "maintenance": "Maintenance tracking",
-      "analytics": "Analytics",
-      "support": "Email support",
-      "priority": "Priority support"
+    "step3": {
+      "title": "Manage from One Dashboard",
+      "desc": "Track rent collection, approve maintenance requests, verify signed documents, and get real-time notifications."
     }
   },
+  "Pricing": {
+    "badge": "Pricing",
+    "title": "Simple, transparent pricing",
+    "subtitle": "Pay based on where you operate. Nigerian pricing is annual; international is monthly.",
+    "year": "/year",
+    "month": "/mo",
+    "trial": "All plans include a 14-day free trial. No credit card required for Free tier.",
+    "volumePricing": "Volume Pricing",
+    "getStarted": "Get Started",
+    "mostPopular": "Most Popular"
+  },
   "CTA": {
-    "title": "Ready to Simplify Property Management?",
-    "subtitle": "Join agents who are already managing properties smarter with PropManager.",
-    "cta": "Create Free Account"
+    "title": "Start Managing Properties Free",
+    "subtitle": "Join agents across Nigeria who are already managing their properties the smart way.",
+    "cta": "Get Started Free",
+    "emailPlaceholder": "Enter your email",
+    "freeNote": "Free for 1 property. No credit card needed. Upgrade anytime."
   },
   "Footer": {
-    "copyright": "All rights reserved.",
-    "tagline": "Modern property management for real estate professionals."
+    "tagline": "Property management platform for agents and landlords. Manage properties, tenants, and agreements — all in one place.",
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "features": "Features",
+    "pricing": "Pricing",
+    "login": "Login",
+    "register": "Register",
+    "about": "About",
+    "blog": "Blog",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "All rights reserved."
   }
 }

@@ -4,37 +4,24 @@ import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Home, UserCheck, LayoutDashboard } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
+import { useTranslations } from 'next-intl';
 
-const steps = [
-  {
-    icon: Home,
-    title: 'List Your Property',
-    description: 'Add your property details, set rent prices, configure units, and publish your listing — all in minutes.',
-  },
-  {
-    icon: UserCheck,
-    title: 'Invite Tenants',
-    description: 'Send automated invitations. Tenants create their own profiles, submit payments, and sign agreements digitally.',
-  },
-  {
-    icon: LayoutDashboard,
-    title: 'Manage from One Dashboard',
-    description: 'Track rent collection, approve maintenance requests, verify signed documents, and get real-time notifications.',
-  },
-];
+const iconMap = [Home, UserCheck, LayoutDashboard];
+const stepKeys = ['step1', 'step2', 'step3'] as const;
 
 export default function HowItWorks() {
   const svgRef = useRef<SVGSVGElement>(null);
   const isInView = useInView(svgRef, { once: true, margin: '-100px' });
+  const t = useTranslations('HowItWorks');
 
   return (
     <section className="py-20 sm:py-28" style={{ backgroundColor: 'var(--card-bg)' }}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <p className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm tracking-wide uppercase mb-3">How It Works</p>
+            <p className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm tracking-wide uppercase mb-3">{t('badge')}</p>
             <h2 className="text-3xl sm:text-4xl font-extrabold mb-4" style={{ color: 'var(--text)' }}>
-              Get started in three simple steps
+              {t('title')}
             </h2>
           </div>
         </ScrollReveal>
@@ -63,11 +50,11 @@ export default function HowItWorks() {
           </svg>
 
           <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
-            {steps.map((step, i) => {
-              const Icon = step.icon;
+            {stepKeys.map((key, i) => {
+              const Icon = iconMap[i];
               return (
                 <motion.div
-                  key={step.title}
+                  key={key}
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-80px' }}
@@ -83,8 +70,8 @@ export default function HowItWorks() {
                         {i + 1}
                       </div>
                     </div>
-                    <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text)' }}>{step.title}</h3>
-                    <p className="text-sm leading-relaxed max-w-sm" style={{ color: 'var(--text-light)' }}>{step.description}</p>
+                    <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text)' }}>{t(`${key}.title`)}</h3>
+                    <p className="text-sm leading-relaxed max-w-sm" style={{ color: 'var(--text-light)' }}>{t(`${key}.desc`)}</p>
                   </div>
                 </motion.div>
               );

@@ -2,101 +2,100 @@
   "Navbar": {
     "features": "Características",
     "pricing": "Precios",
-    "howItWorks": "Cómo Funciona",
     "login": "Iniciar Sesión",
     "getStarted": "Comenzar"
   },
   "Hero": {
-    "title": "Administra Propiedades, Inquilinos y Pagos — Todo en Un Solo Lugar",
-    "subtitle": "La plataforma moderna de gestión de propiedades diseñada para agentes inmobiliarios. Seguimiento de contratos, cobro de alquiler y mantenimiento.",
-    "cta": "Comenzar Ahora",
-    "demo": "Ver Demo en Vivo"
+    "badge": "Confiado por agentes en Nigeria",
+    "title": "Gestión de Propiedades, Simplificada.",
+    "titleHighlight": "Gestión",
+    "subtitle": "Desde publicación hasta contrato — administra propiedades, rastrea alquileres, maneja mantenimiento y firma acuerdos de arrendamiento digitalmente. Una plataforma para agentes y propietarios.",
+    "cta": "Comenzar Gratis",
+    "emailPlaceholder": "Ingresa tu email",
+    "freeNote": "Gratis para 1 propiedad. Sin tarjeta de crédito."
   },
   "Stats": {
-    "properties": "Propiedades Gestiónadas",
-    "agents": "Agentes Activos",
-    "uptime": "Disponibilidad",
-    "support": "Soporte"
+    "properties": "Propiedades Gestionadas",
+    "tenants": "Inquilinos Incorporados",
+    "agreements": "Contratos Firmados"
   },
   "Features": {
-    "title": "Todo Lo Que Necesitas Para Gestionar Propiedades",
-    "subtitle": "Un conjunto completo para administradores de propiedades, desde la incorporación de inquilinos hasta los reportes financieros.",
-    "lease": {
-      "title": "Gestión de Contratos",
-      "desc": "Crea, envía y firma digitalmente contratos de arrendamiento. Seguimiento de vencimientos y renovaciones automáticas."
+    "badge": "Características",
+    "title": "Todo lo que necesitas para gestionar propiedades",
+    "subtitle": "Desde publicación hasta contrato, PropManager te da las herramientas para administrar tu negocio de propiedades eficientemente.",
+    "management": {
+      "title": "Gestión de Propiedades",
+      "desc": "Rastrea propiedades, unidades e inquilinos desde un solo panel. Organiza por ubicación, estado y ciclo de alquiler."
+    },
+    "tenantPortal": {
+      "title": "Portal de Inquilinos",
+      "desc": "Los inquilinos obtienen un panel de autoservicio para ver contratos, pagar alquiler, solicitar mantenimiento y actualizar su perfil."
     },
     "payments": {
-      "title": "Cobro y Seguimiento de Alquileres",
-      "desc": "Registra pagos, fechas de vencimiento y genera recibos. Soporte para múltiples métodos de pago."
+      "title": "Seguimiento y Pagos de Alquiler",
+      "desc": "Rastrea ciclos de alquiler (diario, mensual, anual). Los inquilinos envían prueba de pago para aprobación. Las fechas de contrato se actualizan automáticamente."
     },
     "maintenance": {
       "title": "Solicitudes de Mantenimiento",
-      "desc": "Los inquilinos reportan problemas, tú haces seguimiento de la resolución. Nunca pierdas de vista lo que necesita arreglo."
+      "desc": "Los inquilinos envían solicitudes de mantenimiento con niveles de prioridad. Recibes notificaciones y puedes rastrear el progreso."
     },
-    "documents": {
-      "title": "Gestión de Documentos",
-      "desc": "Sube, almacena y comparte documentos importantes. Los inquilinos pueden enviar comprobantes de pago e identificaciones."
+    "agreements": {
+      "title": "Contratos Digitales",
+      "desc": "Crea plantillas de contrato de arrendamiento personalizables. Firma digital con testigos o sube PDFs firmados para verificación."
     },
-    "analytics": {
-      "title": "Informes Financieros",
-      "desc": "Seguimiento de ingresos, tasas de ocupación e historial de pagos con paneles en tiempo real."
-    },
-    "multiuser": {
-      "title": "Acceso Multiusuario",
-      "desc": "Invita agentes, administradores e inquilinos. Cada usuario obtiene un panel basado en roles."
+    "notifications": {
+      "title": "Notificaciones Inteligentes",
+      "desc": "Recibe notificaciones sobre cambios de alquiler, avisos de salida, aprobaciones de pago y eventos de documentos. Escalación por email para alertas críticas."
     }
   },
   "HowItWorks": {
-    "title": "Cómo Funciona",
-    "subtitle": "Comienza en minutos con nuestro simple proceso de 4 pasos.",
-    "step1": { "title": "Regístrate como Agente", "desc": "Crea tu cuenta gratuita y configura el perfil de tu agencia." },
-    "step2": { "title": "Agrega Propiedades", "desc": "Publica tus propiedades con unidades, precios y detalles." },
-    "step3": { "title": "Invita Inquilinos", "desc": "Los inquilinos se registran, completan su perfil y firman contratos." },
-    "step4": { "title": "Administra y Cobra", "desc": "Seguimiento de pagos, manejo de mantenimiento y gestión de contratos — todo en un solo lugar." }
-  },
-  "Pricing": {
-    "title": "Precios Simples y Transparentes",
-    "subtitle": "Empieza gratis, upgrades cuando lo necesites. Precios en USD. Cambia a Naira Nigeriana (₦) abajo.",
-    "toggle": "Mostrar precios en Naira Nigeriana (₦)",
-    "year": "/año",
-    "month": "/mes",
-    "free": {
-      "name": "Inicial",
-      "cta": "Comenzar Gratis"
+    "badge": "Cómo Funciona",
+    "title": "Comienza en tres simples pasos",
+    "step1": {
+      "title": "Publica Tu Propiedad",
+      "desc": "Agrega los detalles de tu propiedad, configura precios de alquiler, establece unidades y publica tu anuncio — todo en minutos."
     },
-    "growth": {
-      "name": "Crecimiento",
-      "cta": "Iniciar Plan Crecimiento",
-      "popular": "Más Popular"
+    "step2": {
+      "title": "Invita Inquilinos",
+      "desc": "Envía invitaciones automáticas. Los inquilinos crean sus perfiles, envían pagos y firman contratos digitalmente."
     },
-    "premium": {
-      "name": "Premium",
-      "cta": "Iniciar Plan Premium"
-    },
-    "naira": {
-      "free": { "name": "Inicial", "cta": "Comenzar Gratis" },
-      "growth": { "name": "Crecimiento", "cta": "Iniciar Plan Crecimiento" },
-      "premium": { "name": "Premium", "cta": "Iniciar Plan Premium" }
-    },
-    "features": {
-      "properties": "propiedades",
-      "unlimited": "Ilimitado",
-      "agents": "agentes",
-      "tenants": "inquilinos",
-      "agreements": "Contratos digitales",
-      "maintenance": "Seguimiento de mantenimiento",
-      "analytics": "Analíticas",
-      "support": "Soporte por email",
-      "priority": "Soporte prioritario"
+    "step3": {
+      "title": "Administra desde Un Solo Panel",
+      "desc": "Rastrea la recaudación de alquileres, aprueba solicitudes de mantenimiento, verifica documentos firmados y recibe notificaciones en tiempo real."
     }
   },
+  "Pricing": {
+    "badge": "Precios",
+    "title": "Precios simples y transparentes",
+    "subtitle": "Paga según dónde operes. Los precios en Nigeria son anuales; los internacionales son mensuales.",
+    "year": "/año",
+    "month": "/mes",
+    "trial": "Todos los planes incluyen 14 días de prueba gratis. Sin tarjeta de crédito para el nivel Free.",
+    "volumePricing": "Precios por Volumen",
+    "getStarted": "Comenzar",
+    "mostPopular": "Más Popular"
+  },
   "CTA": {
-    "title": "¿Listo Para Simplificar la Gestión de Propiedades?",
-    "subtitle": "Únete a los agentes que ya están administrando propiedades de manera inteligente con PropManager.",
-    "cta": "Crear Cuenta Gratis"
+    "title": "Comienza a Gestionar Propiedades Gratis",
+    "subtitle": "Únete a los agentes en Nigeria que ya están administrando sus propiedades de manera inteligente.",
+    "cta": "Comenzar Gratis",
+    "emailPlaceholder": "Ingresa tu email",
+    "freeNote": "Gratis para 1 propiedad. Sin tarjeta de crédito. Actualiza cuando quieras."
   },
   "Footer": {
-    "copyright": "Todos los derechos reservados.",
-    "tagline": "Gestión moderna de propiedades para profesionales inmobiliarios."
+    "tagline": "Plataforma de gestión de propiedades para agentes y propietarios. Administra propiedades, inquilinos y contratos — todo en un solo lugar.",
+    "product": "Producto",
+    "company": "Empresa",
+    "legal": "Legal",
+    "features": "Características",
+    "pricing": "Precios",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "about": "Acerca de",
+    "blog": "Blog",
+    "contact": "Contacto",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Servicio",
+    "copyright": "Todos los derechos reservados."
   }
 }

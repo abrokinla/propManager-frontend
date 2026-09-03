@@ -5,6 +5,7 @@ import { motion, useInView, useMotionValue, useSpring, useTransform, animate } f
 import { useEffect } from 'react';
 import { Building2, Users, FileSignature } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
+import { useTranslations } from 'next-intl';
 
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -27,19 +28,21 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
   );
 }
 
-const stats = [
-  { icon: Building2, target: 500, suffix: '+', label: 'Properties Managed' },
-  { icon: Users, target: 1200, suffix: '+', label: 'Tenants Onboarded' },
-  { icon: FileSignature, target: 3000, suffix: '+', label: 'Agreements Signed' },
-];
-
 export default function StatsSection() {
+  const t = useTranslations('Stats');
+
+  const stats = [
+    { icon: Building2, target: 500, suffix: '+', label: t('properties') },
+    { icon: Users, target: 1200, suffix: '+', label: t('tenants') },
+    { icon: FileSignature, target: 3000, suffix: '+', label: t('agreements') },
+  ];
+
   return (
     <section className="py-16 border-y border-gray-200 dark:border-gray-800" style={{ backgroundColor: 'var(--card-bg)' }}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
-            {stats.map((stat, i) => {
+            {stats.map((stat) => {
               const Icon = stat.icon;
               return (
                 <div key={stat.label} className="text-center">
