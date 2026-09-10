@@ -4,9 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from './Navbar';
 import { useAuth } from '../context/AuthContext';
+import { useTranslations } from 'next-intl';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const t = useTranslations('DashboardLayout');
 
   if (loading) {
     return (
@@ -20,9 +22,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <div className="card text-center max-w-md">
-          <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--text)' }}>Please log in</h1>
-          <p className="mb-6" style={{ color: 'var(--text-light)' }}>You need to be authenticated to view this page.</p>
-          <Link href="/login" className="btn btn-primary">Go to Login</Link>
+          <h1 className="text-2xl font-bold mb-4" style={{ color: 'var(--text)' }}>{t('pleaseLogin')}</h1>
+          <p className="mb-6" style={{ color: 'var(--text-light)' }}>{t('authRequired')}</p>
+          <Link href="/login" className="btn btn-primary">{t('goToLogin')}</Link>
         </div>
       </div>
     );

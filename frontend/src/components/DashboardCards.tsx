@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import type { DashboardStats } from '../types';
+import { useTranslations } from 'next-intl';
 
 interface StatCardProps {
   title: string;
@@ -36,9 +37,10 @@ export function StatCard({ title, value, icon, color = 'blue' }: StatCardProps) 
 }
 
 export function QuickActions({ items }: { items: Array<{ label: string; href: string; color?: string }> }) {
+  const t = useTranslations('DashboardCards');
   return (
     <div className="card">
-      <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>Quick Actions</h3>
+      <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>{t('quickActions')}</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {items.map((item) => (
           <Link
@@ -56,11 +58,12 @@ export function QuickActions({ items }: { items: Array<{ label: string; href: st
 }
 
 export function RecentActivity({ payments }: { payments: DashboardStats['recent_payments'] }) {
+  const t = useTranslations('DashboardCards');
   return (
     <div className="card">
-      <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>Recent Payments</h3>
+      <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>{t('recentPayments')}</h3>
       {payments.length === 0 ? (
-        <p className="text-sm" style={{ color: 'var(--text-light)' }}>No recent payments</p>
+        <p className="text-sm" style={{ color: 'var(--text-light)' }}>{t('noRecentPayments')}</p>
       ) : (
         <div className="space-y-3">
           {payments.map((p, i) => (
@@ -79,11 +82,12 @@ export function RecentActivity({ payments }: { payments: DashboardStats['recent_
 }
 
 export function LeaseAlerts({ expirations }: { expirations: DashboardStats['upcoming_lease_expirations'] }) {
+  const t = useTranslations('DashboardCards');
   return (
     <div className="card">
-      <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>Lease Expiring Soon</h3>
+      <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>{t('leaseExpiringSoon')}</h3>
       {expirations.length === 0 ? (
-        <p className="text-sm" style={{ color: 'var(--text-light)' }}>No upcoming lease expirations</p>
+        <p className="text-sm" style={{ color: 'var(--text-light)' }}>{t('noUpcomingExpirations')}</p>
       ) : (
         <div className="space-y-3">
           {expirations.map((e, i) => (

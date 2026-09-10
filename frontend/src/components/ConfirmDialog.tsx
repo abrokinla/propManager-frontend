@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -14,10 +15,13 @@ interface ConfirmDialogProps {
 }
 
 export default function ConfirmDialog({
-  open, title, message, confirmLabel = 'Delete', cancelLabel = 'Cancel',
+  open, title, message, confirmLabel, cancelLabel,
   danger = true, onConfirm, onCancel,
 }: ConfirmDialogProps) {
   const [loading, setLoading] = useState(false);
+  const t = useTranslations('ConfirmDialog');
+  const resolvedConfirmLabel = confirmLabel || t('delete');
+  const resolvedCancelLabel = cancelLabel || t('cancel');
 
   if (!open) return null;
 
@@ -41,14 +45,14 @@ export default function ConfirmDialog({
             disabled={loading}
             className="btn btn-secondary disabled:opacity-50"
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <button
             onClick={handleConfirm}
             disabled={loading}
             className={danger ? 'btn btn-danger disabled:opacity-50' : 'btn btn-primary disabled:opacity-50'}
           >
-            {loading ? 'Processing...' : confirmLabel}
+            {loading ? t('processing') : resolvedConfirmLabel}
           </button>
         </div>
       </div>

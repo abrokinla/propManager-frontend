@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import type { Notification } from '../types';
+import { useTranslations } from 'next-intl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,6 +16,7 @@ function getAuthHeaders() {
 
 export default function NotificationBell({ basePath }: { basePath: string }) {
   const router = useRouter();
+  const t = useTranslations('NotificationBell');
   const [unread, setUnread] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
@@ -74,7 +76,7 @@ export default function NotificationBell({ basePath }: { basePath: string }) {
         style={{ color: 'var(--text-light)' }}
         onMouseEnter={(e) => e.currentTarget.style.background = 'var(--hover-bg)'}
         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-        aria-label="Notifications"
+        aria-label={t('notifications')}
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -92,14 +94,14 @@ export default function NotificationBell({ basePath }: { basePath: string }) {
           style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
         >
           <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
-            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Notifications</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{t('notifications')}</p>
             {unread > 0 && (
-              <button onClick={markAllRead} className="text-xs text-primary-600 hover:underline">Mark all read</button>
+              <button onClick={markAllRead} className="text-xs text-primary-600 hover:underline">{t('markAllRead')}</button>
             )}
           </div>
 
           {notifications.length === 0 ? (
-            <p className="text-sm text-center py-6" style={{ color: 'var(--text-light)' }}>No notifications yet</p>
+            <p className="text-sm text-center py-6" style={{ color: 'var(--text-light)' }}>{t('noNotifications')}</p>
           ) : (
             <div className="max-h-80 overflow-y-auto">
               {notifications.map((n) => (
@@ -127,7 +129,7 @@ export default function NotificationBell({ basePath }: { basePath: string }) {
             className="w-full text-center text-sm py-2 font-medium border-t transition-colors hover:bg-gray-50"
             style={{ color: 'var(--primary)', borderColor: 'var(--border)' }}
           >
-            View All Notifications
+            {t('viewAll')}
           </button>
         </div>
       )}

@@ -97,5 +97,58 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "copyright": "All rights reserved."
+  },
+  "DashboardLayout": {
+    "pleaseLogin": "Please log in",
+    "authRequired": "You need to be authenticated to view this page.",
+    "goToLogin": "Go to Login"
+  },
+  "AppNavbar": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "units": "Units",
+    "tenants": "Tenants",
+    "payments": "Payments",
+    "maintenance": "Maintenance",
+    "availability": "Availability",
+    "bookings": "Bookings",
+    "analytics": "Analytics",
+    "agreement": "Agreement",
+    "agreementTemplate": "Agreement Template",
+    "profile": "Profile",
+    "logout": "Logout",
+    "propertyOwner": "Property Owner",
+    "propertyManager": "Property Manager",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
+  },
+  "TenantNavbar": {
+    "dashboard": "Dashboard",
+    "tenant": "Tenant",
+    "changePassword": "Change Password",
+    "logout": "Logout"
+  },
+  "DashboardCards": {
+    "quickActions": "Quick Actions",
+    "recentPayments": "Recent Payments",
+    "noRecentPayments": "No recent payments",
+    "leaseExpiringSoon": "Lease Expiring Soon",
+    "noUpcomingExpirations": "No upcoming lease expirations"
+  },
+  "NotificationBell": {
+    "notifications": "Notifications",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications yet",
+    "viewAll": "View All Notifications"
+  },
+  "ConfirmDialog": {
+    "processing": "Processing...",
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "ErrorBoundary": {
+    "somethingWentWrong": "Something went wrong",
+    "unexpectedError": "An unexpected error occurred.",
+    "reloadPage": "Reload page"
   }
 }

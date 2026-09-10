@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import NotificationBell from './NotificationBell';
+import { useTranslations } from 'next-intl';
 
 interface TenantNavbarProps {
   tenantName: string;
@@ -12,6 +13,7 @@ interface TenantNavbarProps {
 
 export default function TenantNavbar({ tenantName, onLogout, onOpenPasswordModal }: TenantNavbarProps) {
   const router = useRouter();
+  const t = useTranslations('TenantNavbar');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +40,7 @@ export default function TenantNavbar({ tenantName, onLogout, onOpenPasswordModal
 
           <div className="flex items-center gap-4">
             <button onClick={() => router.push('/tenant/dashboard')} className="text-sm font-medium" style={{ color: 'var(--text-light)' }}>
-              Dashboard
+              {t('dashboard')}
             </button>
 
             <NotificationBell basePath="/tenant" />
@@ -62,7 +64,7 @@ export default function TenantNavbar({ tenantName, onLogout, onOpenPasswordModal
                 >
                   <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
                     <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{tenantName}</p>
-                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>Tenant</p>
+                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>{t('tenant')}</p>
                   </div>
                   {onOpenPasswordModal && (
                     <button
@@ -73,7 +75,7 @@ export default function TenantNavbar({ tenantName, onLogout, onOpenPasswordModal
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
-                      Change Password
+                      {t('changePassword')}
                     </button>
                   )}
                   <div className="border-t" style={{ borderColor: 'var(--border)' }}>
@@ -85,7 +87,7 @@ export default function TenantNavbar({ tenantName, onLogout, onOpenPasswordModal
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                       </svg>
-                      Logout
+                      {t('logout')}
                     </button>
                   </div>
                 </div>

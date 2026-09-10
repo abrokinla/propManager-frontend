@@ -97,5 +97,58 @@
     "privacy": "Política de Privacidad",
     "terms": "Términos de Servicio",
     "copyright": "Todos los derechos reservados."
+  },
+  "DashboardLayout": {
+    "pleaseLogin": "Por favor inicia sesión",
+    "authRequired": "Necesitas estar autenticado para ver esta página.",
+    "goToLogin": "Ir a Iniciar Sesión"
+  },
+  "AppNavbar": {
+    "dashboard": "Panel",
+    "properties": "Propiedades",
+    "units": "Unidades",
+    "tenants": "Inquilinos",
+    "payments": "Pagos",
+    "maintenance": "Mantenimiento",
+    "availability": "Disponibilidad",
+    "bookings": "Reservas",
+    "analytics": "Analíticas",
+    "agreement": "Contrato",
+    "agreementTemplate": "Plantilla de Contrato",
+    "profile": "Perfil",
+    "logout": "Cerrar Sesión",
+    "propertyOwner": "Propietario",
+    "propertyManager": "Administrador",
+    "switchToLight": "Cambiar a modo claro",
+    "switchToDark": "Cambiar a modo oscuro"
+  },
+  "TenantNavbar": {
+    "dashboard": "Panel",
+    "tenant": "Inquilino",
+    "changePassword": "Cambiar Contraseña",
+    "logout": "Cerrar Sesión"
+  },
+  "DashboardCards": {
+    "quickActions": "Acciones Rápidas",
+    "recentPayments": "Pagos Recientes",
+    "noRecentPayments": "No hay pagos recientes",
+    "leaseExpiringSoon": "Contrato Por Vencer",
+    "noUpcomingExpirations": "No hay vencimientos de contrato próximos"
+  },
+  "NotificationBell": {
+    "notifications": "Notificaciones",
+    "markAllRead": "Marcar todo como leído",
+    "noNotifications": "No hay notificaciones aún",
+    "viewAll": "Ver Todas las Notificaciones"
+  },
+  "ConfirmDialog": {
+    "processing": "Procesando...",
+    "delete": "Eliminar",
+    "cancel": "Cancelar"
+  },
+  "ErrorBoundary": {
+    "somethingWentWrong": "Algo salió mal",
+    "unexpectedError": "Ocurrió un error inesperado.",
+    "reloadPage": "Recargar página"
   }
 }

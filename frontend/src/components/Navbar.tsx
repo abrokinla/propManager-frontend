@@ -6,27 +6,29 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import NotificationBell from './NotificationBell';
-
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/properties', label: 'Properties' },
-  { href: '/units', label: 'Units' },
-  { href: '/tenants', label: 'Tenants' },
-  { href: '/payments', label: 'Payments' },
-  { href: '/maintenance', label: 'Maintenance' },
-  { href: '/dashboard/availability', label: 'Availability' },
-  { href: '/dashboard/bookings', label: 'Bookings' },
-  { href: '/dashboard/analytics', label: 'Analytics' },
-  { href: '/agreement-template', label: 'Agreement' },
-];
+import { useTranslations } from 'next-intl';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
+  const t = useTranslations('AppNavbar');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const navItems = [
+    { href: '/dashboard', label: t('dashboard') },
+    { href: '/properties', label: t('properties') },
+    { href: '/units', label: t('units') },
+    { href: '/tenants', label: t('tenants') },
+    { href: '/payments', label: t('payments') },
+    { href: '/maintenance', label: t('maintenance') },
+    { href: '/dashboard/availability', label: t('availability') },
+    { href: '/dashboard/bookings', label: t('bookings') },
+    { href: '/dashboard/analytics', label: t('analytics') },
+    { href: '/agreement-template', label: t('agreement') },
+  ];
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -42,7 +44,6 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b" style={{ background: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">PM</span>
@@ -50,7 +51,6 @@ export default function Navbar() {
             <span className="font-bold text-lg" style={{ color: 'var(--text)' }}>PropManager</span>
           </Link>
 
-          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
               <Link
@@ -71,7 +71,6 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right section */}
           <div className="hidden md:flex items-center gap-2">
             <NotificationBell basePath="" />
 
@@ -81,7 +80,7 @@ export default function Navbar() {
               style={{ color: 'var(--text-light)' }}
               onMouseEnter={(e) => e.currentTarget.style.background = 'var(--hover-bg)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={theme === 'dark' ? t('switchToLight') : t('switchToDark')}
             >
               {theme === 'dark' ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,7 +93,6 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* User dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -114,7 +112,7 @@ export default function Navbar() {
                 >
                   <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
                     <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{user?.first_name || user?.username}</p>
-                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>{user?.profile.role === 'owner' ? 'Property Owner' : 'Property Manager'}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>{user?.profile.role === 'owner' ? t('propertyOwner') : t('propertyManager')}</p>
                   </div>
                   <Link
                     href="/agreement-template"
@@ -123,7 +121,7 @@ export default function Navbar() {
                     style={{ color: 'var(--text)' }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    Agreement Template
+                    {t('agreementTemplate')}
                   </Link>
                   <Link
                     href="/profile"
@@ -132,7 +130,7 @@ export default function Navbar() {
                     style={{ color: 'var(--text)' }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                    Profile
+                    {t('profile')}
                   </Link>
                   <div className="border-t" style={{ borderColor: 'var(--border)' }}>
                     <button
@@ -141,7 +139,7 @@ export default function Navbar() {
                       style={{ color: 'var(--danger)' }}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                      Logout
+                      {t('logout')}
                     </button>
                   </div>
                 </div>
@@ -149,7 +147,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile toggle */}
           <button
             className="md:hidden p-2 rounded-lg"
             style={{ color: 'var(--text)' }}
@@ -165,7 +162,6 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden pb-4 border-t pt-2" style={{ borderColor: 'var(--border)' }}>
             {navItems.map((item) => (
@@ -195,7 +191,7 @@ export default function Navbar() {
                   )}
                 </button>
               </div>
-              <button onClick={logout} className="btn btn-secondary text-sm">Logout</button>
+              <button onClick={logout} className="btn btn-secondary text-sm">{t('logout')}</button>
             </div>
           </div>
         )}
