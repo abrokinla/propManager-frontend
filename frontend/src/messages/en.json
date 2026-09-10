@@ -610,5 +610,37 @@
     "logout": "Logout",
     "markAllRead": "Mark All Read",
     "noNotifications": "No notifications yet."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark All Read",
+    "noNotifications": "No notifications yet."
+  },
+  "Profile": {
+    "title": "Profile Settings",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "companyName": "Company Name",
+    "role": "Role",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "profileUpdated": "Profile updated successfully",
+    "profileFailed": "Failed to update profile"
+  },
+  "UploadDocument": {
+    "documentSubmitted": "Document Submitted",
+    "documentSubmittedMessage": "Thank you. Your signed tenancy agreement has been received successfully.",
+    "linkInvalidTitle": "Link Invalid",
+    "linkInvalid": "This link is invalid or has expired.",
+    "signAgreement": "Sign Tenancy Agreement",
+    "uploadInstructions": "Please upload a scanned copy of your signed tenancy agreement. Make sure all signatures are clearly visible.",
+    "removeFile": "Remove file",
+    "clickToUpload": "Click to upload signed PDF",
+    "fileDescription": "Scanned copy of your signed agreement (PDF)",
+    "uploading": "Uploading...",
+    "submitDocument": "Submit Signed Document",
+    "uploadFailed": "Failed to upload. Please try again."
   }
 }

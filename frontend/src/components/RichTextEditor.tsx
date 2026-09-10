@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
+import { useTranslations } from 'next-intl';
 
 interface RichTextEditorProps {
   value: string;
@@ -13,6 +14,8 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({ value, onChange, label, minHeight = 150 }: RichTextEditorProps) {
+  const t = useTranslations('RichTextEditor');
+
   const editor = useEditor({
     extensions: [StarterKit, Underline],
     content: value,
@@ -49,14 +52,14 @@ export default function RichTextEditor({ value, onChange, label, minHeight = 150
       <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{label}</label>
       <div className="border rounded-lg overflow-hidden" style={{ borderColor: 'var(--border)' }}>
         <div className="flex gap-1 px-2 py-1.5 border-b bg-gray-50 flex-wrap" style={{ borderColor: 'var(--border)' }}>
-          <ToolBtn action={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} label="B" />
-          <ToolBtn action={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} label="I" />
-          <ToolBtn action={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} label="U" />
+          <ToolBtn action={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} label={t('bold')} />
+          <ToolBtn action={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} label={t('italic')} />
+          <ToolBtn action={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} label={t('underline')} />
           <span className="w-px bg-gray-300 mx-1" />
-          <ToolBtn action={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} label="• List" />
-          <ToolBtn action={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} label="1. List" />
+          <ToolBtn action={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} label={t('bulletList')} />
+          <ToolBtn action={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} label={t('orderedList')} />
           <span className="w-px bg-gray-300 mx-1" />
-          <ToolBtn action={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} label="H3" />
+          <ToolBtn action={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} label={t('heading3')} />
         </div>
         <EditorContent editor={editor} />
       </div>

@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import api from '@/lib/api';
 
 export default function UploadSignedDocumentPage() {
   const params = useParams();
   const token = params.token as string;
+  const t = useTranslations('UploadDocument');
 
   const [loading, setLoading] = useState(true);
   const [document, setDocument] = useState<{ tenant_name: string; property_name: string } | null>(null);
@@ -23,7 +25,7 @@ export default function UploadSignedDocumentPage() {
         setLoading(false);
       })
       .catch(() => {
-        setError('This link is invalid or has expired.');
+        setError(t('linkInvalid'));
         setLoading(false);
       });
   }, [token]);
@@ -41,7 +43,7 @@ export default function UploadSignedDocumentPage() {
       });
       setSuccess(true);
     } catch {
-      setError('Failed to upload. Please try again.');
+      setError(t('uploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -64,9 +66,9 @@ export default function UploadSignedDocumentPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold mb-2">Document Submitted</h2>
+          <h2 className="text-xl font-bold mb-2">{t('documentSubmitted')}</h2>
           <p className="text-gray-600">
-            Thank you. Your signed tenancy agreement has been received successfully.
+            {t('documentSubmittedMessage')}
           </p>
         </div>
       </div>
@@ -82,7 +84,7 @@ export default function UploadSignedDocumentPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold mb-2">Link Invalid</h2>
+          <h2 className="text-xl font-bold mb-2">{t('linkInvalidTitle')}</h2>
           <p className="text-gray-600">{error}</p>
         </div>
       </div>
@@ -96,7 +98,7 @@ export default function UploadSignedDocumentPage() {
           <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">PM</span>
           </div>
-          <h2 className="text-xl font-bold">Sign Tenancy Agreement</h2>
+          <h2 className="text-xl font-bold">{t('signAgreement')}</h2>
           {document && (
             <p className="text-gray-500 mt-1">
               {document.tenant_name} — {document.property_name}
@@ -106,8 +108,7 @@ export default function UploadSignedDocumentPage() {
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-sm text-blue-700">
-            Please upload a scanned copy of your signed tenancy agreement.
-            Make sure all signatures are clearly visible.
+            {t('uploadInstructions')}
           </p>
         </div>
 
@@ -125,7 +126,7 @@ export default function UploadSignedDocumentPage() {
                   onClick={(e) => { e.stopPropagation(); setFile(null); }}
                   className="text-sm text-red-600 hover:text-red-700 mt-2"
                 >
-                  Remove file
+                  {t('removeFile')}
                 </button>
               </div>
             ) : (
@@ -133,8 +134,8 @@ export default function UploadSignedDocumentPage() {
                 <svg className="w-10 h-10 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <p className="font-medium text-gray-600">Click to upload signed PDF</p>
-                <p className="text-sm text-gray-500 mt-1">Scanned copy of your signed agreement (PDF)</p>
+                <p className="font-medium text-gray-600">{t('clickToUpload')}</p>
+                <p className="text-sm text-gray-500 mt-1">{t('fileDescription')}</p>
               </div>
             )}
             <input
@@ -151,7 +152,7 @@ export default function UploadSignedDocumentPage() {
             disabled={uploading || !file}
             className="btn btn-primary w-full justify-center py-3 disabled:opacity-50"
           >
-            {uploading ? 'Uploading...' : 'Submit Signed Document'}
+            {uploading ? t('uploading') : t('submitDocument')}
           </button>
         </form>
       </div>

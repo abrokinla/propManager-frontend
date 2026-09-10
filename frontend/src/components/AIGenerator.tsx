@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import api from '../lib/api';
 import { useToast } from '../context/ToastContext';
 
@@ -11,6 +12,7 @@ interface AIGeneratorProps {
 }
 
 export default function AIGenerator({ propertyId, propertyName, onDescriptionGenerated }: AIGeneratorProps) {
+  const t = useTranslations('AIGenerator');
   const [activeTab, setActiveTab] = useState<'description' | 'social'>('description');
   const [generating, setGenerating] = useState(false);
   const [description, setDescription] = useState('');
@@ -24,9 +26,9 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
       const { data } = await api.post('/ai/generate-description/', { property_id: propertyId });
       setDescription(data.description);
       onDescriptionGenerated?.(data.description);
-      toast('Description generated!', 'success');
+      toast(t('descriptionGenerated'), 'success');
     } catch (err: any) {
-      toast(err.response?.data?.error || 'Generation failed', 'error');
+      toast(err.response?.data?.error || t('generationFailed'), 'error');
     } finally {
       setGenerating(false);
     }
@@ -37,9 +39,9 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
     try {
       const { data } = await api.post('/ai/generate-social-posts/', { property_id: propertyId });
       setSocialPosts(data.posts);
-      toast('Social posts generated!', 'success');
+      toast(t('socialPostsGenerated'), 'success');
     } catch (err: any) {
-      toast(err.response?.data?.error || 'Generation failed', 'error');
+      toast(err.response?.data?.error || t('generationFailed'), 'error');
     } finally {
       setGenerating(false);
     }
@@ -60,8 +62,8 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
           </svg>
         </div>
         <div>
-          <h3 className="font-semibold" style={{ color: 'var(--text)' }}>AI Content Generator</h3>
-          <p className="text-xs" style={{ color: 'var(--text-light)' }}>Generate descriptions & social posts for {propertyName}</p>
+          <h3 className="font-semibold" style={{ color: 'var(--text)' }}>{t('title')}</h3>
+          <p className="text-xs" style={{ color: 'var(--text-light)' }}>{t('subtitle', { name: propertyName })}</p>
         </div>
       </div>
 
@@ -74,7 +76,7 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
           }`}
           style={{ color: activeTab === 'description' ? 'var(--primary)' : 'var(--text-light)' }}
         >
-          Description
+          {t('descriptionTab')}
         </button>
         <button
           onClick={() => setActiveTab('social')}
@@ -83,7 +85,7 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
           }`}
           style={{ color: activeTab === 'social' ? 'var(--primary)' : 'var(--text-light)' }}
         >
-          Social Posts
+          {t('socialTab')}
         </button>
       </div>
 
@@ -99,27 +101,27 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
               {generating ? (
                 <span className="flex items-center gap-2">
                   <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                  Generating...
+                  {t('generating')}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  Generate Description
+                  {t('generateDescription')}
                 </span>
               )}
             </button>
           ) : (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium" style={{ color: 'var(--text-light)' }}>Generated Description</span>
+                <span className="text-xs font-medium" style={{ color: 'var(--text-light)' }}>{t('generatedDescription')}</span>
                 <button
                   onClick={() => copyToClipboard(description, 'desc')}
                   className="text-xs px-2 py-1 rounded"
                   style={{ color: 'var(--primary)' }}
                 >
-                  {copied === 'desc' ? 'Copied!' : 'Copy'}
+                  {copied === 'desc' ? t('copied') : t('copy')}
                 </button>
               </div>
               <div className="p-3 rounded-lg text-sm leading-relaxed" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
@@ -127,10 +129,10 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
               </div>
               <div className="flex gap-2 mt-3">
                 <button onClick={generateDescription} className="btn btn-secondary text-sm flex-1" disabled={generating}>
-                  Regenerate
+                  {t('regenerate')}
                 </button>
                 <button onClick={() => setDescription('')} className="btn btn-secondary text-sm" style={{ color: 'var(--danger)' }}>
-                  Clear
+                  {t('clear')}
                 </button>
               </div>
             </div>
@@ -150,14 +152,14 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
               {generating ? (
                 <span className="flex items-center gap-2">
                   <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                  Generating...
+                  {t('generating')}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  Generate Social Posts
+                  {t('generateSocialPosts')}
                 </span>
               )}
             </button>
@@ -179,7 +181,7 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
                         className="text-xs px-2 py-1 rounded"
                         style={{ color: 'var(--primary)' }}
                       >
-                        {copied === platform ? 'Copied!' : 'Copy'}
+                        {copied === platform ? t('copied') : t('copy')}
                       </button>
                     </div>
                     <div className="p-3 rounded-lg text-sm whitespace-pre-wrap" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
@@ -189,7 +191,7 @@ export default function AIGenerator({ propertyId, propertyName, onDescriptionGen
                 ))
               )}
               <button onClick={generateSocialPosts} className="btn btn-secondary w-full text-sm" disabled={generating}>
-                Regenerate
+                {t('regenerate')}
               </button>
             </div>
           )}

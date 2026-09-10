@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import axios from 'axios';
 import DashboardLayout from '../../../components/DashboardLayout';
 import type { Notification } from '../../../types';
@@ -10,6 +11,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const t = useTranslations('Notifications');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,9 +49,9 @@ export default function NotificationsPage() {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Notifications</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{t('title')}</h1>
           {notifications.some(n => !n.is_read) && (
-            <button onClick={markAllRead} className="btn btn-secondary text-sm">Mark All Read</button>
+            <button onClick={markAllRead} className="btn btn-secondary text-sm">{t('markAllRead')}</button>
           )}
         </div>
 
@@ -59,7 +61,7 @@ export default function NotificationsPage() {
           </div>
         ) : notifications.length === 0 ? (
           <div className="card text-center py-12">
-            <p style={{ color: 'var(--text-light)' }}>No notifications yet.</p>
+            <p style={{ color: 'var(--text-light)' }}>{t('noNotifications')}</p>
           </div>
         ) : (
           <div className="space-y-2">

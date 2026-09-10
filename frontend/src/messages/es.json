@@ -610,5 +610,37 @@
     "logout": "Cerrar Sesión",
     "markAllRead": "Marcar Todo Leído",
     "noNotifications": "Aún no hay notificaciones."
+  },
+  "Notifications": {
+    "title": "Notificaciones",
+    "markAllRead": "Marcar Todo Leído",
+    "noNotifications": "Aún no hay notificaciones."
+  },
+  "Profile": {
+    "title": "Configuración del Perfil",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Email",
+    "phone": "Teléfono",
+    "companyName": "Nombre de la Empresa",
+    "role": "Rol",
+    "saving": "Guardando...",
+    "saveChanges": "Guardar Cambios",
+    "profileUpdated": "Perfil actualizado exitosamente",
+    "profileFailed": "Error al actualizar perfil"
+  },
+  "UploadDocument": {
+    "documentSubmitted": "Documento Enviado",
+    "documentSubmittedMessage": "Gracias. Tu contrato de arrendamiento firmado ha sido recibido exitosamente.",
+    "linkInvalidTitle": "Enlace Inválido",
+    "linkInvalid": "Este enlace es inválido o ha expirado.",
+    "signAgreement": "Firmar Contrato de Arrendamiento",
+    "uploadInstructions": "Por favor sube una copia escaneada de tu contrato de arrendamiento firmado. Asegúrate de que todas las firmas sean claramente visibles.",
+    "removeFile": "Eliminar archivo",
+    "clickToUpload": "Clic para subir PDF firmado",
+    "fileDescription": "Copia escaneada de tu contrato firmado (PDF)",
+    "uploading": "Subiendo...",
+    "submitDocument": "Enviar Documento Firmado",
+    "uploadFailed": "Error al subir. Por favor intenta de nuevo."
   }
 }

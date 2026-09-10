@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { TenancyDocument, TenancyStatus } from '../types';
 
 interface TenantDocumentListProps {
@@ -9,23 +10,24 @@ interface TenantDocumentListProps {
   tenantStatus: TenancyStatus;
 }
 
-const statusLabels: Record<string, { label: string; className: string }> = {
-  draft: { label: 'Draft', className: 'badge-warning' },
-  sent: { label: 'Sent', className: 'badge-info' },
-  viewed: { label: 'Viewed', className: 'badge-info' },
-  signed: { label: 'Signed', className: 'badge-success' },
-  completed: { label: 'Completed', className: 'badge-success' },
-};
-
 export default function TenantDocumentList({
   documents, onSendDocument, onUploadSigned, tenantStatus,
 }: TenantDocumentListProps) {
+  const t = useTranslations('DocumentList');
   const canSend = tenantStatus === 'pending_document' || tenantStatus === 'document_sent';
+
+  const statusLabels: Record<string, { label: string; className: string }> = {
+    draft: { label: t('draft'), className: 'badge-warning' },
+    sent: { label: t('sent'), className: 'badge-info' },
+    viewed: { label: t('viewed'), className: 'badge-info' },
+    signed: { label: t('signed'), className: 'badge-success' },
+    completed: { label: t('completed'), className: 'badge-success' },
+  };
 
   return (
     <div>
       {documents.length === 0 ? (
-        <p className="text-gray-500 text-sm mb-4">No documents yet.</p>
+        <p className="text-gray-500 text-sm mb-4">{t('noDocuments')}</p>
       ) : (
         <div className="space-y-2 mb-4">
           {documents.map(doc => {
@@ -37,7 +39,7 @@ export default function TenantDocumentList({
                     {doc.document_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {doc.sent_at ? `Sent ${new Date(doc.sent_at).toLocaleDateString()}` : 'Not sent'}
+                    {doc.sent_at ? `Sent ${new Date(doc.sent_at).toLocaleDateString()}` : t('notSent')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 ml-2">
@@ -47,7 +49,7 @@ export default function TenantDocumentList({
                       onClick={() => onUploadSigned(doc)}
                       className="text-xs text-primary-600 hover:text-primary-700 font-medium"
                     >
-                      Upload Signed
+                      {t('uploadSigned')}
                     </button>
                   )}
                   {doc.file_url && (
@@ -57,7 +59,7 @@ export default function TenantDocumentList({
                       rel="noopener noreferrer"
                       className="text-xs text-gray-500 hover:text-gray-700"
                     >
-                      PDF
+                      {t('pdf')}
                     </a>
                   )}
                 </div>
@@ -68,7 +70,7 @@ export default function TenantDocumentList({
       )}
       {canSend && (
         <button onClick={onSendDocument} className="btn btn-primary w-full text-sm">
-          Send Tenancy Agreement
+          {t('sendAgreement')}
         </button>
       )}
     </div>

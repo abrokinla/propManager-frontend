@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../components/DashboardLayout';
 import { useAuth } from '../../../context/AuthContext';
 
 export default function ProfilePage() {
   const { user, updateProfile } = useAuth();
+  const t = useTranslations('Profile');
   const [form, setForm] = useState({
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
@@ -28,9 +30,9 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       await updateProfile(form);
-      setMessage('Profile updated successfully');
+      setMessage(t('profileUpdated'));
     } catch {
-      setError('Failed to update profile');
+      setError(t('profileFailed'));
     } finally {
       setSaving(false);
     }
@@ -39,7 +41,7 @@ export default function ProfilePage() {
   return (
     <DashboardLayout>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-8" style={{ color: 'var(--text)' }}>Profile Settings</h1>
+        <h1 className="text-2xl font-bold mb-8" style={{ color: 'var(--text)' }}>{t('title')}</h1>
 
         {message && <div className="bg-green-50 text-green-700 px-4 py-3 rounded-lg text-sm mb-4">{message}</div>}
         {error && <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">{error}</div>}
@@ -48,37 +50,37 @@ export default function ProfilePage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>First Name</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('firstName')}</label>
                 <input name="first_name" value={form.first_name} onChange={handleChange} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Last Name</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('lastName')}</label>
                 <input name="last_name" value={form.last_name} onChange={handleChange} />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Email</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('email')}</label>
               <input name="email" type="email" value={form.email} onChange={handleChange} />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Phone</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('phone')}</label>
               <input name="phone" value={form.phone} onChange={handleChange} placeholder="+234..." />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Company Name</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('companyName')}</label>
               <input name="company_name" value={form.company_name} onChange={handleChange} placeholder="Your company" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Role</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('role')}</label>
               <div className="badge badge-info text-sm py-1 px-3">{user?.profile?.role || '—'}</div>
             </div>
 
             <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? t('saving') : t('saveChanges')}
             </button>
           </form>
         </div>
