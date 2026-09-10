@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import { Link } from '../../../navigation';
 import DashboardLayout from '../../../components/DashboardLayout';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import ConfirmDialog from '../../../components/ConfirmDialog';
@@ -304,7 +305,7 @@ export default function PropertiesPage() {
                 <div>
                   <span className="badge badge-info mb-2">{prop.property_type}</span>
                   {prop.is_published && <span className="badge badge-success ml-1">{t('published')}</span>}
-                  <a href={`/properties/${prop.id}`} className="font-semibold text-lg hover:text-primary-600 transition-colors block mt-1" style={{ color: 'var(--text)' }}>{prop.name}</a>
+                  <Link href={`/properties/${prop.id}`} className="font-semibold text-lg hover:text-primary-600 transition-colors block mt-1" style={{ color: 'var(--text)' }}>{prop.name}</Link>
                 </div>
               </div>
               <p className="text-sm mb-4 flex items-center gap-1" style={{ color: 'var(--text-light)' }}>

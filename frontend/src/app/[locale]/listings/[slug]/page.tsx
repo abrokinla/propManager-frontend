@@ -16,6 +16,11 @@ export default function ListingDetailPage() {
   const [property, setProperty] = useState<PublicPropertyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showInterestModal, setShowInterestModal] = useState(false);
+  const [interestForm, setInterestForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [interestSubmitting, setInterestSubmitting] = useState(false);
+  const [interestSubmitted, setInterestSubmitted] = useState(false);
+  const [interestError, setInterestError] = useState('');
 
   useEffect(() => {
     if (!slug) return;
@@ -206,8 +211,12 @@ export default function ListingDetailPage() {
                 >
                   {t('bookVisit')}
                 </Link>
-                <p className="text-sm text-gray-500 mb-3 text-center">{t('interestedInProperty')}</p>
-                <p className="text-center text-sm text-gray-400">{t('contactManager')}</p>
+                <button
+                  onClick={() => setShowInterestModal(true)}
+                  className="btn btn-secondary w-full text-center"
+                >
+                  {t('expressInterest')}
+                </button>
               </div>
             </div>
           </div>
@@ -219,6 +228,90 @@ export default function ListingDetailPage() {
           &copy; {new Date().getFullYear()} PropManager. {t('allRightsReserved')}
         </div>
       </footer>
+
+      {/* Express Interest Modal */}
+      {showInterestModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => { setShowInterestModal(false); setInterestSubmitted(false); setInterestError(''); }}>
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            {interestSubmitted ? (
+              <div className="text-center py-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{t('expressInterestTitle')}</h3>
+                <p className="text-sm text-gray-500 mb-6">{t('interestSubmitted')}</p>
+                <button onClick={() => { setShowInterestModal(false); setInterestSubmitted(false); }} className="btn btn-primary">Close</button>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-lg font-semibold mb-4">{t('expressInterestTitle')}</h3>
+                {interestError && <p className="text-sm text-red-600 mb-3">{interestError}</p>}
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setInterestSubmitting(true);
+                  setInterestError('');
+                  try {
+                    await axios.post(`${API_URL}/public/properties/slug/${slug}/express-interest/`, interestForm);
+                    setInterestSubmitted(true);
+                    setInterestForm({ name: '', email: '', phone: '', message: '' });
+                  } catch (err: any) {
+                    setInterestError(err.response?.data?.error || t('interestFailed'));
+                  } finally {
+                    setInterestSubmitting(false);
+                  }
+                }} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700">{t('interestName')}</label>
+                    <input
+                      type="text"
+                      value={interestForm.name}
+                      onChange={e => setInterestForm({ ...interestForm, name: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700">{t('interestEmail')}</label>
+                    <input
+                      type="email"
+                      value={interestForm.email}
+                      onChange={e => setInterestForm({ ...interestForm, email: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700">{t('interestPhone')}</label>
+                    <input
+                      type="tel"
+                      value={interestForm.phone}
+                      onChange={e => setInterestForm({ ...interestForm, phone: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      placeholder="+234..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700">{t('interestMessage')}</label>
+                    <textarea
+                      value={interestForm.message}
+                      onChange={e => setInterestForm({ ...interestForm, message: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      rows={3}
+                      placeholder={t('interestMessagePlaceholder')}
+                    />
+                  </div>
+                  <div className="flex gap-3 justify-end">
+                    <button type="button" onClick={() => { setShowInterestModal(false); setInterestSubmitted(false); setInterestError(''); }} className="btn btn-secondary">Cancel</button>
+                    <button type="submit" disabled={interestSubmitting} className="btn btn-primary disabled:opacity-50">
+                      {interestSubmitting ? t('interestSubmitting') : t('expressInterest')}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

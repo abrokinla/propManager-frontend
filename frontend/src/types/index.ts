@@ -35,6 +35,7 @@ export interface Property {
   is_published?: boolean;
   amenities?: string;
   nearby_places?: string;
+  public_slug?: string;
   created_at: string;
   updated_at: string;
 }
