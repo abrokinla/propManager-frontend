@@ -8,5 +8,5 @@ export default createI18nMiddleware({
 });
 
 export const config = {
-  matcher: ['/', '/(en|es)/:path*']
+  matcher: ['/((?!_next|_vercel|.*\\..*).*)']
 };

@@ -1,25 +1,31 @@
 import { getRequestConfig } from 'next-intl/server';
 import { locales, defaultLocale } from './i18n-config';
 
+async function detectLocale(): Promise<string | undefined> {
+  try {
+    const { headers } = await import('next/headers');
+    const h = await headers();
+    for (const key of ['x-invoke-path', 'x-matched-path', 'x-next-url', 'referer']) {
+      const val = h.get(key) || '';
+      for (const locale of locales) {
+        if (val.startsWith(`/${locale}/`) || val === `/${locale}`) return locale;
+      }
+    }
+  } catch {}
+  try {
+    const { cookies } = await import('next/headers');
+    const c = await cookies();
+    const nextLocale = c.get('NEXT_LOCALE')?.value;
+    if (nextLocale && locales.includes(nextLocale as any)) return nextLocale;
+  } catch {}
+  return undefined;
+}
+
 export default getRequestConfig(async ({ requestLocale }) => {
   let resolvedLocale = await requestLocale;
 
   if (!resolvedLocale || !locales.includes(resolvedLocale as any)) {
-    try {
-      const { headers } = await import('next/headers');
-      const h = await headers();
-      const pathname =
-        h.get('x-invoke-path') ||
-        h.get('x-matched-path') ||
-        h.get('x-next-url') ||
-        '';
-      for (const locale of locales) {
-        if (pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`) {
-          resolvedLocale = locale;
-          break;
-        }
-      }
-    } catch {}
+    resolvedLocale = await detectLocale();
   }
 
   const currentLocale = locales.includes(resolvedLocale as any)
