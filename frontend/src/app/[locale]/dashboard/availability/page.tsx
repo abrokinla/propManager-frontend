@@ -1,15 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../../components/DashboardLayout';
 import ErrorBoundary from '../../../../components/ErrorBoundary';
 import api from '../../../../lib/api';
 import { useToast } from '../../../../context/ToastContext';
 import type { PropertyAvailability, Property } from '../../../../types';
 
-const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
 export default function AvailabilityPage() {
+  const t = useTranslations('DashboardAvailability');
+  const DAY_NAMES = [t('monday'), t('tuesday'), t('wednesday'), t('thursday'), t('friday'), t('saturday'), t('sunday')];
   const [slots, setSlots] = useState<PropertyAvailability[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,9 +33,9 @@ export default function AvailabilityPage() {
     ]).then(([availRes, propRes]) => {
       setSlots(availRes.data);
       setProperties(propRes.data.results || propRes.data as any);
-    }).catch(() => toast('Failed to load data', 'error'))
+    }).catch(() => toast(t('failedToLoadData'), 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,29 +44,29 @@ export default function AvailabilityPage() {
       if (editingSlot) {
         const { data } = await api.put<PropertyAvailability>(`/availability/${editingSlot.id}/`, payload);
         setSlots(slots.map(s => s.id === data.id ? data : s));
-        toast('Availability updated', 'success');
+        toast(t('availabilityUpdated'), 'success');
       } else {
         const { data } = await api.post<PropertyAvailability>('/availability/', payload);
         setSlots([data, ...slots]);
-        toast('Availability added', 'success');
+        toast(t('availabilityAdded'), 'success');
       }
       setShowForm(false);
       setEditingSlot(null);
       setForm({ property: '', day_of_week: 0, start_time: '09:00', end_time: '17:00', slot_duration_minutes: 30, is_active: true });
     } catch (err: any) {
-      const msg = err.response?.data?.detail || err.response?.data?.non_field_errors?.[0] || 'Failed to save';
+      const msg = err.response?.data?.detail || err.response?.data?.non_field_errors?.[0] || t('failedToSave');
       toast(msg, 'error');
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this availability slot?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     try {
       await api.delete(`/availability/${id}/`);
       setSlots(slots.filter(s => s.id !== id));
-      toast('Deleted', 'success');
+      toast(t('deleted'), 'success');
     } catch {
-      toast('Failed to delete', 'error');
+      toast(t('failedToDelete'), 'error');
     }
   };
 
@@ -96,26 +97,26 @@ export default function AvailabilityPage() {
     <DashboardLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Visit Availability</h1>
-          <p className="mt-1" style={{ color: 'var(--text-light)' }}>Set when tenants can book property visits</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{t('title')}</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{t('subtitle')}</p>
         </div>
         <button
           onClick={() => { setShowForm(true); setEditingSlot(null); }}
           className="btn btn-primary"
         >
-          + Add Availability
+          {t('addAvailability')}
         </button>
       </div>
 
       {showForm && (
         <div className="card mb-8">
           <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>
-            {editingSlot ? 'Edit Availability' : 'Add Availability'}
+            {editingSlot ? t('editAvailability') : t('addAvailabilityTitle')}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('property')}</label>
                 <select
                   value={form.property}
                   onChange={e => setForm({ ...form, property: e.target.value })}
@@ -123,14 +124,14 @@ export default function AvailabilityPage() {
                   style={{ borderColor: 'var(--border)', background: 'var(--input-bg)', color: 'var(--text)' }}
                   required
                 >
-                  <option value="">Select property</option>
+                  <option value="">{t('selectProperty')}</option>
                   {properties.map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Day of Week</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('dayOfWeek')}</label>
                 <select
                   value={form.day_of_week}
                   onChange={e => setForm({ ...form, day_of_week: Number(e.target.value) })}
@@ -144,7 +145,7 @@ export default function AvailabilityPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Start Time</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('startTime')}</label>
                 <input
                   type="time"
                   value={form.start_time}
@@ -155,7 +156,7 @@ export default function AvailabilityPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>End Time</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('endTime')}</label>
                 <input
                   type="time"
                   value={form.end_time}
@@ -166,7 +167,7 @@ export default function AvailabilityPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Slot Duration (minutes)</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('slotDuration')}</label>
                 <input
                   type="number"
                   min="15"
@@ -186,19 +187,19 @@ export default function AvailabilityPage() {
                   className="h-4 w-4"
                   id="is_active"
                 />
-                <label htmlFor="is_active" className="text-sm" style={{ color: 'var(--text)' }}>Active</label>
+                <label htmlFor="is_active" className="text-sm" style={{ color: 'var(--text)' }}>{t('active')}</label>
               </div>
             </div>
             <div className="flex gap-3">
               <button type="submit" className="btn btn-primary">
-                {editingSlot ? 'Update' : 'Add'}
+                {editingSlot ? t('update') : t('add')}
               </button>
               <button
                 type="button"
                 onClick={() => { setShowForm(false); setEditingSlot(null); }}
                 className="btn btn-secondary"
               >
-                Cancel
+                {t('cancel')}
               </button>
             </div>
           </form>
@@ -210,8 +211,8 @@ export default function AvailabilityPage() {
           <svg className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p className="font-medium mb-2" style={{ color: 'var(--text)' }}>No availability set</p>
-          <p className="text-sm" style={{ color: 'var(--text-light)' }}>Add availability slots so guests can book visits to your properties.</p>
+          <p className="font-medium mb-2" style={{ color: 'var(--text)' }}>{t('noAvailabilitySet')}</p>
+          <p className="text-sm" style={{ color: 'var(--text-light)' }}>{t('addAvailabilityDescription')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -232,10 +233,10 @@ export default function AvailabilityPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => startEdit(slot)} className="text-sm px-3 py-1 rounded border" style={{ borderColor: 'var(--border)', color: 'var(--text)' }}>
-                    Edit
+                    {t('edit')}
                   </button>
                   <button onClick={() => handleDelete(slot.id)} className="text-sm px-3 py-1 rounded border" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}>
-                    Delete
+                    {t('delete')}
                   </button>
                 </div>
               </div>

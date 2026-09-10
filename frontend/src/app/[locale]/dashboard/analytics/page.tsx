@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../../components/DashboardLayout';
 import api from '../../../../lib/api';
 import { useToast } from '../../../../context/ToastContext';
 import type { AnalyticsSummary } from '../../../../types';
 
 export default function AnalyticsPage() {
+  const t = useTranslations('DashboardAnalytics');
   const [data, setData] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
@@ -16,9 +18,9 @@ export default function AnalyticsPage() {
     setLoading(true);
     api.get<AnalyticsSummary>(`/analytics/summary/?days=${days}`)
       .then(({ data }) => setData(data))
-      .catch(() => toast('Failed to load analytics', 'error'))
+      .catch(() => toast(t('failedToLoadAnalytics'), 'error'))
       .finally(() => setLoading(false));
-  }, [days]);
+  }, [days, t]);
 
   if (loading) {
     return (
@@ -34,7 +36,7 @@ export default function AnalyticsPage() {
     return (
       <DashboardLayout>
         <div className="card text-center py-12">
-          <p style={{ color: 'var(--text)' }}>No analytics data available.</p>
+          <p style={{ color: 'var(--text)' }}>{t('noDataAvailable')}</p>
         </div>
       </DashboardLayout>
     );
@@ -46,8 +48,8 @@ export default function AnalyticsPage() {
     <DashboardLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Analytics</h1>
-          <p className="mt-1" style={{ color: 'var(--text-light)' }}>Track how your listings are performing</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{t('title')}</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{t('subtitle')}</p>
         </div>
         <select
           value={days}
@@ -55,38 +57,38 @@ export default function AnalyticsPage() {
           className="px-3 py-2 border rounded-lg text-sm"
           style={{ borderColor: 'var(--border)', background: 'var(--input-bg)', color: 'var(--text)' }}
         >
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
-          <option value={365}>Last year</option>
+          <option value={7}>{t('last7Days')}</option>
+          <option value={30}>{t('last30Days')}</option>
+          <option value={90}>{t('last90Days')}</option>
+          <option value={365}>{t('lastYear')}</option>
         </select>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <div className="card">
-          <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-light)' }}>Total Views</p>
+          <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-light)' }}>{t('totalViews')}</p>
           <p className="text-3xl font-bold" style={{ color: 'var(--text)' }}>{data.total_views.toLocaleString()}</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>Last {data.period_days} days</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>{t('lastPeriod', { days: data.period_days })}</p>
         </div>
         <div className="card">
-          <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-light)' }}>Properties Viewed</p>
+          <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-light)' }}>{t('propertiesViewed')}</p>
           <p className="text-3xl font-bold" style={{ color: 'var(--text)' }}>{data.properties.length}</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>With at least 1 view</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>{t('withAtLeast1View')}</p>
         </div>
         <div className="card">
-          <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-light)' }}>Traffic Sources</p>
+          <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-light)' }}>{t('trafficSources')}</p>
           <p className="text-3xl font-bold" style={{ color: 'var(--text)' }}>{data.sources.length}</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>Unique UTM sources</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>{t('uniqueUtmSources')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Views Over Time */}
         <div className="card">
-          <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>Views Over Time</h2>
+          <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('viewsOverTime')}</h2>
           {data.views_over_time.length === 0 ? (
-            <p className="text-center py-8 text-sm" style={{ color: 'var(--text-light)' }}>No data for this period.</p>
+            <p className="text-center py-8 text-sm" style={{ color: 'var(--text-light)' }}>{t('noDataForPeriod')}</p>
           ) : (
             <div className="space-y-1">
               {data.views_over_time.map(d => (
@@ -109,9 +111,9 @@ export default function AnalyticsPage() {
 
         {/* Source Breakdown */}
         <div className="card">
-          <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>Traffic Sources</h2>
+          <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('trafficSources')}</h2>
           {data.sources.length === 0 ? (
-            <p className="text-center py-8 text-sm" style={{ color: 'var(--text-light)' }}>No UTM sources tracked yet.</p>
+            <p className="text-center py-8 text-sm" style={{ color: 'var(--text-light)' }}>{t('noUtmSources')}</p>
           ) : (
             <div className="space-y-3">
               {data.sources.map(s => {
@@ -136,15 +138,15 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Properties */}
         <div className="card">
-          <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>Top Properties</h2>
+          <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('topProperties')}</h2>
           {data.properties.length === 0 ? (
-            <p className="text-center py-8 text-sm" style={{ color: 'var(--text-light)' }}>No views yet.</p>
+            <p className="text-center py-8 text-sm" style={{ color: 'var(--text-light)' }}>{t('noViewsYet')}</p>
           ) : (
             <div className="space-y-3">
               {data.properties.map(p => (
                 <div key={p.property__id} className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: 'var(--border)' }}>
                   <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>{p.property__name}</span>
-                  <span className="text-sm font-bold" style={{ color: 'var(--primary)' }}>{p.total_views.toLocaleString()} views</span>
+                  <span className="text-sm font-bold" style={{ color: 'var(--primary)' }}>{p.total_views.toLocaleString()} {t('views')}</span>
                 </div>
               ))}
             </div>
@@ -153,9 +155,9 @@ export default function AnalyticsPage() {
 
         {/* Top Referrers */}
         <div className="card">
-          <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>Top Referrers</h2>
+          <h2 className="font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('topReferrers')}</h2>
           {data.referrers.length === 0 ? (
-            <p className="text-center py-8 text-sm" style={{ color: 'var(--text-light)' }}>No referrer data yet.</p>
+            <p className="text-center py-8 text-sm" style={{ color: 'var(--text-light)' }}>{t('noReferrerData')}</p>
           ) : (
             <div className="space-y-2">
               {data.referrers.map(r => {

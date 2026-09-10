@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../../components/DashboardLayout';
 import api from '../../../../lib/api';
 import { useToast } from '../../../../context/ToastContext';
@@ -14,6 +15,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function BookingsPage() {
+  const t = useTranslations('DashboardBookings');
   const [bookings, setBookings] = useState<VisitBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -22,17 +24,17 @@ export default function BookingsPage() {
   useEffect(() => {
     api.get<VisitBooking[]>('/bookings/')
       .then(({ data }) => setBookings(data))
-      .catch(() => toast('Failed to load bookings', 'error'))
+      .catch(() => toast(t('failedToLoadBookings'), 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   const handleAction = async (id: number, action: 'confirm' | 'cancel') => {
     try {
       const { data } = await api.post<VisitBooking>(`/bookings/${id}/${action}/`);
       setBookings(bookings.map(b => b.id === data.id ? data : b));
-      toast(`Booking ${action === 'confirm' ? 'confirmed' : 'cancelled'}`, 'success');
+      toast(action === 'confirm' ? t('bookingConfirmed') : t('bookingCancelled'), 'success');
     } catch (err: any) {
-      toast(err.response?.data?.error || 'Action failed', 'error');
+      toast(err.response?.data?.error || t('actionFailed'), 'error');
     }
   };
 
@@ -51,8 +53,8 @@ export default function BookingsPage() {
   return (
     <DashboardLayout>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Visit Bookings</h1>
-        <p className="mt-1" style={{ color: 'var(--text-light)' }}>Manage guest visit requests</p>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{t('title')}</h1>
+        <p className="mt-1" style={{ color: 'var(--text-light)' }}>{t('subtitle')}</p>
       </div>
 
       <div className="flex gap-2 mb-6 flex-wrap">
@@ -67,7 +69,7 @@ export default function BookingsPage() {
             }`}
             style={filter !== s ? { borderColor: 'var(--border)', color: 'var(--text)' } : {}}
           >
-            {s.charAt(0).toUpperCase() + s.slice(1)}
+            {t(s as 'all' | 'pending' | 'confirmed' | 'cancelled' | 'completed')}
           </button>
         ))}
       </div>
@@ -77,9 +79,9 @@ export default function BookingsPage() {
           <svg className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <p className="font-medium mb-2" style={{ color: 'var(--text)' }}>No bookings found</p>
+          <p className="font-medium mb-2" style={{ color: 'var(--text)' }}>{t('noBookingsFound')}</p>
           <p className="text-sm" style={{ color: 'var(--text-light)' }}>
-            {filter === 'all' ? 'No visit bookings have been made yet.' : `No ${filter} bookings.`}
+            {filter === 'all' ? t('noBookingsYet') : t('noFilterBookings', { filter })}
           </p>
         </div>
       ) : (
@@ -95,17 +97,17 @@ export default function BookingsPage() {
                     </span>
                   </div>
                   <p className="text-sm mb-1" style={{ color: 'var(--text-light)' }}>
-                    <strong>Property:</strong> {booking.property_name}
+                    <strong>{t('propertyLabel')}</strong> {booking.property_name}
                   </p>
                   <p className="text-sm mb-1" style={{ color: 'var(--text-light)' }}>
-                    <strong>Date:</strong> {booking.visit_date} at {booking.visit_time}
+                    <strong>{t('dateLabel')}</strong> {booking.visit_date} at {booking.visit_time}
                   </p>
                   <p className="text-sm mb-1" style={{ color: 'var(--text-light)' }}>
-                    <strong>Email:</strong> {booking.guest_email}
+                    <strong>{t('emailLabel')}</strong> {booking.guest_email}
                   </p>
                   {booking.guest_phone && (
                     <p className="text-sm mb-1" style={{ color: 'var(--text-light)' }}>
-                      <strong>Phone:</strong> {booking.guest_phone}
+                      <strong>{t('phoneLabel')}</strong> {booking.guest_phone}
                     </p>
                   )}
                   {booking.notes && (
@@ -121,14 +123,14 @@ export default function BookingsPage() {
                         onClick={() => handleAction(booking.id, 'confirm')}
                         className="btn btn-primary text-sm"
                       >
-                        Confirm
+                        {t('confirm')}
                       </button>
                       <button
                         onClick={() => handleAction(booking.id, 'cancel')}
                         className="btn btn-secondary text-sm"
                         style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
                       >
-                        Decline
+                        {t('decline')}
                       </button>
                     </>
                   )}
@@ -138,7 +140,7 @@ export default function BookingsPage() {
                       className="btn btn-secondary text-sm"
                       style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
                     >
-                      Cancel
+                      {t('cancel')}
                     </button>
                   )}
                   {booking.whatsapp_enabled && booking.whatsapp_link && (
