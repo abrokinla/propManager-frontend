@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../components/DashboardLayout';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import ConfirmDialog from '../../../components/ConfirmDialog';
@@ -11,6 +12,7 @@ import { useToast } from '../../../context/ToastContext';
 import type { Property, PaginatedResponse } from '../../../types';
 
 export default function PropertiesPage() {
+  const t = useTranslations('Properties');
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -28,7 +30,7 @@ export default function PropertiesPage() {
       const { data } = await api.get<PaginatedResponse<Property>>('/properties/');
       setProperties(data.results);
     } catch {
-      toast('Failed to load properties', 'error');
+      toast(t('failedToLoad'), 'error');
     } finally {
       setLoading(false);
     }
@@ -52,9 +54,9 @@ export default function PropertiesPage() {
     const result = await uploadImage(file);
     if (result.success && result.url) {
       setForm(prev => ({ ...prev, image_url: result.url! }));
-      toast('Image uploaded successfully', 'success');
+      toast(t('imageUploaded'), 'success');
     } else {
-      toast(result.error || 'Failed to upload image', 'error');
+      toast(result.error || t('imageUploadFailed'), 'error');
     }
     setUploading(false);
     e.target.value = '';
@@ -71,7 +73,7 @@ export default function PropertiesPage() {
       } else {
         await api.post('/properties/', payload);
       }
-      toast(`Property ${editing ? 'updated' : 'created'} successfully`, 'success');
+      toast(editing ? t('updatedSuccessfully') : t('createdSuccessfully'), 'success');
       setForm({ name: '', address: '', property_type: 'Apartment', description: '', total_units: '1', image_url: '', is_published: 'false', amenities: '', nearby_places: '' });
       setShowForm(false);
       setEditing(null);
@@ -86,7 +88,7 @@ export default function PropertiesPage() {
         }
         setFormErrors(fieldErrors);
       } else {
-        toast('Failed to save property', 'error');
+        toast(t('failedToSave'), 'error');
       }
     } finally {
       setSaving(false);
@@ -102,10 +104,10 @@ export default function PropertiesPage() {
   const handleDelete = async (id: number) => {
     try {
       await api.delete(`/properties/${id}/`);
-      toast('Property deleted successfully', 'success');
+      toast(t('deletedSuccessfully'), 'success');
       fetchProperties();
     } catch {
-      toast('Failed to delete property', 'error');
+      toast(t('failedToDelete'), 'error');
     }
   };
 
@@ -121,12 +123,12 @@ export default function PropertiesPage() {
     <DashboardLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Properties</h1>
-          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{properties.length} propert{properties.length === 1 ? 'y' : 'ies'} in your portfolio</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{t('title')}</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{t('count', { count: properties.length })}</p>
         </div>
         <button onClick={() => setShowForm(true)} className="btn btn-primary">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-          Add Property
+          {t('addProperty')}
         </button>
       </div>
 
@@ -135,7 +137,7 @@ export default function PropertiesPage() {
         <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 modal-overlay">
           <div className="card w-full max-w-2xl mt-8 mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold" style={{ color: 'var(--text)' }}>{editing ? 'Edit Property' : 'Add New Property'}</h2>
+              <h2 className="text-xl font-bold" style={{ color: 'var(--text)' }}>{editing ? t('editProperty') : t('addNewProperty')}</h2>
               <button onClick={closeForm} className="p-2 rounded-lg transition-colors" style={{ color: 'var(--text-light)' }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -144,32 +146,32 @@ export default function PropertiesPage() {
             <form onSubmit={handleSubmit}>
               {/* Basic Info */}
               <div className="form-section">
-                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-light)' }}>Basic Information</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-light)' }}>{t('basicInfo')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property Name</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('propertyName')}</label>
                     <input name="name" value={form.name} onChange={handleChange} required placeholder="e.g. Sunset Apartments" />
                     {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Address</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('address')}</label>
                     <input name="address" value={form.address} onChange={handleChange} required placeholder="e.g. 123 Main St" />
                     {formErrors.address && <p className="text-red-500 text-xs mt-1">{formErrors.address}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property Type</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('propertyType')}</label>
                     <select name="property_type" value={form.property_type} onChange={handleChange}>
-                      <option value="Apartment">Apartment</option>
-                      <option value="House">House</option>
-                      <option value="Condo">Condo</option>
-                      <option value="Commercial">Commercial</option>
-                      <option value="Villa">Villa</option>
-                      <option value="Townhouse">Townhouse</option>
-                      <option value="Studio">Studio</option>
+                      <option value="Apartment">{t('typeApartment')}</option>
+                      <option value="House">{t('typeHouse')}</option>
+                      <option value="Condo">{t('typeCondo')}</option>
+                      <option value="Commercial">{t('typeCommercial')}</option>
+                      <option value="Villa">{t('typeVilla')}</option>
+                      <option value="Townhouse">{t('typeTownhouse')}</option>
+                      <option value="Studio">{t('typeStudio')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Total Units</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('totalUnits')}</label>
                     <input name="total_units" type="number" min="1" value={form.total_units} onChange={handleChange} required />
                   </div>
                 </div>
@@ -177,24 +179,24 @@ export default function PropertiesPage() {
 
               {/* Description */}
               <div className="form-section">
-                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-light)' }}>Description & Media</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-light)' }}>{t('descriptionMedia')}</h3>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Description</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('description')}</label>
                   <textarea name="description" value={form.description} onChange={handleChange} rows={3} placeholder="Describe the property, its features, and what makes it special..." />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property Image</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('propertyImage')}</label>
                   {uploading ? (
                     <div className="border-2 border-dashed rounded-lg p-8 text-center" style={{ borderColor: 'var(--border)' }}>
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-2"></div>
-                      <p className="text-sm" style={{ color: 'var(--text-light)' }}>Uploading image...</p>
+                      <p className="text-sm" style={{ color: 'var(--text-light)' }}>{t('uploadingImage')}</p>
                     </div>
                   ) : form.image_url ? (
                     <div className="relative">
                       <img src={form.image_url} alt="Property" className="h-36 w-full object-cover rounded-lg" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
-                        <button type="button" onClick={() => fileRef.current?.click()} className="bg-white text-gray-700 px-3 py-1.5 rounded text-sm font-medium">Change</button>
-                        <button type="button" onClick={() => setForm(prev => ({ ...prev, image_url: '' }))} className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium">Remove</button>
+                        <button type="button" onClick={() => fileRef.current?.click()} className="bg-white text-gray-700 px-3 py-1.5 rounded text-sm font-medium">{t('change')}</button>
+                        <button type="button" onClick={() => setForm(prev => ({ ...prev, image_url: '' }))} className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium">{t('remove')}</button>
                       </div>
                     </div>
                   ) : (
@@ -206,8 +208,8 @@ export default function PropertiesPage() {
                       <svg className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--text-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <p className="font-medium" style={{ color: 'var(--text-light)' }}>Click to upload image</p>
-                      <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>PNG, JPG, WEBP up to 10MB</p>
+                      <p className="font-medium" style={{ color: 'var(--text-light)' }}>{t('clickToUpload')}</p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>{t('imageFormats')}</p>
                     </div>
                   )}
                   <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
@@ -219,14 +221,14 @@ export default function PropertiesPage() {
 
               {/* Property Details */}
               <div className="form-section">
-                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-light)' }}>Property Details</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-light)' }}>{t('propertyDetails')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Amenities</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('amenities')}</label>
                     <textarea name="amenities" value={form.amenities} onChange={handleChange} rows={3} placeholder="Swimming pool, Gym, Parking, 24/7 Security..." />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Nearby Places</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('nearbyPlaces')}</label>
                     <textarea name="nearby_places" value={form.nearby_places} onChange={handleChange} rows={3} placeholder="Shopping mall, School, Hospital, Bus stop..." />
                   </div>
                 </div>
@@ -234,25 +236,25 @@ export default function PropertiesPage() {
 
               {/* Publishing */}
               <div className="form-section">
-                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-light)' }}>Publishing</h3>
+                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-light)' }}>{t('publishing')}</h3>
                 <div className="flex items-center gap-3">
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" className="sr-only peer" checked={form.is_published === 'true'} onChange={handleTogglePublished} />
                     <div className="w-10 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                   </label>
                   <div>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Published</p>
-                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>Make this property visible on the public listings page</p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{t('published')}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-light)' }}>{t('publishDescription')}</p>
                   </div>
                 </div>
               </div>
 
               <div className="flex gap-3 justify-end pt-2">
-                <button type="button" onClick={closeForm} className="btn btn-secondary">Cancel</button>
+                <button type="button" onClick={closeForm} className="btn btn-secondary">{t('cancel')}</button>
                 <button type="submit" disabled={saving || uploading} className="btn btn-primary disabled:opacity-50">
                   {saving ? (
                     <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                  ) : editing ? 'Update Property' : 'Create Property'}
+                  ) : editing ? t('updateProperty') : t('createProperty')}
                 </button>
               </div>
             </form>
@@ -281,9 +283,9 @@ export default function PropertiesPage() {
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'var(--hover-bg)' }}>
             <svg className="w-8 h-8" style={{ color: 'var(--text-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
           </div>
-          <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No properties yet</h3>
-          <p className="mb-4" style={{ color: 'var(--text-light)' }}>Get started by adding your first property</p>
-          <button onClick={() => setShowForm(true)} className="btn btn-primary">Add Property</button>
+          <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>{t('emptyTitle')}</h3>
+          <p className="mb-4" style={{ color: 'var(--text-light)' }}>{t('emptyDescription')}</p>
+          <button onClick={() => setShowForm(true)} className="btn btn-primary">{t('addProperty')}</button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -301,7 +303,7 @@ export default function PropertiesPage() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <span className="badge badge-info mb-2">{prop.property_type}</span>
-                  {prop.is_published && <span className="badge badge-success ml-1">Published</span>}
+                  {prop.is_published && <span className="badge badge-success ml-1">{t('published')}</span>}
                   <a href={`/properties/${prop.id}`} className="font-semibold text-lg hover:text-primary-600 transition-colors block mt-1" style={{ color: 'var(--text)' }}>{prop.name}</a>
                 </div>
               </div>
@@ -310,12 +312,12 @@ export default function PropertiesPage() {
                 {prop.address}
               </p>
               <div className="flex items-center justify-between text-sm mb-4" style={{ color: 'var(--text-light)' }}>
-                <span>{prop.units_count}/{prop.total_units ?? prop.units_count} unit{(prop.total_units ?? prop.units_count) === 1 ? '' : 's'}</span>
-                <span>Added {new Date(prop.created_at).toLocaleDateString()}</span>
+                <span>{prop.units_count}/{prop.total_units ?? prop.units_count} {t('unitCount', { count: prop.total_units ?? prop.units_count })}</span>
+                <span>{t('added', { date: new Date(prop.created_at).toLocaleDateString() })}</span>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => handleEdit(prop)} className="btn btn-secondary text-sm flex-1">Edit</button>
-                <button onClick={() => setDeleteTarget(prop)} className="btn btn-danger text-sm flex-1">Delete</button>
+                <button onClick={() => handleEdit(prop)} className="btn btn-secondary text-sm flex-1">{t('edit')}</button>
+                <button onClick={() => setDeleteTarget(prop)} className="btn btn-danger text-sm flex-1">{t('delete')}</button>
               </div>
             </div>
           ))}
@@ -324,8 +326,8 @@ export default function PropertiesPage() {
 
       <ConfirmDialog
         open={!!deleteTarget}
-        title="Delete Property"
-        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        title={t('deleteTitle')}
+        message={t('deleteMessage', { name: deleteTarget?.name ?? '' })}
         onConfirm={() => {
           const id = deleteTarget!.id;
           setDeleteTarget(null);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import axios from 'axios';
 import type { PublicProperty } from '../../../types';
@@ -8,6 +9,7 @@ import type { PublicProperty } from '../../../types';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ListingsPage() {
+  const t = useTranslations('Listings');
   const [properties, setProperties] = useState<PublicProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,7 +20,7 @@ export default function ListingsPage() {
         const { data } = await axios.get<{ results: PublicProperty[] }>(`${API_URL}/public/properties/`);
         setProperties(data.results);
       } catch {
-        setError('Unable to load listings at this time. Please check back later.');
+        setError(t('loadError'));
       } finally {
         setLoading(false);
       }
@@ -36,17 +38,17 @@ export default function ListingsPage() {
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">PM</span>
               </div>
-              <span className="font-bold text-lg">PropManager</span>
+              <span className="font-bold text-lg">{t('brand')}</span>
             </div>
-            <Link href="/login" className="btn btn-primary text-sm">Agent Login</Link>
+            <Link href="/login" className="btn btn-primary text-sm">{t('agentLogin')}</Link>
           </div>
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Find Your Perfect Property</h1>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">Browse our curated selection of available properties for rent.</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('heroTitle')}</h1>
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto">{t('heroSubtitle')}</p>
         </div>
 
         {loading ? (
@@ -58,7 +60,7 @@ export default function ListingsPage() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
             </div>
-            <h3 className="font-semibold text-lg mb-2">Listings Unavailable</h3>
+            <h3 className="font-semibold text-lg mb-2">{t('unavailable')}</h3>
             <p className="text-gray-500">{error}</p>
           </div>
         ) : properties.length === 0 ? (
@@ -66,8 +68,8 @@ export default function ListingsPage() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
             </div>
-            <h3 className="font-semibold text-lg mb-2">No Properties Listed Yet</h3>
-            <p className="text-gray-500">Check back soon for new listings.</p>
+            <h3 className="font-semibold text-lg mb-2">{t('noProperties')}</h3>
+            <p className="text-gray-500">{t('checkBackSoon')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -93,9 +95,9 @@ export default function ListingsPage() {
                     <span className="text-primary-600 font-semibold">
                       {prop.price_range
                         ? `$${prop.price_range.min.toLocaleString()} - $${prop.price_range.max.toLocaleString()}`
-                        : 'Contact for price'}
+                        : t('contactForPrice')}
                     </span>
-                    <span className="text-gray-500">{prop.available_units_count} unit{prop.available_units_count !== 1 ? 's' : ''} available</span>
+                    <span className="text-gray-500">{t('unitsAvailable', { count: prop.available_units_count })}</span>
                   </div>
                 </div>
               </Link>
@@ -106,7 +108,7 @@ export default function ListingsPage() {
 
       <footer className="border-t bg-white mt-20">
         <div className="max-w-7xl mx-auto px-4 py-8 text-center text-sm text-gray-400">
-          &copy; {new Date().getFullYear()} PropManager. All rights reserved.
+          &copy; {new Date().getFullYear()} PropManager. {t('allRightsReserved')}
         </div>
       </footer>
     </div>

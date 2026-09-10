@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../components/DashboardLayout';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import ConfirmDialog from '../../../components/ConfirmDialog';
@@ -21,6 +22,7 @@ interface EditState {
 }
 
 export default function UnitsPage() {
+  const t = useTranslations('Units');
   const [units, setUnits] = useState<Unit[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ export default function UnitsPage() {
     ]).then(([unitsRes, propsRes]) => {
       setUnits(unitsRes.data.results);
       setProperties(propsRes.data.results);
-    }).catch(() => toast('Failed to load data', 'error'))
+    }).catch(() => toast(t('failedToLoad'), 'error'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -88,10 +90,10 @@ export default function UnitsPage() {
       };
       const { data } = await api.put<Unit>(`/units/${unit.id}/`, payload);
       setUnits(prev => prev.map(u => u.id === unit.id ? data : u));
-      toast('Unit updated', 'success');
+      toast(t('unitUpdated'), 'success');
       cancelEdit();
     } catch {
-      toast('Failed to update unit', 'error');
+      toast(t('failedToUpdate'), 'error');
     } finally {
       setSavingId(null);
     }
@@ -101,9 +103,9 @@ export default function UnitsPage() {
     try {
       await api.delete(`/units/${id}/`);
       setUnits(prev => prev.filter(u => u.id !== id));
-      toast('Unit deleted', 'success');
+      toast(t('unitDeleted'), 'success');
     } catch {
-      toast('Failed to delete unit', 'error');
+      toast(t('failedToDelete'), 'error');
     }
   };
 
@@ -119,12 +121,12 @@ export default function UnitsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
-            {selectedProperty ? selectedProperty.name : 'Properties'}
+            {selectedProperty ? selectedProperty.name : t('properties')}
           </h1>
           <p className="mt-1" style={{ color: 'var(--text-light)' }}>
             {selectedProperty
-              ? `${filteredUnits.length} unit${filteredUnits.length === 1 ? '' : 's'}`
-              : `${properties.length} propert${properties.length === 1 ? 'y' : 'ies'} in your portfolio`
+              ? t('unitCount', { count: filteredUnits.length })
+              : t('propertyCount', { count: properties.length })
             }
           </p>
         </div>
@@ -134,29 +136,29 @@ export default function UnitsPage() {
         <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
       ) : selectedProperty ? (
         <>
-          <button onClick={() => setSelectedProperty(null)} className="btn btn-secondary mb-4">← Back to Properties</button>
+          <button onClick={() => setSelectedProperty(null)} className="btn btn-secondary mb-4">← {t('backToProperties')}</button>
 
           {filteredUnits.length === 0 ? (
             <div className="card text-center py-12">
-              <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No units for this property</h3>
-              <p className="mb-4" style={{ color: 'var(--text-light)' }}>Units are created when you set total_units on a property.</p>
+              <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>{t('noUnitsTitle')}</h3>
+              <p className="mb-4" style={{ color: 'var(--text-light)' }}>{t('noUnitsDescription')}</p>
             </div>
           ) : (
             <div className="card overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Unit</th>
-                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Beds</th>
-                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Baths</th>
-                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Toilets</th>
-                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Sqft</th>
-                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Rent</th>
-                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Cycle</th>
-                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Sale</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Status</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Tenant</th>
-                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Actions</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thUnit')}</th>
+                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thBeds')}</th>
+                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thBaths')}</th>
+                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thToilets')}</th>
+                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thSqft')}</th>
+                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thRent')}</th>
+                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thCycle')}</th>
+                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thSale')}</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thStatus')}</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thTenant')}</th>
+                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('thActions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -187,9 +189,9 @@ export default function UnitsPage() {
                             </td>
                             <td className="py-2 px-2 text-center">
                               <select value={vals.rent_cycle} onChange={e => handleEditChange(unit.id, 'rent_cycle', e.target.value)} className="px-1 py-1 border border-gray-300 rounded text-sm">
-                                <option value="daily">Daily</option>
-                                <option value="monthly">Monthly</option>
-                                <option value="yearly">Yearly</option>
+                                <option value="daily">{t('cycleDaily')}</option>
+                                <option value="monthly">{t('cycleMonthly')}</option>
+                                <option value="yearly">{t('cycleYearly')}</option>
                               </select>
                             </td>
                             <td className="py-2 px-2 text-right">
@@ -215,14 +217,14 @@ export default function UnitsPage() {
                           {isEditing ? (
                             <span className="flex gap-1 justify-end">
                               <button onClick={() => saveUnit(unit)} disabled={isSaving} className="text-sm font-medium disabled:opacity-50" style={{ color: 'var(--success)' }}>
-                                {isSaving ? 'Saving...' : 'Save'}
+                                {isSaving ? t('saving') : t('save')}
                               </button>
-                              <button onClick={cancelEdit} className="text-sm font-medium ml-2" style={{ color: 'var(--text-light)' }}>Cancel</button>
+                              <button onClick={cancelEdit} className="text-sm font-medium ml-2" style={{ color: 'var(--text-light)' }}>{t('cancel')}</button>
                             </span>
                           ) : (
                             <span className="flex gap-1 justify-end">
-                              <button onClick={() => startEdit(unit)} className="text-primary-600 hover:text-primary-700 text-sm font-medium">Edit</button>
-                              <button onClick={() => setDeleteTarget(unit.id)} className="text-sm font-medium ml-2" style={{ color: 'var(--danger)' }}>Delete</button>
+                              <button onClick={() => startEdit(unit)} className="text-primary-600 hover:text-primary-700 text-sm font-medium">{t('edit')}</button>
+                              <button onClick={() => setDeleteTarget(unit.id)} className="text-sm font-medium ml-2" style={{ color: 'var(--danger)' }}>{t('delete')}</button>
                             </span>
                           )}
                         </td>
@@ -239,8 +241,8 @@ export default function UnitsPage() {
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'var(--hover-bg)' }}>
             <svg className="w-8 h-8" style={{ color: 'var(--text-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
           </div>
-          <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No properties yet</h3>
-          <p className="mb-4" style={{ color: 'var(--text-light)' }}>Add a property first to see its units.</p>
+          <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>{t('emptyTitle')}</h3>
+          <p className="mb-4" style={{ color: 'var(--text-light)' }}>{t('emptyDescription')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -263,9 +265,9 @@ export default function UnitsPage() {
               <p className="text-sm mb-3" style={{ color: 'var(--text-light)' }}>{prop.address}</p>
               <div className="flex items-center justify-between">
                 <span className="text-sm" style={{ color: 'var(--text-light)' }}>
-                  {prop.units_count ?? 0} unit{(prop.units_count ?? 0) === 1 ? '' : 's'}
+                  {prop.units_count ?? 0} {t('unitCount', { count: prop.units_count ?? 0 })}
                 </span>
-                <span className="text-sm font-medium text-primary-600">Edit Units →</span>
+                <span className="text-sm font-medium text-primary-600">{t('editUnits')}</span>
               </div>
             </div>
           ))}
@@ -274,8 +276,8 @@ export default function UnitsPage() {
 
       <ConfirmDialog
         open={!!deleteTarget}
-        title="Delete Unit"
-        message="Are you sure you want to delete this unit? This action cannot be undone."
+        title={t('deleteTitle')}
+        message={t('deleteMessage')}
         onConfirm={() => {
           const id = deleteTarget!;
           setDeleteTarget(null);
