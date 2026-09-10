@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../../components/DashboardLayout';
 import ErrorBoundary from '../../../../components/ErrorBoundary';
 import ConfirmDialog from '../../../../components/ConfirmDialog';
@@ -17,19 +18,20 @@ import type {
   TenancyDocument, Reminder, QuitNotice, TenancyStatus,
 } from '../../../../types';
 
-const tenancyStatusConfig: Record<TenancyStatus, { label: string; className: string }> = {
-  invited: { label: 'Invited', className: 'badge-warning' },
-  profile_pending: { label: 'Profile Pending', className: 'badge-warning' },
-  document_pending: { label: 'Document Pending', className: 'badge-info' },
-  pending_document: { label: 'Pending Document', className: 'badge-warning' },
-  document_sent: { label: 'Document Sent', className: 'badge-info' },
-  document_signed: { label: 'Document Signed', className: 'badge-info' },
-  active: { label: 'Active', className: 'badge-success' },
-  expired: { label: 'Expired', className: 'badge-danger' },
-  quit_notice_issued: { label: 'Quit Notice', className: 'badge-danger' },
+const tenancyStatusClassName: Record<TenancyStatus, string> = {
+  invited: 'badge-warning',
+  profile_pending: 'badge-warning',
+  document_pending: 'badge-info',
+  pending_document: 'badge-warning',
+  document_sent: 'badge-info',
+  document_signed: 'badge-info',
+  active: 'badge-success',
+  expired: 'badge-danger',
+  quit_notice_issued: 'badge-danger',
 };
 
 export default function TenantDetailPage() {
+  const t = useTranslations('TenantDetail');
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -61,6 +63,9 @@ export default function TenantDetailPage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
 
+  const statusLabel = (status: string) => t(`status.${status}` as any);
+  const statusConfig = (status: string) => ({ label: statusLabel(status), className: tenancyStatusClassName[status as TenancyStatus] || 'badge-info' });
+
   const fetchTenant = async () => {
     try {
       const [tRes, pRes, uRes, propRes] = await Promise.all([
@@ -74,7 +79,7 @@ export default function TenantDetailPage() {
       setUnits(uRes.data.results);
       setProperties(propRes.data.results);
     } catch {
-      toast('Failed to load tenant data', 'error');
+      toast(t('toast.loadFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -138,12 +143,12 @@ export default function TenantDetailPage() {
         document_data,
         upload_base_url: window.location.origin,
       });
-      toast('Tenancy agreement sent to tenant', 'success');
+      toast(t('toast.documentSent'), 'success');
       setShowSendDocument(false);
       fetchTenant();
       fetchDocuments();
     } catch {
-      toast('Failed to send document', 'error');
+      toast(t('toast.documentSendFailed'), 'error');
     } finally {
       setSendingDocument(false);
     }
@@ -153,10 +158,10 @@ export default function TenantDetailPage() {
     setSendingReminder(true);
     try {
       await api.post(`/tenants/${tenantId}/send-reminder/`, { channel, reminder_type: 'lease_expiry' });
-      toast(`Reminder sent via ${channel}`, 'success');
+      toast(t('toast.reminderSent', { channel }), 'success');
       fetchReminders();
     } catch {
-      toast('Failed to send reminder', 'error');
+      toast(t('toast.reminderFailed'), 'error');
     } finally {
       setSendingReminder(false);
     }
@@ -191,7 +196,7 @@ export default function TenantDetailPage() {
         is_active: editForm.is_active === 'true',
       };
       await api.put(`/tenants/${tenantId}/`, payload);
-      toast('Tenant updated successfully', 'success');
+      toast(t('toast.updated'), 'success');
       setShowEditForm(false);
       setEditing(null);
       fetchTenant();
@@ -203,7 +208,7 @@ export default function TenantDetailPage() {
         for (const [k, v] of Object.entries(data)) fe[k] = Array.isArray(v) ? v[0] : v;
         setEditFormErrors(fe);
       } else {
-        toast('Failed to update tenant', 'error');
+        toast(t('toast.updateFailed'), 'error');
       }
     } finally {
       setSaving(false);
@@ -223,10 +228,10 @@ export default function TenantDetailPage() {
   const handleDelete = async () => {
     try {
       await api.delete(`/tenants/${tenantId}/`);
-      toast('Tenant deleted successfully', 'success');
+      toast(t('toast.deleted'), 'success');
       router.push('/tenants');
     } catch {
-      toast('Failed to delete tenant', 'error');
+      toast(t('toast.deleteFailed'), 'error');
     }
   };
 
@@ -244,14 +249,14 @@ export default function TenantDetailPage() {
     return (
       <DashboardLayout>
         <div className="card text-center py-12">
-          <h2 className="text-lg font-semibold mb-2" style={{ color: 'var(--text)' }}>Tenant not found</h2>
-          <Link href="/tenants" className="btn btn-primary">Back to Tenants</Link>
+          <h2 className="text-lg font-semibold mb-2" style={{ color: 'var(--text)' }}>{t('notFound')}</h2>
+          <Link href="/tenants" className="btn btn-primary">{t('backToTenants')}</Link>
         </div>
       </DashboardLayout>
     );
   }
 
-  const statusCfg = tenancyStatusConfig[tenant.tenancy_status] || tenancyStatusConfig.active;
+  const sCfg = statusConfig(tenant.tenancy_status);
   const activeQuitNotice = quitNotices.find(q => q.status === 'issued' || q.status === 'acknowledged');
 
   return (
@@ -259,7 +264,7 @@ export default function TenantDetailPage() {
     <DashboardLayout>
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm mb-6" style={{ color: 'var(--text-light)' }}>
-        <Link href="/tenants" className="hover:text-primary-600">Tenants</Link>
+        <Link href="/tenants" className="hover:text-primary-600">{t('breadcrumb.tenants')}</Link>
         <span>/</span>
         <span className="font-medium" style={{ color: 'var(--text)' }}>{tenant.name}</span>
       </div>
@@ -269,15 +274,15 @@ export default function TenantDetailPage() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{tenant.name}</h1>
-            <span className={`badge ${statusCfg.className}`}>{statusCfg.label}</span>
+            <span className={`badge ${sCfg.className}`}>{sCfg.label}</span>
           </div>
           <p style={{ color: 'var(--text-light)' }}>
             {tenant.unit?.property_name || tenant.property_name || '—'} · Unit {tenant.unit?.unit_number || tenant.unit_number || '—'}
           </p>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleEdit} className="btn btn-secondary">Edit</button>
-          <button onClick={() => setShowDeleteConfirm(true)} className="btn btn-danger">Delete</button>
+          <button onClick={handleEdit} className="btn btn-secondary">{t('edit')}</button>
+          <button onClick={() => setShowDeleteConfirm(true)} className="btn btn-danger">{t('delete')}</button>
         </div>
       </div>
 
@@ -286,51 +291,51 @@ export default function TenantDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Lease Information */}
           <div className="card">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Lease Information</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('leaseInfo')}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
-                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>Annual Rent</p>
+                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>{t('fields.annualRent')}</p>
                 <p className="text-lg font-bold text-primary-600">
                   {tenant.annual_rent ? `₦${Number(tenant.annual_rent).toLocaleString()}` : '—'}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>Lease Start</p>
+                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>{t('fields.leaseStart')}</p>
                 <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{tenant.lease_start_date || '—'}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>Lease Expiry</p>
+                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>{t('fields.leaseExpiry')}</p>
                 <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{tenant.lease_expiry_date || '—'}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>Lease Renewal</p>
+                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>{t('fields.leaseRenewal')}</p>
                 <p className="text-sm" style={{ color: 'var(--text)' }}>{tenant.lease_renewal_date || '—'}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>Move-in Date</p>
+                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>{t('fields.moveInDate')}</p>
                 <p className="text-sm" style={{ color: 'var(--text)' }}>{tenant.move_in_date || '—'}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>Active</p>
-                <p className="text-sm" style={{ color: 'var(--text)' }}>{tenant.is_active ? 'Yes' : 'No'}</p>
+                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>{t('fields.active')}</p>
+                <p className="text-sm" style={{ color: 'var(--text)' }}>{tenant.is_active ? t('yes') : t('no')}</p>
               </div>
             </div>
           </div>
 
           {/* Contact Information */}
           <div className="card">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Contact Information</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('contactInfo')}</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>Email</p>
+                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>{t('fields.email')}</p>
                 <p className="text-sm" style={{ color: 'var(--text)' }}>{tenant.email || '—'}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>Phone</p>
+                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>{t('fields.phone')}</p>
                 <p className="text-sm" style={{ color: 'var(--text)' }}>{tenant.phone || '—'}</p>
               </div>
               <div className="col-span-2">
-                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>Address</p>
+                <p className="text-xs font-medium uppercase" style={{ color: 'var(--text-light)' }}>{t('fields.address')}</p>
                 <p className="text-sm" style={{ color: 'var(--text)' }}>{tenant.address || '—'}</p>
               </div>
             </div>
@@ -339,23 +344,23 @@ export default function TenantDetailPage() {
           {/* Payment History */}
           <div className="card">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>Payment History</h2>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>{t('paymentHistory')}</h2>
               <Link href={`/payments?tenant=${tenantId}`} className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-                Record Payment
+                {t('recordPayment')}
               </Link>
             </div>
             {payments.length === 0 ? (
-              <p className="text-sm" style={{ color: 'var(--text-light)' }}>No payments recorded yet.</p>
+              <p className="text-sm" style={{ color: 'var(--text-light)' }}>{t('noPayments')}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>Amount</th>
-                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>Period</th>
-                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>Date</th>
-                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>Method</th>
-                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>Ref</th>
+                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>{t('paymentTable.amount')}</th>
+                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>{t('paymentTable.period')}</th>
+                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>{t('paymentTable.date')}</th>
+                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>{t('paymentTable.method')}</th>
+                      <th className="text-left py-2 px-3 font-medium" style={{ color: 'var(--text-light)' }}>{t('paymentTable.ref')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -379,7 +384,7 @@ export default function TenantDetailPage() {
         <div className="space-y-6">
           {/* Tenancy Documents */}
           <div className="card">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Documents</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('documents')}</h2>
             <TenantDocumentList
               documents={documents}
               onSendDocument={() => setShowSendDocument(true)}
@@ -390,9 +395,9 @@ export default function TenantDetailPage() {
 
           {/* Reminders */}
           <div className="card">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Reminders</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('reminders')}</h2>
             {reminders.length === 0 ? (
-              <p className="text-sm mb-4" style={{ color: 'var(--text-light)' }}>No reminders sent yet.</p>
+              <p className="text-sm mb-4" style={{ color: 'var(--text-light)' }}>{t('noReminders')}</p>
             ) : (
               <div className="space-y-2 mb-4">
                 {reminders.slice(0, 5).map(r => (
@@ -413,18 +418,18 @@ export default function TenantDetailPage() {
               disabled={sendingReminder}
               className="btn btn-secondary w-full text-sm disabled:opacity-50"
             >
-              {sendingReminder ? 'Sending...' : 'Send Lease Reminder'}
+              {sendingReminder ? t('sending') : t('sendReminder')}
             </button>
           </div>
 
           {/* Quit Notice */}
           <div className="card">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Quit Notice</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('quitNotice')}</h2>
             {activeQuitNotice ? (
               <div>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                  <p className="text-sm font-medium text-red-700">Quit Notice Issued</p>
-                  <p className="text-xs text-red-600 mt-1">Effective: {activeQuitNotice.effective_date}</p>
+                  <p className="text-sm font-medium text-red-700">{t('quitNoticeIssued')}</p>
+                  <p className="text-xs text-red-600 mt-1">{t('effective')}: {activeQuitNotice.effective_date}</p>
                   {activeQuitNotice.document_url && (
                     <a
                       href={activeQuitNotice.document_url}
@@ -432,20 +437,20 @@ export default function TenantDetailPage() {
                       rel="noopener noreferrer"
                       className="text-xs text-primary-600 hover:text-primary-700 font-medium mt-2 inline-block"
                     >
-                      Download Notice
+                      {t('downloadNotice')}
                     </a>
                   )}
                 </div>
               </div>
             ) : (
-              <p className="text-sm mb-4" style={{ color: 'var(--text-light)' }}>No quit notice issued.</p>
+              <p className="text-sm mb-4" style={{ color: 'var(--text-light)' }}>{t('noQuitNotice')}</p>
             )}
             <button
               onClick={() => setShowQuitNotice(true)}
               className="btn btn-danger w-full text-sm"
               disabled={!!activeQuitNotice}
             >
-              {activeQuitNotice ? 'Quit Notice Active' : 'Issue Quit Notice'}
+              {activeQuitNotice ? t('quitNoticeActive') : t('issueQuitNotice')}
             </button>
           </div>
         </div>
@@ -455,12 +460,12 @@ export default function TenantDetailPage() {
       {showSendDocument && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="card w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Send Tenancy Agreement</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('sendAgreement')}</h2>
             <TenancyDocumentPreview tenant={tenant} />
             <div className="flex gap-3 justify-end mt-6">
-              <button onClick={() => setShowSendDocument(false)} className="btn btn-secondary">Cancel</button>
+              <button onClick={() => setShowSendDocument(false)} className="btn btn-secondary">{t('form.cancel')}</button>
               <button onClick={handleSendDocument} disabled={sendingDocument} className="btn btn-primary disabled:opacity-50">
-                {sendingDocument ? 'Sending...' : 'Send to Tenant'}
+                {sendingDocument ? t('sending') : t('sendToTenant')}
               </button>
             </div>
           </div>
@@ -471,19 +476,19 @@ export default function TenantDetailPage() {
       {showEditForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Edit Tenant</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('editTenant')}</h2>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property *</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.property')} *</label>
                 <select name="property_id" value={editForm.property_id} onChange={handleEditChange} required>
-                  <option value="">Select property...</option>
+                  <option value="">{t('form.selectProperty')}</option>
                   {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Unit *</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.unit')} *</label>
                 <select name="unit_id" value={editForm.unit_id} onChange={handleEditChange} required>
-                  <option value="">{editForm.property_id ? 'Select unit...' : 'Select a property first'}</option>
+                  <option value="">{editForm.property_id ? t('form.selectUnit') : t('form.selectPropertyFirst')}</option>
                   {editForm.property_id && units
                     .filter(u => u.property_id === Number(editForm.property_id))
                     .map(u => <option key={u.id} value={u.id}>{u.unit_number}</option>)
@@ -492,44 +497,44 @@ export default function TenantDetailPage() {
                 {editFormErrors.unit_id && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{editFormErrors.unit_id}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Full Name *</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.fullName')} *</label>
                 <input name="name" value={editForm.name} onChange={handleEditChange} required />
                 {editFormErrors.name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{editFormErrors.name}</p>}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Phone</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.phone')}</label>
                   <input name="phone" value={editForm.phone} onChange={handleEditChange} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Email</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.email')}</label>
                   <input name="email" type="email" value={editForm.email} onChange={handleEditChange} />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Address</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.address')}</label>
                 <input name="address" value={editForm.address} onChange={handleEditChange} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Annual Rent (₦)</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.annualRent')}</label>
                   <input name="annual_rent" type="number" value={editForm.annual_rent} onChange={handleEditChange} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Active</label>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.active')}</label>
                   <select name="is_active" value={editForm.is_active} onChange={handleEditChange}>
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
+                    <option value="true">{t('form.activeOption')}</option>
+                    <option value="false">{t('form.inactiveOption')}</option>
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Move-in Date</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.moveInDate')}</label>
                 <input name="move_in_date" type="date" value={editForm.move_in_date} onChange={handleEditChange} />
               </div>
               <div className="flex gap-3 justify-end">
-                <button type="button" onClick={() => { setShowEditForm(false); setEditing(null); }} className="btn btn-secondary">Cancel</button>
-                <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+                <button type="button" onClick={() => { setShowEditForm(false); setEditing(null); }} className="btn btn-secondary">{t('form.cancel')}</button>
+                <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? t('form.saving') : t('form.save')}</button>
               </div>
             </form>
           </div>
@@ -539,9 +544,9 @@ export default function TenantDetailPage() {
       {/* Delete Confirm */}
       <ConfirmDialog
         open={showDeleteConfirm}
-        title="Delete Tenant"
-        message={`Are you sure you want to delete "${tenant.name}"? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t('deleteTitle')}
+        message={t('deleteMessage', { name: tenant.name })}
+        confirmLabel={t('delete')}
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteConfirm(false)}
       />

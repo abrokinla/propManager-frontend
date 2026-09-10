@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import axios from 'axios';
 import type { TenantSelf, TenancyDocument, TenantProfile, Payment, MaintenanceRequest, DocumentStatus } from '../../../../types';
 import TenantNavbar from '../../../../components/TenantNavbar';
@@ -19,6 +20,7 @@ function getAuthHeaders() {
 }
 
 export default function TenantDashboardPage() {
+  const t = useTranslations('TenantDashboard');
   const router = useRouter();
   const [tenant, setTenant] = useState<TenantSelf | null>(null);
   const [documents, setDocuments] = useState<TenancyDocument[]>([]);
@@ -113,11 +115,11 @@ export default function TenantDashboardPage() {
     setMessage('');
     try {
       await axios.put(`${API_URL}/tenant/me/complete-profile/`, profileForm, { headers: getAuthHeaders() });
-      setMessage('Profile updated successfully.');
+      setMessage(t('toast.profileUpdated'));
       setEditing(false);
       fetchData();
     } catch {
-      setMessage('Failed to update profile. Please try again.');
+      setMessage(t('toast.profileFailed'));
     } finally {
       setSaving(false);
     }
@@ -129,11 +131,11 @@ export default function TenantDashboardPage() {
     setSaving(true);
     try {
       await axios.put(`${API_URL}/tenant/me/`, { move_in_date: moveInForm }, { headers: getAuthHeaders() });
-      setMessage('Move-in date updated successfully.');
+      setMessage(t('toast.moveInUpdated'));
       setEditingMoveIn(false);
       fetchData();
     } catch {
-      setMessage('Failed to update move-in date.');
+      setMessage(t('toast.moveInFailed'));
     } finally {
       setSaving(false);
     }
@@ -142,10 +144,10 @@ export default function TenantDashboardPage() {
   const signDocument = async (docId: number) => {
     try {
       await axios.post(`${API_URL}/tenant/me/documents/${docId}/sign/`, { signature_name: tenant?.name }, { headers: getAuthHeaders() });
-      setMessage('Document signed successfully.');
+      setMessage(t('toast.documentSigned'));
       fetchData();
     } catch {
-      setMessage('Failed to sign document.');
+      setMessage(t('toast.signFailed'));
     }
   };
 
@@ -160,7 +162,7 @@ export default function TenantDashboardPage() {
   if (!tenant) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p>Redirecting to login...</p>
+        <p>{t('redirecting')}</p>
       </div>
     );
   }
@@ -171,69 +173,69 @@ export default function TenantDashboardPage() {
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {message && (
-          <div className={`px-4 py-3 rounded-lg text-sm mb-6 ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+          <div className={`px-4 py-3 rounded-lg text-sm mb-6 ${message.includes(t('toast.profileUpdated')) || message.includes(t('toast.moveInUpdated')) || message.includes(t('toast.documentSigned')) || message.includes(t('toast.passwordUpdated')) || message.includes(t('toast.interestSent')) || message.includes(t('toast.maintenanceSubmitted')) || message.includes(t('toast.paymentSubmitted')) ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
             {message}
           </div>
         )}
 
         {!hasApprovedPayment && tenant && (tenant.tenancy_status === 'document_pending' || tenant.tenancy_status === 'document_sent') && (
           <div className="px-4 py-3 rounded-lg text-sm mb-6" style={{ backgroundColor: '#fef2f2', color: '#991b1b' }}>
-            You need to complete rent payment before you can sign your tenancy agreement.
-            <button onClick={() => { setPayForm({ amount: tenant.annual_rent?.toString() || '', payment_method: 'Bank Transfer', payment_date: new Date().toISOString().split('T')[0] }); setShowPayForm(true); }} className="underline font-medium ml-2">Pay Rent Now</button>
+            {t('payRentWarning')}
+            <button onClick={() => { setPayForm({ amount: tenant.annual_rent?.toString() || '', payment_method: 'Bank Transfer', payment_date: new Date().toISOString().split('T')[0] }); setShowPayForm(true); }} className="underline font-medium ml-2">{t('payRentNow')}</button>
           </div>
         )}
 
         {/* Lease Summary */}
         <div className="card mb-8">
-          <h2 className="text-lg font-semibold mb-4">Your Lease</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('yourLease')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <p className="text-sm text-gray-500">Property</p>
+              <p className="text-sm text-gray-500">{t('fields.property')}</p>
               <p className="font-medium">{tenant.property_name}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Unit</p>
+              <p className="text-sm text-gray-500">{t('fields.unit')}</p>
               <p className="font-medium">{tenant.unit_number}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Annual Rent</p>
+              <p className="text-sm text-gray-500">{t('fields.annualRent')}</p>
               <p className="font-medium">NGN {tenant.annual_rent?.toLocaleString() || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Status</p>
+              <p className="text-sm text-gray-500">{t('fields.status')}</p>
               <span className="badge badge-info">{tenant.tenancy_status?.replace(/_/g, ' ')}</span>
             </div>
           </div>
           {tenant.lease_start_date && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t">
               <div>
-                <p className="text-sm text-gray-500">Start Date</p>
+                <p className="text-sm text-gray-500">{t('fields.startDate')}</p>
                 <p className="font-medium">{new Date(tenant.lease_start_date).toLocaleDateString()}</p>
               </div>
               {tenant.lease_renewal_date && (
                 <div>
-                  <p className="text-sm text-gray-500">Renewal Date</p>
+                  <p className="text-sm text-gray-500">{t('fields.renewalDate')}</p>
                   <p className="font-medium">{new Date(tenant.lease_renewal_date).toLocaleDateString()}</p>
                 </div>
               )}
               {tenant.lease_expiry_date && (
                 <div>
-                  <p className="text-sm text-gray-500">Expiry Date</p>
+                  <p className="text-sm text-gray-500">{t('fields.expiryDate')}</p>
                   <p className="font-medium">{new Date(tenant.lease_expiry_date).toLocaleDateString()}</p>
                 </div>
               )}
               <div>
-                <p className="text-sm text-gray-500">Move-in Date</p>
+                <p className="text-sm text-gray-500">{t('fields.moveInDate')}</p>
                 {editingMoveIn ? (
                   <div className="flex gap-2 items-center">
                     <input type="date" value={moveInForm} onChange={e => setMoveInForm(e.target.value)} className="text-sm border rounded px-2 py-1" />
-                    <button onClick={saveMoveInDate} disabled={saving} className="btn btn-primary text-xs disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
-                    <button onClick={() => setEditingMoveIn(false)} className="btn btn-secondary text-xs">Cancel</button>
+                    <button onClick={saveMoveInDate} disabled={saving} className="btn btn-primary text-xs disabled:opacity-50">{saving ? t('form.saving') : t('form.save')}</button>
+                    <button onClick={() => setEditingMoveIn(false)} className="btn btn-secondary text-xs">{t('form.cancel')}</button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <p className="font-medium">{tenant.move_in_date ? new Date(tenant.move_in_date).toLocaleDateString() : 'Not set'}</p>
-                    <button onClick={() => { setMoveInForm(tenant.move_in_date || ''); setEditingMoveIn(true); }} className="text-primary-600 text-xs underline">Edit</button>
+                    <p className="font-medium">{tenant.move_in_date ? new Date(tenant.move_in_date).toLocaleDateString() : t('notSet')}</p>
+                    <button onClick={() => { setMoveInForm(tenant.move_in_date || ''); setEditingMoveIn(true); }} className="text-primary-600 text-xs underline">{t('form.edit')}</button>
                   </div>
                 )}
               </div>
@@ -246,33 +248,33 @@ export default function TenantDashboardPage() {
           <div className="card">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold">Buy This Property</h2>
-                <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>Interested in purchasing {tenant.property_name}?</p>
+                <h2 className="text-lg font-semibold">{t('buyThisProperty')}</h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>{t('interestedIn', { property: tenant.property_name })}</p>
               </div>
               <button
                 onClick={async () => {
                   try {
                     const token = getTenantToken();
                     await axios.post(`${API_URL}/tenant/me/express-interest/`, {}, { headers: { Authorization: `Bearer ${token}` } });
-                    setMessage('Your interest has been sent to the property owner.');
+                    setMessage(t('toast.interestSent'));
                   } catch {
-                    setMessage('Failed to send interest. Please try again.');
+                    setMessage(t('toast.interestFailed'));
                   }
                 }}
                 className="btn btn-primary text-sm"
               >
-                Express Interest
+                {t('expressInterest')}
               </button>
             </div>
           </div>
           <div className="card">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold">Report an Issue</h2>
-                <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>Submit a maintenance request for your unit.</p>
+                <h2 className="text-lg font-semibold">{t('reportIssue')}</h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>{t('submitMaintenance')}</p>
               </div>
               <button onClick={() => setShowMaintenanceModal(true)} className="btn btn-primary text-sm">
-                Report Issue
+                {t('reportIssueBtn')}
               </button>
             </div>
           </div>
@@ -281,23 +283,23 @@ export default function TenantDashboardPage() {
         {/* Tenancy Agreement */}
         <div className="card mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Tenancy Agreement</h2>
-            <button onClick={() => router.push('/tenant/tenancy-agreement')} className="btn btn-secondary text-sm">View Agreement</button>
+            <h2 className="text-lg font-semibold">{t('tenancyAgreement')}</h2>
+            <button onClick={() => router.push('/tenant/tenancy-agreement')} className="btn btn-secondary text-sm">{t('viewAgreement')}</button>
           </div>
           <p className="text-sm text-gray-500">
-            Status: <span className={`badge ${agreement?.status === 'signed' ? 'badge-success' : agreement?.status === 'sent' ? 'badge-info' : 'badge-warning'}`}>
-              {agreement?.status === 'signed' ? 'Signed' : agreement?.status === 'sent' ? 'Awaiting Signature' : 'Not Available'}
+            {t('statusLabel')}: <span className={`badge ${agreement?.status === 'signed' ? 'badge-success' : agreement?.status === 'sent' ? 'badge-info' : 'badge-warning'}`}>
+              {agreement?.status === 'signed' ? t('agreementStatus.signed') : agreement?.status === 'sent' ? t('agreementStatus.awaiting') : t('agreementStatus.notAvailable')}
             </span>
-            {agreement?.signed_at && <> &middot; Signed {new Date(agreement.signed_at).toLocaleDateString()}</>}
+            {agreement?.signed_at && <> &middot; {t('signedOn')} {new Date(agreement.signed_at).toLocaleDateString()}</>}
           </p>
         </div>
 
         {/* Profile */}
         <div className="card mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">My Profile</h2>
+            <h2 className="text-lg font-semibold">{t('myProfile')}</h2>
             {!editing && (
-              <button onClick={startEdit} className="btn btn-secondary text-sm">Edit Profile</button>
+              <button onClick={startEdit} className="btn btn-secondary text-sm">{t('editProfile')}</button>
             )}
           </div>
 
@@ -305,116 +307,116 @@ export default function TenantDashboardPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.phone')}</label>
                   <input name="phone" value={profileForm.phone || ''} onChange={handleProfileChange} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.occupation')}</label>
                   <input name="occupation" value={profileForm.occupation || ''} onChange={handleProfileChange} />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.address')}</label>
                   <textarea name="address" value={profileForm.address || ''} onChange={handleProfileChange} rows={2} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Employer Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.employerName')}</label>
                   <input name="employer_name" value={profileForm.employer_name || ''} onChange={handleProfileChange} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Employer Address</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.employerAddress')}</label>
                   <input name="employer_address" value={profileForm.employer_address || ''} onChange={handleProfileChange} />
                 </div>
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="font-medium text-sm mb-3">Next of Kin</h3>
+                <h3 className="font-medium text-sm mb-3">{t('nextOfKin')}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.name')}</label>
                     <input name="next_of_kin_name" value={profileForm.next_of_kin_name || ''} onChange={handleProfileChange} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.phone')}</label>
                     <input name="next_of_kin_phone" value={profileForm.next_of_kin_phone || ''} onChange={handleProfileChange} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.email')}</label>
                     <input name="next_of_kin_email" value={profileForm.next_of_kin_email || ''} onChange={handleProfileChange} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.address')}</label>
                     <textarea name="next_of_kin_address" value={profileForm.next_of_kin_address || ''} onChange={handleProfileChange} rows={2} />
                   </div>
                 </div>
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="font-medium text-sm mb-3">Emergency Contact</h3>
+                <h3 className="font-medium text-sm mb-3">{t('emergencyContact')}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.name')}</label>
                     <input name="emergency_contact_name" value={profileForm.emergency_contact_name || ''} onChange={handleProfileChange} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.phone')}</label>
                     <input name="emergency_contact_phone" value={profileForm.emergency_contact_phone || ''} onChange={handleProfileChange} />
                   </div>
                 </div>
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="font-medium text-sm mb-3">Guarantor</h3>
+                <h3 className="font-medium text-sm mb-3">{t('guarantor')}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.name')}</label>
                     <input name="guarantor_name" value={profileForm.guarantor_name || ''} onChange={handleProfileChange} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.phone')}</label>
                     <input name="guarantor_phone" value={profileForm.guarantor_phone || ''} onChange={handleProfileChange} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.email')}</label>
                     <input name="guarantor_email" value={profileForm.guarantor_email || ''} onChange={handleProfileChange} />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.address')}</label>
                     <textarea name="guarantor_address" value={profileForm.guarantor_address || ''} onChange={handleProfileChange} rows={2} />
                   </div>
                 </div>
               </div>
 
               <div className="flex gap-3 justify-end pt-4">
-                <button onClick={() => setEditing(false)} className="btn btn-secondary">Cancel</button>
+                <button onClick={() => setEditing(false)} className="btn btn-secondary">{t('form.cancel')}</button>
                 <button onClick={saveProfile} disabled={saving} className="btn btn-primary disabled:opacity-50">
-                  {saving ? 'Saving...' : 'Save Profile'}
+                  {saving ? t('form.saving') : t('saveProfile')}
                 </button>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Name</p>
+                <p className="text-sm text-gray-500">{t('fields.name')}</p>
                 <p className="font-medium">{tenant.name}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Email</p>
+                <p className="text-sm text-gray-500">{t('fields.email')}</p>
                 <p className="font-medium">{tenant.email}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Phone</p>
+                <p className="text-sm text-gray-500">{t('fields.phone')}</p>
                 <p className="font-medium">{tenant.phone || '—'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Address</p>
+                <p className="text-sm text-gray-500">{t('fields.address')}</p>
                 <p className="font-medium">{tenant.address || '—'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Occupation</p>
+                <p className="text-sm text-gray-500">{t('fields.occupation')}</p>
                 <p className="font-medium">{tenant.occupation || '—'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Employer</p>
+                <p className="text-sm text-gray-500">{t('fields.employer')}</p>
                 <p className="font-medium">{tenant.employer_name || '—'}</p>
               </div>
             </div>
@@ -423,9 +425,9 @@ export default function TenantDashboardPage() {
 
         {/* Documents */}
         <div className="card mb-8">
-          <h2 className="text-lg font-semibold mb-4">Documents</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('documents')}</h2>
           {documents.length === 0 ? (
-            <p className="text-gray-500 text-sm">No documents yet.</p>
+            <p className="text-gray-500 text-sm">{t('noDocuments')}</p>
           ) : (
             <div className="space-y-4">
               {documents.map((doc) => (
@@ -433,17 +435,17 @@ export default function TenantDashboardPage() {
                   <div>
                     <p className="font-medium capitalize">{doc.document_type.replace(/_/g, ' ')}</p>
                     <p className="text-sm text-gray-500">
-                      Status: <span className="badge badge-info">{doc.status}</span>
-                      {doc.sent_at && <> &middot; Sent {new Date(doc.sent_at).toLocaleDateString()}</>}
-                      {doc.signed_at && <> &middot; Signed {new Date(doc.signed_at).toLocaleDateString()}</>}
+                      {t('statusLabel')}: <span className="badge badge-info">{doc.status}</span>
+                      {doc.sent_at && <> &middot; {t('sentOn')} {new Date(doc.sent_at).toLocaleDateString()}</>}
+                      {doc.signed_at && <> &middot; {t('signedOn')} {new Date(doc.signed_at).toLocaleDateString()}</>}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     {doc.file_url && (
-                      <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary text-sm">View</a>
+                      <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary text-sm">{t('view')}</a>
                     )}
                     {doc.status === 'sent' && (
-                      <button onClick={() => signDocument(doc.id)} className="btn btn-primary text-sm">Sign</button>
+                      <button onClick={() => signDocument(doc.id)} className="btn btn-primary text-sm">{t('sign')}</button>
                     )}
                   </div>
                 </div>
@@ -454,17 +456,17 @@ export default function TenantDashboardPage() {
         {/* Payments */}
         <div className="card mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Payments</h2>
+            <h2 className="text-lg font-semibold">{t('payments')}</h2>
             <button onClick={() => {
               setPayForm({ amount: tenant?.annual_rent?.toString() || '', payment_method: 'Bank Transfer', payment_date: new Date().toISOString().split('T')[0] });
               setShowPayForm(true);
-            }} className="btn btn-primary text-sm">Pay Rent</button>
+            }} className="btn btn-primary text-sm">{t('payRent')}</button>
           </div>
 
           {showPayForm && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-                <h3 className="font-semibold text-lg mb-4">Pay Rent</h3>
+                <h3 className="font-semibold text-lg mb-4">{t('payRent')}</h3>
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   setPaySaving(true);
@@ -477,42 +479,42 @@ export default function TenantDashboardPage() {
                     await axios.post(`${API_URL}/tenant/me/payments/`, formData, {
                       headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' },
                     });
-                    setMessage('Payment submitted successfully.');
+                    setMessage(t('toast.paymentSubmitted'));
                     setShowPayForm(false);
                     setPayFile(null);
                     const { data } = await axios.get<Payment[]>(`${API_URL}/tenant/me/payments/`, { headers: getAuthHeaders() });
                     setPayments(data);
                   } catch {
-                    setMessage('Failed to submit payment.');
+                    setMessage(t('toast.paymentFailed'));
                   } finally {
                     setPaySaving(false);
                   }
                 }} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₦)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('payForm.amount')}</label>
                     <input type="number" value={payForm.amount} onChange={e => setPayForm({ ...payForm, amount: e.target.value })} required />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('payForm.method')}</label>
                     <select value={payForm.payment_method} onChange={e => setPayForm({ ...payForm, payment_method: e.target.value })}>
-                      <option value="Bank Transfer">Bank Transfer</option>
-                      <option value="Cash">Cash</option>
-                      <option value="Credit Card">Credit Card</option>
-                      <option value="Mobile Money">Mobile Money</option>
-                      <option value="Cheque">Cheque</option>
+                      <option value="Bank Transfer">{t('payMethods.bankTransfer')}</option>
+                      <option value="Cash">{t('payMethods.cash')}</option>
+                      <option value="Credit Card">{t('payMethods.creditCard')}</option>
+                      <option value="Mobile Money">{t('payMethods.mobileMoney')}</option>
+                      <option value="Cheque">{t('payMethods.cheque')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('payForm.date')}</label>
                     <input type="date" value={payForm.payment_date} onChange={e => setPayForm({ ...payForm, payment_date: e.target.value })} required />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Proof of Payment (optional)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('payForm.proof')}</label>
                     <input type="file" accept="image/*,application/pdf" onChange={e => setPayFile(e.target.files?.[0] || null)} className="text-sm" />
                   </div>
                   <div className="flex gap-3 justify-end">
-                    <button type="button" onClick={() => { setShowPayForm(false); setPayFile(null); }} className="btn btn-secondary">Cancel</button>
-                    <button type="submit" disabled={paySaving} className="btn btn-primary disabled:opacity-50">{paySaving ? 'Submitting...' : 'Submit Payment'}</button>
+                    <button type="button" onClick={() => { setShowPayForm(false); setPayFile(null); }} className="btn btn-secondary">{t('form.cancel')}</button>
+                    <button type="submit" disabled={paySaving} className="btn btn-primary disabled:opacity-50">{paySaving ? t('submitting') : t('submitPayment')}</button>
                   </div>
                 </form>
               </div>
@@ -523,40 +525,40 @@ export default function TenantDashboardPage() {
           {showPasswordModal && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="rounded-xl shadow-xl p-6 w-full max-w-md" style={{ background: 'var(--card)' }}>
-                <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>Change Password</h3>
+                <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>{t('changePassword')}</h3>
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   if (passwordForm.new_password !== passwordForm.confirm_password) {
-                    setMessage('Passwords do not match.');
+                    setMessage(t('toast.passwordsNoMatch'));
                     return;
                   }
                   setPasswordSaving(true);
                   try {
                     await axios.post(`${API_URL}/tenant/me/change-password/`, passwordForm, { headers: getAuthHeaders() });
-                    setMessage('Password updated successfully.');
+                    setMessage(t('toast.passwordUpdated'));
                     setShowPasswordModal(false);
                     setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
                   } catch (err: any) {
-                    setMessage(err.response?.data?.error || 'Failed to update password.');
+                    setMessage(err.response?.data?.error || t('toast.passwordFailed'));
                   } finally {
                     setPasswordSaving(false);
                   }
                 }} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Current Password</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('passwordForm.current')}</label>
                     <input type="password" value={passwordForm.current_password} onChange={e => setPasswordForm({ ...passwordForm, current_password: e.target.value })} required />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>New Password</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('passwordForm.new')}</label>
                     <input type="password" value={passwordForm.new_password} onChange={e => setPasswordForm({ ...passwordForm, new_password: e.target.value })} required minLength={8} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Confirm New Password</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('passwordForm.confirm')}</label>
                     <input type="password" value={passwordForm.confirm_password} onChange={e => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })} required />
                   </div>
                   <div className="flex gap-3 justify-end">
-                    <button type="button" onClick={() => { setShowPasswordModal(false); setMessage(''); }} className="btn btn-secondary">Cancel</button>
-                    <button type="submit" disabled={passwordSaving} className="btn btn-primary disabled:opacity-50">{passwordSaving ? 'Updating...' : 'Update Password'}</button>
+                    <button type="button" onClick={() => { setShowPasswordModal(false); setMessage(''); }} className="btn btn-secondary">{t('form.cancel')}</button>
+                    <button type="submit" disabled={passwordSaving} className="btn btn-primary disabled:opacity-50">{passwordSaving ? t('updating') : t('updatePassword')}</button>
                   </div>
                 </form>
               </div>
@@ -567,40 +569,40 @@ export default function TenantDashboardPage() {
           {showMaintenanceModal && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="rounded-xl shadow-xl p-6 w-full max-w-md" style={{ background: 'var(--card)' }}>
-                <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>Report an Issue</h3>
+                <h3 className="font-semibold text-lg mb-4" style={{ color: 'var(--text)' }}>{t('reportIssue')}</h3>
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   setMaintenanceSaving(true);
                   try {
                     await axios.post(`${API_URL}/tenant/me/maintenance/`, maintenanceForm, { headers: getAuthHeaders() });
-                    setMessage('Maintenance request submitted successfully.');
+                    setMessage(t('toast.maintenanceSubmitted'));
                     setShowMaintenanceModal(false);
                     setMaintenanceForm({ title: '', description: '', priority: 'Medium' });
                   } catch (err: any) {
-                    setMessage(err.response?.data?.error || 'Failed to submit maintenance request.');
+                    setMessage(err.response?.data?.error || t('toast.maintenanceFailed'));
                   } finally {
                     setMaintenanceSaving(false);
                   }
                 }} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Title</label>
-                    <input type="text" value={maintenanceForm.title} onChange={e => setMaintenanceForm({ ...maintenanceForm, title: e.target.value })} required placeholder="e.g., Leaking faucet" />
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('maintenanceForm.title')}</label>
+                    <input type="text" value={maintenanceForm.title} onChange={e => setMaintenanceForm({ ...maintenanceForm, title: e.target.value })} required placeholder={t('maintenanceForm.titlePlaceholder')} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Description</label>
-                    <textarea value={maintenanceForm.description} onChange={e => setMaintenanceForm({ ...maintenanceForm, description: e.target.value })} required rows={3} placeholder="Describe the issue in detail" />
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('maintenanceForm.description')}</label>
+                    <textarea value={maintenanceForm.description} onChange={e => setMaintenanceForm({ ...maintenanceForm, description: e.target.value })} required rows={3} placeholder={t('maintenanceForm.descriptionPlaceholder')} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Priority</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('maintenanceForm.priority')}</label>
                     <select value={maintenanceForm.priority} onChange={e => setMaintenanceForm({ ...maintenanceForm, priority: e.target.value })}>
-                      <option value="Low">Low</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
+                      <option value="Low">{t('priorities.low')}</option>
+                      <option value="Medium">{t('priorities.medium')}</option>
+                      <option value="High">{t('priorities.high')}</option>
                     </select>
                   </div>
                   <div className="flex gap-3 justify-end">
-                    <button type="button" onClick={() => { setShowMaintenanceModal(false); setMessage(''); }} className="btn btn-secondary">Cancel</button>
-                    <button type="submit" disabled={maintenanceSaving} className="btn btn-primary disabled:opacity-50">{maintenanceSaving ? 'Submitting...' : 'Submit'}</button>
+                    <button type="button" onClick={() => { setShowMaintenanceModal(false); setMessage(''); }} className="btn btn-secondary">{t('form.cancel')}</button>
+                    <button type="submit" disabled={maintenanceSaving} className="btn btn-primary disabled:opacity-50">{maintenanceSaving ? t('submitting') : t('submit')}</button>
                   </div>
                 </form>
               </div>
@@ -608,17 +610,17 @@ export default function TenantDashboardPage() {
           )}
 
           {payments.length === 0 ? (
-            <p className="text-gray-500 text-sm">No payments yet.</p>
+            <p className="text-gray-500 text-sm">{t('noPayments')}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Date</th>
-                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Amount</th>
-                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Method</th>
-                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Status</th>
-                    <th className="text-left py-2 font-medium text-gray-500">Receipt</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">{t('paymentTable.date')}</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">{t('paymentTable.amount')}</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">{t('paymentTable.method')}</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">{t('paymentTable.status')}</th>
+                    <th className="text-left py-2 font-medium text-gray-500">{t('paymentTable.receipt')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -636,7 +638,7 @@ export default function TenantDashboardPage() {
                       </td>
                       <td className="py-2">
                         {p.proof_url ? (
-                          <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline text-xs">View</a>
+                          <a href={p.proof_url} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline text-xs">{t('view')}</a>
                         ) : '—'}
                       </td>
                     </tr>
@@ -648,18 +650,18 @@ export default function TenantDashboardPage() {
         </div>
 
         <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-4">Maintenance Requests</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('maintenanceRequests')}</h2>
           {maintenanceRequests.length === 0 ? (
-            <p className="text-gray-500 text-sm">No maintenance requests.</p>
+            <p className="text-gray-500 text-sm">{t('noMaintenance')}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Date</th>
-                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Title</th>
-                    <th className="text-left py-2 pr-4 font-medium text-gray-500">Priority</th>
-                    <th className="text-left py-2 font-medium text-gray-500">Status</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">{t('maintenanceTable.date')}</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">{t('maintenanceTable.title')}</th>
+                    <th className="text-left py-2 pr-4 font-medium text-gray-500">{t('maintenanceTable.priority')}</th>
+                    <th className="text-left py-2 font-medium text-gray-500">{t('maintenanceTable.status')}</th>
                   </tr>
                 </thead>
                 <tbody>

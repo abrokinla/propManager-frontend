@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../components/DashboardLayout';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import ConfirmDialog from '../../../components/ConfirmDialog';
@@ -9,17 +10,17 @@ import api from '../../../lib/api';
 import { useToast } from '../../../context/ToastContext';
 import type { Unit, Tenant, Property, PaginatedResponse, TenancyStatus } from '../../../types';
 
-const tenancyStatusConfig: Record<string, { label: string; className: string }> = {
-  invited: { label: 'Invited', className: 'badge-warning' },
-  profile_pending: { label: 'Profile Pending', className: 'badge-warning' },
-  document_pending: { label: 'Document Pending', className: 'badge-info' },
-  pending_document: { label: 'Pending Document', className: 'badge-warning' },
-  document_sent: { label: 'Document Sent', className: 'badge-info' },
-  document_signed: { label: 'Document Signed', className: 'badge-info' },
-  pending_verification: { label: 'Pending Verification', className: 'badge-warning' },
-  active: { label: 'Active', className: 'badge-success' },
-  expired: { label: 'Expired', className: 'badge-danger' },
-  quit_notice_issued: { label: 'Quit Notice', className: 'badge-danger' },
+const tenancyStatusClassName: Record<string, string> = {
+  invited: 'badge-warning',
+  profile_pending: 'badge-warning',
+  document_pending: 'badge-info',
+  pending_document: 'badge-warning',
+  document_sent: 'badge-info',
+  document_signed: 'badge-info',
+  pending_verification: 'badge-warning',
+  active: 'badge-success',
+  expired: 'badge-danger',
+  quit_notice_issued: 'badge-danger',
 };
 
 const defaultForm = {
@@ -29,6 +30,7 @@ const defaultForm = {
 };
 
 export default function TenantsPage() {
+  const t = useTranslations('Tenants');
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
@@ -48,6 +50,9 @@ export default function TenantsPage() {
   const [verifying, setVerifying] = useState(false);
   const { toast } = useToast();
 
+  const statusLabel = (status: string) => t(`status.${status}` as any);
+  const statusConfig = (status: string) => ({ label: statusLabel(status), className: tenancyStatusClassName[status] || 'badge-info' });
+
   useEffect(() => {
     Promise.all([
       api.get<PaginatedResponse<Tenant>>('/tenants/'),
@@ -63,7 +68,7 @@ export default function TenantsPage() {
         vMap[v.tenant_id] = { document_id: v.document_id, signed_file_url: v.signed_file_url, tenant_name: v.tenant_name };
       }
       setPendingVerifications(vMap);
-    }).catch(() => toast('Failed to load data', 'error'))
+    }).catch(() => toast(t('toast.loadDataFailed'), 'error'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -92,10 +97,10 @@ export default function TenantsPage() {
       };
       if (editing) {
         await api.put(`/tenants/${editing.id}/`, payload);
-        toast('Tenant updated successfully', 'success');
+        toast(t('toast.updated'), 'success');
       } else {
         await api.post('/tenants/', payload);
-        toast('Tenant created. Invitation sent to ' + (payload.email || 'their email'), 'success');
+        toast(t('toast.created', { email: payload.email || t('toast.theirEmail') }), 'success');
       }
       setShowForm(false);
       setEditing(null);
@@ -110,7 +115,7 @@ export default function TenantsPage() {
         for (const [k, v] of Object.entries(data)) fe[k] = Array.isArray(v) ? v[0] : v;
         setFormErrors(fe);
       } else {
-        toast('Failed to save tenant', 'error');
+        toast(t('toast.saveFailed'), 'error');
       }
     } finally {
       setSaving(false);
@@ -136,10 +141,10 @@ export default function TenantsPage() {
   const handleDelete = async (id: number) => {
     try {
       await api.delete(`/tenants/${id}/`);
-      toast('Tenant removed successfully', 'success');
+      toast(t('toast.removed'), 'success');
       setTenants(tenants.filter(t => t.id !== id));
     } catch {
-      toast('Failed to remove tenant', 'error');
+      toast(t('toast.removeFailed'), 'error');
     }
   };
 
@@ -147,9 +152,9 @@ export default function TenantsPage() {
     setSendingInvite(tenantId);
     try {
       await api.post(`/tenants/${tenantId}/resend-invite/`);
-      toast('Invitation resent successfully', 'success');
+      toast(t('toast.inviteResent'), 'success');
     } catch {
-      toast('Failed to resend invitation', 'error');
+      toast(t('toast.inviteFailed'), 'error');
     } finally {
       setSendingInvite(null);
     }
@@ -205,17 +210,17 @@ export default function TenantsPage() {
         <>
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Tenants</h1>
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{t('title')}</h1>
               <p className="mt-1" style={{ color: 'var(--text-light)' }}>
-                {tenants.length} tenant{tenants.length === 1 ? '' : 's'} across {properties.length} {properties.length === 1 ? 'property' : 'properties'}
+                {t('count', { tenants: tenants.length, properties: properties.length })}
               </p>
             </div>
           </div>
 
           {properties.length === 0 ? (
             <div className="card text-center py-12">
-              <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No properties yet</h3>
-              <p className="mb-4" style={{ color: 'var(--text-light)' }}>Create a property first before adding tenants.</p>
+              <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>{t('noProperties')}</h3>
+              <p className="mb-4" style={{ color: 'var(--text-light)' }}>{t('createPropertyFirst')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -242,7 +247,7 @@ export default function TenantsPage() {
                     <h3 className="font-semibold text-base" style={{ color: 'var(--text)' }}>{prop.name}</h3>
                     <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>{prop.address}</p>
                     <p className="text-xs mt-2 font-medium" style={{ color: 'var(--text-light)' }}>
-                      {count} tenant{count === 1 ? '' : 's'} / {total} unit{total === 1 ? '' : 's'}
+                      {t('tenantUnitCount', { count, total })}
                     </p>
                   </button>
                 );
@@ -261,7 +266,7 @@ export default function TenantsPage() {
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                Back to Properties
+                {t('backToProperties')}
               </button>
             </div>
           </div>
@@ -269,10 +274,10 @@ export default function TenantsPage() {
           <div className="card mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>{selectedPropData?.name || 'Property'}</h2>
+                <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>{selectedPropData?.name || t('property')}</h2>
                 <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>{selectedPropData?.address}</p>
                 <p className="text-xs mt-1" style={{ color: 'var(--text-light)' }}>
-                  {propertyTenants.length} of {propertyUnits.length} unit{propertyUnits.length === 1 ? '' : 's'} occupied
+                  {t('unitsOccupied', { occupied: propertyTenants.length, total: propertyUnits.length })}
                 </p>
               </div>
               {availableUnits.length > 0 && (
@@ -287,7 +292,7 @@ export default function TenantsPage() {
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Add Tenant
+                  {t('addTenant')}
                 </button>
               )}
             </div>
@@ -296,34 +301,34 @@ export default function TenantsPage() {
           {showForm && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto">
-                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{editing ? 'Edit Tenant' : 'Add New Tenant'}</h2>
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{editing ? t('editTenant') : t('addNewTenant')}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Property *</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.property')} *</label>
                     {editing || !selectedProperty ? (
                       <select name="property_id" value={form.property_id} onChange={handleChange} required>
-                        <option value="">Select property...</option>
+                        <option value="">{t('form.selectProperty')}</option>
                         {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                       </select>
                     ) : (
                       <select name="property_id" value={form.property_id} disabled className="w-full opacity-60 cursor-not-allowed">
-                        <option value="">Select property...</option>
+                        <option value="">{t('form.selectProperty')}</option>
                         {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                       </select>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Unit *</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.unit')} *</label>
                     {editing ? (
                       <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
-                        <option value="">Select unit...</option>
+                        <option value="">{t('form.selectUnit')}</option>
                         {(form.property_id ? units.filter(u => u.property_id === Number(form.property_id)) : [])
                           .map(u => <option key={u.id} value={u.id}>{u.unit_number}</option>)
                         }
                       </select>
                     ) : (
                       <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
-                        <option value="">{form.property_id ? 'Select unit...' : 'Select a property first'}</option>
+                        <option value="">{form.property_id ? t('form.selectUnit') : t('form.selectPropertyFirst')}</option>
                         {(form.property_id ? units
                           .filter(u => u.property_id === Number(form.property_id))
                           .filter(u => editing || !occupiedUnitIds.has(u.id) || u.id === Number(form.unit_id))
@@ -335,44 +340,44 @@ export default function TenantsPage() {
                     {formErrors.unit_id && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.unit_id}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Full Name *</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.fullName')} *</label>
                     <input name="name" value={form.name} onChange={handleChange} required placeholder="John Doe" />
                     {formErrors.name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.name}</p>}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Phone</label>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.phone')}</label>
                       <input name="phone" value={form.phone} onChange={handleChange} placeholder="+234..." />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Email</label>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.email')}</label>
                       <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="john@example.com" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Address</label>
-                    <input name="address" value={form.address} onChange={handleChange} placeholder="Home address" />
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.address')}</label>
+                    <input name="address" value={form.address} onChange={handleChange} placeholder={t('form.homeAddress')} />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Annual Rent (₦)</label>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.annualRent')}</label>
                       <input name="annual_rent" type="number" value={form.annual_rent} onChange={handleChange} />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Active</label>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.active')}</label>
                       <select name="is_active" value={form.is_active} onChange={handleChange}>
-                        <option value="true">Active</option>
-                        <option value="false">Inactive</option>
+                        <option value="true">{t('form.activeOption')}</option>
+                        <option value="false">{t('form.inactiveOption')}</option>
                       </select>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Move-in Date</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.moveInDate')}</label>
                     <input name="move_in_date" type="date" value={form.move_in_date} onChange={handleChange} />
                   </div>
                   <div className="flex gap-3 justify-end">
-                    <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); setForm(defaultForm); }} className="btn btn-secondary">Cancel</button>
-                    <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : editing ? 'Update' : 'Create Tenant'}</button>
+                    <button type="button" onClick={() => { setShowForm(false); setEditing(null); setFormErrors({}); setForm(defaultForm); }} className="btn btn-secondary">{t('form.cancel')}</button>
+                    <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? t('form.saving') : editing ? t('form.update') : t('form.createTenant')}</button>
                   </div>
                 </form>
               </div>
@@ -381,11 +386,11 @@ export default function TenantsPage() {
 
           {propertyTenants.length === 0 ? (
             <div className="card text-center py-12">
-              <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No tenants yet</h3>
+              <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>{t('noTenants')}</h3>
               <p className="mb-4" style={{ color: 'var(--text-light)' }}>
                 {availableUnits.length > 0
-                  ? `There ${availableUnits.length === 1 ? 'is' : 'are'} ${availableUnits.length} available unit${availableUnits.length === 1 ? '' : 's'} in this property.`
-                  : 'All units in this property are occupied.'}
+                  ? t('availableUnits', { count: availableUnits.length })
+                  : t('allOccupied')}
               </p>
               {availableUnits.length > 0 && (
                 <button
@@ -396,7 +401,7 @@ export default function TenantsPage() {
                   }}
                   className="btn btn-primary"
                 >
-                  Add Tenant
+                  {t('addTenant')}
                 </button>
               )}
             </div>
@@ -405,56 +410,56 @@ export default function TenantsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Name</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Unit</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Annual Rent</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Lease Expiry</th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Status</th>
-                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>Actions</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('table.name')}</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('table.unit')}</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('table.annualRent')}</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('table.leaseExpiry')}</th>
+                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('table.status')}</th>
+                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-light)' }}>{t('table.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {propertyTenants.map((t) => {
-                    const statusCfg = tenancyStatusConfig[t.tenancy_status] || tenancyStatusConfig.active;
+                  {propertyTenants.map((tenant) => {
+                    const sCfg = statusConfig(tenant.tenancy_status);
                     return (
-                      <tr key={t.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <tr key={tenant.id} style={{ borderBottom: '1px solid var(--border)' }}>
                         <td className="py-3 px-4">
-                          <Link href={`/tenants/${t.id}`} className="font-medium text-primary-600 hover:text-primary-700">
-                            {t.name}
+                          <Link href={`/tenants/${tenant.id}`} className="font-medium text-primary-600 hover:text-primary-700">
+                            {tenant.name}
                           </Link>
-                          <div className="text-xs" style={{ color: 'var(--text-light)' }}>{t.email}</div>
+                          <div className="text-xs" style={{ color: 'var(--text-light)' }}>{tenant.email}</div>
                         </td>
-                        <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.unit?.unit_number || t.unit_number || '—'}</td>
-                        <td className="py-3 px-4" style={{ color: 'var(--text)' }}>{t.annual_rent ? `₦${Number(t.annual_rent).toLocaleString()}/yr` : '—'}</td>
-                        <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{t.lease_expiry_date || '—'}</td>
-                        <td className="py-3 px-4"><span className={`badge ${statusCfg.className}`}>{statusCfg.label}</span></td>
+                        <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{tenant.unit?.unit_number || tenant.unit_number || '—'}</td>
+                        <td className="py-3 px-4" style={{ color: 'var(--text)' }}>{tenant.annual_rent ? `₦${Number(tenant.annual_rent).toLocaleString()}/yr` : '—'}</td>
+                        <td className="py-3 px-4" style={{ color: 'var(--text-light)' }}>{tenant.lease_expiry_date || '—'}</td>
+                        <td className="py-3 px-4"><span className={`badge ${sCfg.className}`}>{sCfg.label}</span></td>
                         <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <button onClick={() => handleEdit(t)} className="text-primary-600 hover:text-primary-700 text-sm font-medium mr-3">Edit</button>
-                          {canResend(t.tenancy_status) && (
+                          <button onClick={() => handleEdit(tenant)} className="text-primary-600 hover:text-primary-700 text-sm font-medium mr-3">{t('table.edit')}</button>
+                          {canResend(tenant.tenancy_status) && (
                             <button
-                              onClick={() => handleResendInvite(t.id)}
-                              disabled={sendingInvite === t.id}
+                              onClick={() => handleResendInvite(tenant.id)}
+                              disabled={sendingInvite === tenant.id}
                               className="text-sm font-medium mr-3 disabled:opacity-50"
                               style={{ color: 'var(--success)' }}
                             >
-                              {sendingInvite === t.id ? 'Sending...' : 'Resend Invite'}
+                              {sendingInvite === tenant.id ? t('table.sending') : t('table.resendInvite')}
                             </button>
                           )}
-                          {pendingVerifications[t.id] && (
+                          {pendingVerifications[tenant.id] && (
                             <button
                               onClick={() => setVerifyTarget({
-                                tenantId: t.id,
-                                tenantName: t.name,
-                                docId: pendingVerifications[t.id].document_id,
-                                signedUrl: pendingVerifications[t.id].signed_file_url,
+                                tenantId: tenant.id,
+                                tenantName: tenant.name,
+                                docId: pendingVerifications[tenant.id].document_id,
+                                signedUrl: pendingVerifications[tenant.id].signed_file_url,
                               })}
                               className="text-sm font-medium mr-3"
                               style={{ color: '#a16207' }}
                             >
-                              Review
+                              {t('table.review')}
                             </button>
                           )}
-                          <button onClick={() => setDeleteTarget(t.id)} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>Delete</button>
+                          <button onClick={() => setDeleteTarget(tenant.id)} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>{t('table.delete')}</button>
                         </td>
                       </tr>
                     );
@@ -466,8 +471,8 @@ export default function TenantsPage() {
 
           <ConfirmDialog
             open={!!deleteTarget}
-            title="Delete Tenant"
-            message="Are you sure you want to remove this tenant? The associated unit will become available."
+            title={t('deleteTitle')}
+            message={t('deleteMessage')}
             onConfirm={() => {
               const id = deleteTarget!;
               setDeleteTarget(null);
@@ -479,22 +484,22 @@ export default function TenantsPage() {
           {verifyTarget && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
               <div className="card w-full max-w-md">
-                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Verify Signed Agreement</h2>
-                <p className="text-sm mb-1" style={{ color: 'var(--text)' }}><b>Tenant:</b> {verifyTarget.tenantName}</p>
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('verifyTitle')}</h2>
+                <p className="text-sm mb-1" style={{ color: 'var(--text)' }}><b>{t('verifyTenant')}:</b> {verifyTarget.tenantName}</p>
                 <div className="mb-4">
-                  <a href={verifyTarget.signedUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline text-sm">View signed document</a>
+                  <a href={verifyTarget.signedUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 underline text-sm">{t('viewSignedDocument')}</a>
                 </div>
 
                 {!verifyAction ? (
                   <div className="flex gap-3 justify-end">
-                    <button onClick={() => setVerifyTarget(null)} className="btn btn-secondary">Cancel</button>
-                    <button onClick={() => setVerifyAction('reject')} className="btn btn-danger" style={{ backgroundColor: 'var(--danger)' }}>Reject</button>
+                    <button onClick={() => setVerifyTarget(null)} className="btn btn-secondary">{t('form.cancel')}</button>
+                    <button onClick={() => setVerifyAction('reject')} className="btn btn-danger" style={{ backgroundColor: 'var(--danger)' }}>{t('reject')}</button>
                     <button
                       onClick={async () => {
                         setVerifying(true);
                         try {
                           await api.post(`/tenants/${verifyTarget.tenantId}/documents/${verifyTarget.docId}/verify/`, { action: 'verify' });
-                          toast('Agreement verified as signed', 'success');
+                          toast(t('toast.verified'), 'success');
                           setVerifyTarget(null);
                           setVerifyAction(null);
                           const { data: vRes } = await api.get('/pending-verifications/').catch(() => ({ data: [] }));
@@ -504,7 +509,7 @@ export default function TenantsPage() {
                           }
                           setPendingVerifications(vMap);
                         } catch {
-                          toast('Failed to verify', 'error');
+                          toast(t('toast.verifyFailed'), 'error');
                         } finally {
                           setVerifying(false);
                         }
@@ -512,28 +517,28 @@ export default function TenantsPage() {
                       disabled={verifying}
                       className="btn btn-primary disabled:opacity-50"
                     >
-                      {verifying ? 'Verifying...' : 'Verify'}
+                      {verifying ? t('verifying') : t('verify')}
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Rejection Reason</p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{t('rejectionReason')}</p>
                     <textarea
                       value={rejectReason}
                       onChange={e => setRejectReason(e.target.value)}
                       className="w-full"
                       rows={3}
-                      placeholder="Explain why the signed document was not accepted..."
+                      placeholder={t('rejectionPlaceholder')}
                     />
                     <div className="flex gap-3 justify-end">
-                      <button onClick={() => { setVerifyAction(null); setRejectReason(''); }} className="btn btn-secondary">Back</button>
+                      <button onClick={() => { setVerifyAction(null); setRejectReason(''); }} className="btn btn-secondary">{t('back')}</button>
                       <button
                         onClick={async () => {
-                          if (!rejectReason.trim()) { toast('Please provide a reason', 'error'); return; }
+                          if (!rejectReason.trim()) { toast(t('toast.provideReason'), 'error'); return; }
                           setVerifying(true);
                           try {
                             await api.post(`/tenants/${verifyTarget.tenantId}/documents/${verifyTarget.docId}/verify/`, { action: 'reject', reason: rejectReason });
-                            toast('Agreement rejected', 'success');
+                            toast(t('toast.rejected'), 'success');
                             setVerifyTarget(null);
                             setVerifyAction(null);
                             setRejectReason('');
@@ -544,7 +549,7 @@ export default function TenantsPage() {
                             }
                             setPendingVerifications(vMap);
                           } catch {
-                            toast('Failed to reject', 'error');
+                            toast(t('toast.rejectFailed'), 'error');
                           } finally {
                             setVerifying(false);
                           }
@@ -553,7 +558,7 @@ export default function TenantsPage() {
                         className="btn btn-primary disabled:opacity-50"
                         style={{ backgroundColor: 'var(--danger)' }}
                       >
-                        {verifying ? 'Rejecting...' : 'Confirm Reject'}
+                        {verifying ? t('rejecting') : t('confirmReject')}
                       </button>
                     </div>
                   </div>

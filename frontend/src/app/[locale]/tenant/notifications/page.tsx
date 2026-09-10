@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import axios from 'axios';
 import type { Notification } from '../../../../types';
 
@@ -13,6 +14,7 @@ function getTenantToken() {
 }
 
 export default function TenantNotificationsPage() {
+  const t = useTranslations('TenantNotifications');
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,8 +72,8 @@ export default function TenantNotificationsPage() {
               <span className="font-bold text-lg" style={{ color: 'var(--text)' }}>PropManager</span>
             </div>
             <div className="flex items-center gap-4">
-              <button onClick={() => router.push('/tenant/dashboard')} className="text-sm font-medium" style={{ color: 'var(--text-light)' }}>Dashboard</button>
-              <button onClick={handleLogout} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>Logout</button>
+              <button onClick={() => router.push('/tenant/dashboard')} className="text-sm font-medium" style={{ color: 'var(--text-light)' }}>{t('dashboard')}</button>
+              <button onClick={handleLogout} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>{t('logout')}</button>
             </div>
           </div>
         </div>
@@ -79,9 +81,9 @@ export default function TenantNotificationsPage() {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Notifications</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           {notifications.some(n => !n.is_read) && (
-            <button onClick={markAllRead} className="btn btn-secondary text-sm">Mark All Read</button>
+            <button onClick={markAllRead} className="btn btn-secondary text-sm">{t('markAllRead')}</button>
           )}
         </div>
 
@@ -91,7 +93,7 @@ export default function TenantNotificationsPage() {
           </div>
         ) : notifications.length === 0 ? (
           <div className="card text-center py-12">
-            <p className="text-gray-500">No notifications yet.</p>
+            <p className="text-gray-500">{t('noNotifications')}</p>
           </div>
         ) : (
           <div className="space-y-2">
