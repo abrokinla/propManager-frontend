@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../context/AuthContext';
+import { useTranslations } from 'next-intl';
 
 export default function RegisterPage() {
   const { register } = useAuth();
+  const t = useTranslations('Register');
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -39,7 +41,7 @@ export default function RegisterPage() {
         }
         setErrors(fieldErrors);
       } else {
-        setErrors({ general: 'Registration failed. Please try again.' });
+        setErrors({ general: t('registrationFailed') });
       }
     } finally {
       setLoading(false);
@@ -53,8 +55,8 @@ export default function RegisterPage() {
           <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">PM</span>
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Create your account</h1>
-          <p className="mt-1" style={{ color: 'var(--text-light)' }}>Start managing your properties today</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{t('createAccount')}</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{t('startManaging')}</p>
         </div>
 
         <div className="card">
@@ -67,46 +69,46 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>First Name</label>
-                <input name="first_name" value={form.first_name} onChange={handleChange} placeholder="John" />
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('firstName')}</label>
+                <input name="first_name" value={form.first_name} onChange={handleChange} placeholder={t('firstNamePlaceholder')} />
                 {errors.first_name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.first_name}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Last Name</label>
-                <input name="last_name" value={form.last_name} onChange={handleChange} placeholder="Doe" />
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('lastName')}</label>
+                <input name="last_name" value={form.last_name} onChange={handleChange} placeholder={t('lastNamePlaceholder')} />
                 {errors.last_name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.last_name}</p>}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Username</label>
-              <input name="username" value={form.username} onChange={handleChange} required placeholder="johndoe" />
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('username')}</label>
+              <input name="username" value={form.username} onChange={handleChange} required placeholder={t('usernamePlaceholder')} />
               {errors.username && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.username}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Email</label>
-              <input name="email" type="email" value={form.email} onChange={handleChange} required placeholder="john@example.com" />
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('email')}</label>
+              <input name="email" type="email" value={form.email} onChange={handleChange} required placeholder={t('emailPlaceholder')} />
               {errors.email && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Password</label>
-              <input name="password" type="password" value={form.password} onChange={handleChange} required placeholder="Min 8 characters" minLength={8} />
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('password')}</label>
+              <input name="password" type="password" value={form.password} onChange={handleChange} required placeholder={t('passwordPlaceholder')} minLength={8} />
               {errors.password && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.password}</p>}
             </div>
 
             <button type="submit" disabled={loading} className="btn btn-primary w-full justify-center py-3 disabled:opacity-50">
               {loading ? (
                 <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-              ) : 'Create Account'}
+              ) : t('createAccountBtn')}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm" style={{ color: 'var(--text-light)' }}>
-            Already have an account?{' '}
+            {t('hasAccount')}{' '}
             <Link href="/login" className="text-primary-600 hover:text-primary-700 font-medium">
-              Sign in
+              {t('signIn')}
             </Link>
           </div>
         </div>

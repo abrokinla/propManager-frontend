@@ -150,5 +150,46 @@
     "somethingWentWrong": "Something went wrong",
     "unexpectedError": "An unexpected error occurred.",
     "reloadPage": "Reload page"
+  },
+  "Login": {
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to your PropManager account",
+    "username": "Username",
+    "password": "Password",
+    "usernamePlaceholder": "Enter your username",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "noAccount": "Don't have an account?",
+    "createOne": "Create one",
+    "loginFailed": "Login failed. Please check your credentials."
+  },
+  "Register": {
+    "createAccount": "Create your account",
+    "startManaging": "Start managing your properties today",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "firstNamePlaceholder": "John",
+    "lastNamePlaceholder": "Doe",
+    "usernamePlaceholder": "johndoe",
+    "emailPlaceholder": "john@example.com",
+    "passwordPlaceholder": "Min 8 characters",
+    "createAccountBtn": "Create Account",
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "registrationFailed": "Registration failed. Please try again."
+  },
+  "TenantLogin": {
+    "tenantPortal": "Tenant Portal",
+    "signInSubtitle": "Sign in to manage your tenancy",
+    "email": "Email",
+    "password": "Password",
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "Enter your password",
+    "signIn": "Sign In",
+    "browseProperties": "Browse Properties",
+    "loginFailed": "Login failed. Please check your credentials."
   }
 }

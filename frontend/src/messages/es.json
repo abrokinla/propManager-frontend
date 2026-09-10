@@ -150,5 +150,46 @@
     "somethingWentWrong": "Algo salió mal",
     "unexpectedError": "Ocurrió un error inesperado.",
     "reloadPage": "Recargar página"
+  },
+  "Login": {
+    "welcomeBack": "Bienvenido de nuevo",
+    "signInSubtitle": "Inicia sesión en tu cuenta de PropManager",
+    "username": "Usuario",
+    "password": "Contraseña",
+    "usernamePlaceholder": "Ingresa tu usuario",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "signIn": "Iniciar Sesión",
+    "noAccount": "¿No tienes una cuenta?",
+    "createOne": "Crear una",
+    "loginFailed": "Inicio de sesión fallido. Por favor verifica tus credenciales."
+  },
+  "Register": {
+    "createAccount": "Crea tu cuenta",
+    "startManaging": "Comienza a gestionar tus propiedades hoy",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "username": "Usuario",
+    "email": "Email",
+    "password": "Contraseña",
+    "firstNamePlaceholder": "Juan",
+    "lastNamePlaceholder": "Pérez",
+    "usernamePlaceholder": "juanperez",
+    "emailPlaceholder": "juan@ejemplo.com",
+    "passwordPlaceholder": "Mínimo 8 caracteres",
+    "createAccountBtn": "Crear Cuenta",
+    "hasAccount": "¿Ya tienes una cuenta?",
+    "signIn": "Iniciar Sesión",
+    "registrationFailed": "Registro fallido. Por favor intenta de nuevo."
+  },
+  "TenantLogin": {
+    "tenantPortal": "Portal de Inquilinos",
+    "signInSubtitle": "Inicia sesión para gestionar tu arrendamiento",
+    "email": "Email",
+    "password": "Contraseña",
+    "emailPlaceholder": "tu@email.com",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "signIn": "Iniciar Sesión",
+    "browseProperties": "Ver Propiedades",
+    "loginFailed": "Inicio de sesión fallido. Por favor verifica tus credenciales."
   }
 }

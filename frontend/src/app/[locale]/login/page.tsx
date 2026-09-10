@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../context/AuthContext';
+import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const t = useTranslations('Login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,7 +21,7 @@ export default function LoginPage() {
       await login(username, password);
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { error?: string } } };
-      setError(axiosError.response?.data?.error || 'Login failed. Please check your credentials.');
+      setError(axiosError.response?.data?.error || t('loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -28,13 +30,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--bg)' }}>
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">PM</span>
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Welcome back</h1>
-          <p className="mt-1" style={{ color: 'var(--text-light)' }}>Sign in to your PropManager account</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{t('welcomeBack')}</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{t('signInSubtitle')}</p>
         </div>
 
         <div className="card">
@@ -46,24 +47,24 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Username</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('username')}</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                placeholder="Enter your username"
+                placeholder={t('usernamePlaceholder')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Password</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('password')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Enter your password"
+                placeholder={t('passwordPlaceholder')}
               />
             </div>
 
@@ -74,14 +75,14 @@ export default function LoginPage() {
             >
               {loading ? (
                 <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-              ) : 'Sign In'}
+              ) : t('signIn')}
             </button>
           </form>
 
           <div className="mt-6 text-center text-sm" style={{ color: 'var(--text-light)' }}>
-            Don&apos;t have an account?{' '}
+            {t('noAccount')}{' '}
             <Link href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
-              Create one
+              {t('createOne')}
             </Link>
           </div>
         </div>

@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
+import { useTranslations } from 'next-intl';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function TenantLoginPage() {
   const router = useRouter();
+  const t = useTranslations('TenantLogin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -25,7 +27,7 @@ export default function TenantLoginPage() {
       if (data.tenant) localStorage.setItem('tenant_user', JSON.stringify(data.tenant));
       router.push('/tenant/dashboard');
     } catch {
-      setError('Login failed. Please check your credentials.');
+      setError(t('loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -38,8 +40,8 @@ export default function TenantLoginPage() {
           <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-xl">PM</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Tenant Portal</h1>
-          <p className="text-gray-500 mt-1">Sign in to manage your tenancy</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('tenantPortal')}</h1>
+          <p className="text-gray-500 mt-1">{t('signInSubtitle')}</p>
         </div>
 
         <div className="card">
@@ -49,23 +51,23 @@ export default function TenantLoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="your@email.com" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('email')}</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder={t('emailPlaceholder')} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="Enter your password" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('password')}</label>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder={t('passwordPlaceholder')} />
             </div>
             <button type="submit" disabled={loading} className="btn btn-primary w-full justify-center py-3 disabled:opacity-50">
               {loading ? (
                 <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-              ) : 'Sign In'}
+              ) : t('signIn')}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <Link href="/listings" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-              Browse Properties
+              {t('browseProperties')}
             </Link>
           </div>
         </div>
