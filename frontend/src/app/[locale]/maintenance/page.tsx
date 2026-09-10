@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../components/DashboardLayout';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import ConfirmDialog from '../../../components/ConfirmDialog';
@@ -9,6 +10,7 @@ import { useToast } from '../../../context/ToastContext';
 import type { Unit, MaintenanceRequest, PaginatedResponse } from '../../../types';
 
 export default function MaintenancePage() {
+  const t = useTranslations('Maintenance');
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,7 @@ export default function MaintenancePage() {
       setRequests(mRes.data.results);
       setUnits(uRes.data.results);
     } catch {
-      toast('Failed to load data', 'error');
+      toast(t('toast.loadDataFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -50,10 +52,10 @@ export default function MaintenancePage() {
       const payload = { ...form, unit_id: Number(form.unit_id) };
       if (editing) {
         await api.put(`/maintenance/${editing.id}/`, payload);
-        toast('Request updated successfully', 'success');
+        toast(t('toast.updated'), 'success');
       } else {
         await api.post('/maintenance/', payload);
-        toast('Request created successfully', 'success');
+        toast(t('toast.created'), 'success');
       }
       setShowForm(false);
       setEditing(null);
@@ -67,7 +69,7 @@ export default function MaintenancePage() {
         for (const [k, v] of Object.entries(d)) fe[k] = Array.isArray(v) ? v[0] : v;
         setFormErrors(fe);
       } else {
-        toast('Failed to save request', 'error');
+        toast(t('toast.saveFailed'), 'error');
       }
     } finally {
       setSaving(false);
@@ -90,27 +92,37 @@ export default function MaintenancePage() {
   const handleDelete = async (id: number) => {
     try {
       await api.delete(`/maintenance/${id}/`);
-      toast('Request deleted successfully', 'success');
+      toast(t('toast.deleted'), 'success');
       setRequests(requests.filter(r => r.id !== id));
     } catch {
-      toast('Failed to delete request', 'error');
+      toast(t('toast.deleteFailed'), 'error');
     }
   };
 
   const priorityColor = (p: string) => p === 'High' ? 'badge-danger' : p === 'Medium' ? 'badge-warning' : 'badge-info';
   const statusColor = (s: string) => s === 'Open' ? 'badge-danger' : s === 'In Progress' ? 'badge-warning' : 'badge-success';
 
+  const translatedPriority = (p: string) => {
+    const map: Record<string, string> = { 'Low': t('form.low'), 'Medium': t('form.medium'), 'High': t('form.high') };
+    return map[p] || p;
+  };
+
+  const translatedStatus = (s: string) => {
+    const map: Record<string, string> = { 'Open': t('form.open'), 'In Progress': t('form.inProgress'), 'Completed': t('form.completed') };
+    return map[s] || s;
+  };
+
   return (
     <ErrorBoundary>
     <DashboardLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Maintenance</h1>
-          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{requests.length} request{requests.length === 1 ? '' : 's'}</p>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>{t('title')}</h1>
+          <p className="mt-1" style={{ color: 'var(--text-light)' }}>{t('count', { count: requests.length })}</p>
         </div>
         <button onClick={() => setShowForm(true)} className="btn btn-primary">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-          New Request
+          {t('newRequest')}
         </button>
       </div>
 
@@ -119,63 +131,63 @@ export default function MaintenancePage() {
           <div className="card w-full max-w-lg">
             {editing ? (
               <>
-                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>Maintenance Request</h2>
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('editForm.title')}</h2>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Property</p>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>{t('editForm.property')}</p>
                       <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{editing.property_name || editing.unit?.property_name || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Unit</p>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>{t('editForm.unit')}</p>
                       <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{editing.unit_number || editing.unit?.unit_number || '—'}</p>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Title</p>
+                    <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>{t('editForm.title')}</p>
                     <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{editing.title}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Description</p>
+                    <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>{t('editForm.description')}</p>
                     <p className="text-sm" style={{ color: 'var(--text)' }}>{editing.description}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Reported By</p>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>{t('editForm.reportedBy')}</p>
                       <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{editing.reported_by || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Date</p>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>{t('editForm.date')}</p>
                       <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{new Date(editing.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>Priority</p>
-                      <span className={`badge ${priorityColor(editing.priority)}`}>{editing.priority}</span>
+                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-light)' }}>{t('editForm.priority')}</p>
+                      <span className={`badge ${priorityColor(editing.priority)}`}>{translatedPriority(editing.priority)}</span>
                     </div>
                     <div>
-                      <label className="text-xs font-medium mb-0.5 block" style={{ color: 'var(--text-light)' }}>Status</label>
+                      <label className="text-xs font-medium mb-0.5 block" style={{ color: 'var(--text-light)' }}>{t('editForm.status')}</label>
                       <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full">
-                        <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
+                        <option value="Open">{t('form.open')}</option>
+                        <option value="In Progress">{t('form.inProgress')}</option>
+                        <option value="Completed">{t('form.completed')}</option>
                       </select>
                     </div>
                   </div>
                   <div className="flex gap-3 justify-end pt-2">
-                    <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="btn btn-secondary">Close</button>
+                    <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="btn btn-secondary">{t('editForm.close')}</button>
                     <button
                       onClick={async () => {
                         setSaving(true);
                         try {
                           await api.patch(`/maintenance/${editing.id}/`, { status: form.status });
-                          toast('Status updated successfully', 'success');
+                          toast(t('toast.statusUpdated'), 'success');
                           setShowForm(false);
                           setEditing(null);
                           await fetchData();
                         } catch {
-                          toast('Failed to update status', 'error');
+                          toast(t('toast.statusUpdateFailed'), 'error');
                         } finally {
                           setSaving(false);
                         }
@@ -183,58 +195,58 @@ export default function MaintenancePage() {
                       disabled={saving}
                       className="btn btn-primary disabled:opacity-50"
                     >
-                      {saving ? 'Saving...' : 'Save Status'}
+                      {saving ? t('editForm.saving') : t('editForm.saveStatus')}
                     </button>
                   </div>
                 </div>
               </>
             ) : (
               <>
-                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>New Maintenance Request</h2>
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text)' }}>{t('createForm.title')}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Unit *</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.unit')} *</label>
                     <select name="unit_id" value={form.unit_id} onChange={handleChange} required>
-                      <option value="">Select unit...</option>
+                      <option value="">{t('form.selectUnit')}</option>
                       {units.map(u => <option key={u.id} value={u.id}>{(u.property?.name || u.property_name || '—')} — {u.unit_number}</option>)}
                     </select>
                     {formErrors.unit_id && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.unit_id}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Title *</label>
-                    <input name="title" value={form.title} onChange={handleChange} required placeholder="e.g. Leaking pipe in Unit A" />
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.title')} *</label>
+                    <input name="title" value={form.title} onChange={handleChange} required placeholder={t('form.titlePlaceholder')} />
                     {formErrors.title && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.title}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Description *</label>
-                    <textarea name="description" value={form.description} onChange={handleChange} required rows={3} placeholder="Describe the issue..." />
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.description')} *</label>
+                    <textarea name="description" value={form.description} onChange={handleChange} required rows={3} placeholder={t('form.descriptionPlaceholder')} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Reported By *</label>
-                    <input name="reported_by" value={form.reported_by} onChange={handleChange} required placeholder="e.g. John Doe" />
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.reportedBy')} *</label>
+                    <input name="reported_by" value={form.reported_by} onChange={handleChange} required placeholder={t('form.reportedByPlaceholder')} />
                     {formErrors.reported_by && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{formErrors.reported_by}</p>}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Priority</label>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.priority')}</label>
                       <select name="priority" value={form.priority} onChange={handleChange}>
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
+                        <option value="Low">{t('form.low')}</option>
+                        <option value="Medium">{t('form.medium')}</option>
+                        <option value="High">{t('form.high')}</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>Status</label>
+                      <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('form.status')}</label>
                       <select name="status" value={form.status} onChange={handleChange}>
-                        <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
+                        <option value="Open">{t('form.open')}</option>
+                        <option value="In Progress">{t('form.inProgress')}</option>
+                        <option value="Completed">{t('form.completed')}</option>
                       </select>
                     </div>
                   </div>
                   <div className="flex gap-3 justify-end">
-                    <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="btn btn-secondary">Cancel</button>
-                    <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? 'Saving...' : 'Create'}</button>
+                    <button type="button" onClick={() => { setShowForm(false); setEditing(null); }} className="btn btn-secondary">{t('form.cancel')}</button>
+                    <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">{saving ? t('form.saving') : t('form.create')}</button>
                   </div>
                 </form>
               </>
@@ -247,9 +259,9 @@ export default function MaintenancePage() {
         <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div>
       ) : requests.length === 0 ? (
         <div className="card text-center py-12">
-          <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>No maintenance requests</h3>
-          <p className="mb-4" style={{ color: 'var(--text-light)' }}>Create a new request to track issues</p>
-          <button onClick={() => setShowForm(true)} className="btn btn-primary">New Request</button>
+          <h3 className="font-semibold text-lg mb-2" style={{ color: 'var(--text)' }}>{t('empty.title')}</h3>
+          <p className="mb-4" style={{ color: 'var(--text-light)' }}>{t('empty.description')}</p>
+          <button onClick={() => setShowForm(true)} className="btn btn-primary">{t('empty.cta')}</button>
         </div>
       ) : (
         <div className="space-y-4">
@@ -261,16 +273,16 @@ export default function MaintenancePage() {
                   <p className="text-sm" style={{ color: 'var(--text-light)' }}>{(req.unit?.property_name || req.property_name || '—')} — {(req.unit?.unit_number || req.unit_number || '—')}</p>
                 </div>
                 <div className="flex gap-2">
-                  <span className={`badge ${priorityColor(req.priority)}`}>{req.priority}</span>
-                  <span className={`badge ${statusColor(req.status)}`}>{req.status}</span>
+                  <span className={`badge ${priorityColor(req.priority)}`}>{translatedPriority(req.priority)}</span>
+                  <span className={`badge ${statusColor(req.status)}`}>{translatedStatus(req.status)}</span>
                 </div>
               </div>
               <p className="text-sm mb-4" style={{ color: 'var(--text-light)' }}>{req.description}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs" style={{ color: 'var(--text-light)' }}>Reported by {req.reported_by || '—'} · {new Date(req.created_at).toLocaleDateString()}</span>
+                <span className="text-xs" style={{ color: 'var(--text-light)' }}>{t('card.reportedBy', { name: req.reported_by || '—' })} · {new Date(req.created_at).toLocaleDateString()}</span>
                 <div className="flex gap-2">
-                  <button onClick={() => handleEdit(req)} className="text-primary-600 hover:text-primary-700 text-sm font-medium">Edit</button>
-                  <button onClick={() => setDeleteTarget(req.id)} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>Delete</button>
+                  <button onClick={() => handleEdit(req)} className="text-primary-600 hover:text-primary-700 text-sm font-medium">{t('actions.edit')}</button>
+                  <button onClick={() => setDeleteTarget(req.id)} className="text-sm font-medium" style={{ color: 'var(--danger)' }}>{t('actions.delete')}</button>
                 </div>
               </div>
             </div>
@@ -280,8 +292,8 @@ export default function MaintenancePage() {
 
       <ConfirmDialog
         open={!!deleteTarget}
-        title="Delete Request"
-        message="Are you sure you want to delete this maintenance request? This action cannot be undone."
+        title={t('deleteModal.title')}
+        message={t('deleteModal.message')}
         onConfirm={() => {
           const id = deleteTarget!;
           setDeleteTarget(null);
