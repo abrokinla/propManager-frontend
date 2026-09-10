@@ -203,7 +203,7 @@ export default function TenantDashboardPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">{t('fields.status')}</p>
-              <span className="badge badge-info">{tenant.tenancy_status?.replace(/_/g, ' ')}</span>
+              <span className="badge badge-info">{tenant.tenancy_status && t(`status.${tenant.tenancy_status}` as any) || tenant.tenancy_status?.replace(/_/g, ' ')}</span>
             </div>
           </div>
           {tenant.lease_start_date && (
@@ -634,7 +634,7 @@ export default function TenantDashboardPage() {
                           p.status === 'approved' ? 'badge-success' :
                           p.status === 'rejected' ? 'badge-danger' :
                           'badge-warning'
-                        }`}>{p.status}</span>
+                        }`}>{t(`paymentStatuses.${p.status}` as any) || p.status}</span>
                       </td>
                       <td className="py-2">
                         {p.proof_url ? (
@@ -674,14 +674,14 @@ export default function TenantDashboardPage() {
                           r.priority === 'High' ? 'badge-danger' :
                           r.priority === 'Medium' ? 'badge-warning' :
                           'badge-success'
-                        }`}>{r.priority}</span>
+                        }`}>{t(`priorities.${r.priority.toLowerCase()}` as any) || r.priority}</span>
                       </td>
                       <td className="py-2">
                         <span className={`badge ${
                           r.status === 'Completed' ? 'badge-success' :
                           r.status === 'In Progress' ? 'badge-warning' :
                           'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                        }`}>{r.status}</span>
+                        }`}>{t(`maintenanceStatuses.${r.status}` as any) || r.status}</span>
                       </td>
                     </tr>
                   ))}

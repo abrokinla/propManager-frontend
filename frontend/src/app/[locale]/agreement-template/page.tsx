@@ -146,7 +146,7 @@ function SignaturePreview({ exec, landlordName }: { exec: Record<string, any>; l
         <div className="mt-4">
           <p className="text-xs font-medium" style={{ color: 'var(--text)' }}>{t('witnessTenant')}</p>
           <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
-            {t('witnessName')}: ______________________________<br />{t('witnessAddress')}: ______________________________<br />Occupation: ______________________________<br />{t('signature')}: ______________________________<br />{t('date')}: ______________________________
+            {t('witnessName')}: ______________________________<br />{t('witnessAddress')}: ______________________________<br />{t('witnessOccupation')}: ______________________________<br />{t('signature')}: ______________________________<br />{t('date')}: ______________________________
           </p>
         </div>
       </div>

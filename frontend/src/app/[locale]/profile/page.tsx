@@ -71,7 +71,7 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('companyName')}</label>
-              <input name="company_name" value={form.company_name} onChange={handleChange} placeholder="Your company" />
+              <input name="company_name" value={form.company_name} onChange={handleChange} placeholder={t('companyPlaceholder')} />
             </div>
 
             <div>

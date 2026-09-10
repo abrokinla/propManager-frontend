@@ -150,12 +150,12 @@ export default function PropertiesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('propertyName')}</label>
-                    <input name="name" value={form.name} onChange={handleChange} required placeholder="e.g. Sunset Apartments" />
+                    <input name="name" value={form.name} onChange={handleChange} required placeholder={t('propertyNamePlaceholder')} />
                     {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('address')}</label>
-                    <input name="address" value={form.address} onChange={handleChange} required placeholder="e.g. 123 Main St" />
+                    <input name="address" value={form.address} onChange={handleChange} required placeholder={t('addressPlaceholder')} />
                     {formErrors.address && <p className="text-red-500 text-xs mt-1">{formErrors.address}</p>}
                   </div>
                   <div>
@@ -182,7 +182,7 @@ export default function PropertiesPage() {
                 <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-light)' }}>{t('descriptionMedia')}</h3>
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('description')}</label>
-                  <textarea name="description" value={form.description} onChange={handleChange} rows={3} placeholder="Describe the property, its features, and what makes it special..." />
+                  <textarea name="description" value={form.description} onChange={handleChange} rows={3} placeholder={t('descriptionPlaceholder')} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('propertyImage')}</label>
@@ -225,11 +225,11 @@ export default function PropertiesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('amenities')}</label>
-                    <textarea name="amenities" value={form.amenities} onChange={handleChange} rows={3} placeholder="Swimming pool, Gym, Parking, 24/7 Security..." />
+                    <textarea name="amenities" value={form.amenities} onChange={handleChange} rows={3} placeholder={t('amenitiesPlaceholder')} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('nearbyPlaces')}</label>
-                    <textarea name="nearby_places" value={form.nearby_places} onChange={handleChange} rows={3} placeholder="Shopping mall, School, Hospital, Bus stop..." />
+                    <textarea name="nearby_places" value={form.nearby_places} onChange={handleChange} rows={3} placeholder={t('nearbyPlacesPlaceholder')} />
                   </div>
                 </div>
               </div>

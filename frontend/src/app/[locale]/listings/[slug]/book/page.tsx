@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '../../../../../navigation';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import type { AvailableSlot } from '../../../../../types';
@@ -208,7 +208,7 @@ export default function BookVisitPage() {
                     className="w-full px-4 py-2 border rounded-lg"
                     style={{ borderColor: 'var(--border)', background: 'var(--input-bg)', color: 'var(--text)' }}
                     rows={3}
-                    placeholder="Any special requests or questions..."
+                    placeholder={t('notesPlaceholder')}
                   />
                 </div>
                 <div className="flex items-center gap-2">
