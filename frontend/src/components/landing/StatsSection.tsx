@@ -38,7 +38,7 @@ export default function StatsSection() {
   ];
 
   return (
-    <section className="py-16 border-y border-gray-200 dark:border-gray-800" style={{ backgroundColor: 'var(--card-bg)' }}>
+    <section className="py-16 border-y border-gray-200 dark:border-gray-800" style={{ backgroundColor: 'var(--card)' }}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <ScrollReveal>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">

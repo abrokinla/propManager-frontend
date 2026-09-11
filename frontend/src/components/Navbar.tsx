@@ -140,7 +140,7 @@ export default function Navbar() {
                   {isOpen && (
                     <div
                       className="absolute left-0 mt-1 w-48 rounded-xl shadow-lg border py-1 z-50"
-                      style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                      style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
                       onMouseLeave={() => setOpenGroup(null)}
                     >
                       {group.items!.map((item) => (
@@ -204,7 +204,7 @@ export default function Navbar() {
               {dropdownOpen && (
                 <div
                   className="absolute right-0 mt-1 w-56 rounded-xl shadow-lg border py-1 z-50"
-                  style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                  style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
                 >
                   <div className="px-4 py-2 border-b" style={{ borderColor: 'var(--border)' }}>
                     <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{user?.first_name || user?.username}</p>

@@ -21,6 +21,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --primary: #3b82f6;
   --primary-dark: #2563eb;
   --secondary: #94a3b8;

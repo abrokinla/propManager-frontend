@@ -7,7 +7,7 @@ export default function Footer() {
   const t = useTranslations('Footer');
 
   return (
-    <footer className="border-t" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
+    <footer className="border-t" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="sm:col-span-2 lg:col-span-1">

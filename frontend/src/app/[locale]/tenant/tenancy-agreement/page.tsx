@@ -159,7 +159,7 @@ export default function TenancyAgreementPage() {
   if (error) {
     return (
       <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-        <nav className="border-b" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
+        <nav className="border-b" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-2">
@@ -196,7 +196,7 @@ export default function TenancyAgreementPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg)' }}>
-      <nav className="border-b" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
+      <nav className="border-b" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
@@ -215,7 +215,7 @@ export default function TenancyAgreementPage() {
           <div className="px-4 py-3 rounded-lg text-sm mb-6" style={{ backgroundColor: '#fef2f2', color: '#991b1b' }}>{message}</div>
         )}
 
-        <div className="rounded-xl shadow-sm border p-6 sm:p-8 space-y-8" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
+        <div className="rounded-xl shadow-sm border p-6 sm:p-8 space-y-8" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
           <div className="text-center border-b pb-6" style={{ borderColor: 'var(--border)' }}>
             {agreement?.document_type === 'tenancy_agreement' && !isUploadedPdf && (
               <>

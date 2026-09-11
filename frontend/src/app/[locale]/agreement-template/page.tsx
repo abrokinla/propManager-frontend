@@ -634,8 +634,8 @@ export default function AgreementTemplatePage() {
       {showPreview && previewProps && mode === 'template' && (
         <div className="fixed inset-0 z-50 overflow-y-auto" style={{ backgroundColor: 'var(--bg)' }}>
           <div className="min-h-full flex items-start justify-center p-4">
-            <div className="w-full max-w-4xl rounded-xl shadow-2xl border p-6 sm:p-8 my-8 space-y-8" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
-              <div className="flex items-center justify-between sticky top-0 pb-4 border-b z-10" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--border)' }}>
+            <div className="w-full max-w-4xl rounded-xl shadow-2xl border p-6 sm:p-8 my-8 space-y-8" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+              <div className="flex items-center justify-between sticky top-0 pb-4 border-b z-10" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
                 <h2 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>{t('preview')} — {title || 'Tenancy Agreement'}</h2>
                 <button onClick={() => setShowPreview(false)} className="btn btn-secondary text-sm">{t('closePreview')}</button>
               </div>

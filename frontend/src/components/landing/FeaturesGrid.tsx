@@ -60,7 +60,7 @@ export default function FeaturesGrid() {
                 variants={cardVariants}
                 className="group relative p-6 sm:p-8 rounded-2xl border transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
                 style={{
-                  backgroundColor: 'var(--card-bg)',
+                  backgroundColor: 'var(--card)',
                   borderColor: 'var(--border)',
                 }}
               >

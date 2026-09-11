@@ -131,7 +131,7 @@ function PricingCard({ plan, region }: { plan: any; region: Region }) {
           : ''
       }`}
       style={{
-        backgroundColor: plan.popular ? 'var(--card-bg)' : 'var(--card-bg)',
+        backgroundColor: plan.popular ? 'var(--card)' : 'var(--card)',
         borderColor: plan.popular ? '#6366f1' : 'var(--border)',
       }}
     >
@@ -219,7 +219,7 @@ export default function PricingSection() {
               {t('subtitle')}
             </p>
 
-            <div className="inline-flex items-center p-1 rounded-xl border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card-bg)' }}>
+            <div className="inline-flex items-center p-1 rounded-xl border" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}>
               <button
                 onClick={() => setRegion('ng')}
                 className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
