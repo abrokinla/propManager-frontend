@@ -356,6 +356,7 @@ export interface TenancyAgreementTemplate {
 export interface PropertyAvailability {
   id: number;
   property: number;
+  property_name?: string;
   day_of_week: number;
   day_display: string;
   start_time: string;

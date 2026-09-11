@@ -216,15 +216,13 @@ export default function AvailabilityPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {slots.map(slot => {
-            const prop = properties.find(p => p.id === slot.property);
-            return (
+          {slots.map(slot => (
               <div key={slot.id} className="card flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className={`w-3 h-3 rounded-full ${slot.is_active ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                   <div>
                     <p className="font-semibold" style={{ color: 'var(--text)' }}>
-                      {prop?.name || `Property #${slot.property}`}
+                      {slot.property_name || `Property #${slot.property}`}
                     </p>
                     <p className="text-sm" style={{ color: 'var(--text-light)' }}>
                       {slot.day_display} &middot; {slot.start_time} – {slot.end_time} &middot; {slot.slot_duration_minutes}min slots
@@ -240,8 +238,7 @@ export default function AvailabilityPage() {
                   </button>
                 </div>
               </div>
-            );
-          })}
+            ))}
         </div>
       )}
     </DashboardLayout>
