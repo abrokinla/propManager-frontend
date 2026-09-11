@@ -230,3 +230,14 @@ input, select, textarea {
 .phone-input .PhoneInputCountrySelectArrow {
   display: none;
 }
+
+/* Dark mode: force native <select> dropdowns to use dark color scheme */
+.dark .phone-input {
+  color-scheme: dark;
+}
+
+.dark .phone-input .PhoneInputCountrySelect {
+  color-scheme: dark;
+  background: transparent;
+  color: var(--text);
+}
