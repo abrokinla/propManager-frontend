@@ -54,7 +54,7 @@ export default function ListingDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
       </div>
     );
@@ -62,13 +62,13 @@ export default function ListingDetailPage() {
 
   if (error || !property) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <div className="text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--hover-bg)' }}>
+            <svg className="w-8 h-8" style={{ color: 'var(--text-light)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
           </div>
           <h3 className="font-semibold text-lg mb-2">{t('notFound')}</h3>
-          <p className="text-gray-500 mb-4">{error || t('notFoundDescription')}</p>
+          <p className="mb-4" style={{ color: 'var(--text-light)' }}>{error || t('notFoundDescription')}</p>
           <Link href="/listings" className="btn btn-primary">{t('browseListings')}</Link>
         </div>
       </div>
@@ -78,9 +78,9 @@ export default function ListingDetailPage() {
   const { available_units } = property;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       {/* Nav */}
-      <nav className="bg-white border-b">
+      <nav className="border-b" style={{ background: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export default function ListingDetailPage() {
               <span className="font-bold text-lg">{t('brand')}</span>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/listings" className="text-gray-600 hover:text-gray-900 font-medium">{t('allListings')}</Link>
+              <Link href="/listings" className="font-medium" style={{ color: 'var(--text-light)' }}>{t('allListings')}</Link>
               <Link href="/login" className="btn btn-primary text-sm">{t('agentLogin')}</Link>
             </div>
           </div>
@@ -119,7 +119,7 @@ export default function ListingDetailPage() {
             <div>
               <span className="badge badge-info text-sm">{property.property_type}</span>
               <h1 className="text-3xl font-bold mt-3 mb-2">{property.name}</h1>
-              <p className="text-gray-500 flex items-center gap-1 mb-6">
+              <p className="flex items-center gap-1 mb-6" style={{ color: 'var(--text-light)' }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 {property.address}
               </p>
@@ -127,7 +127,7 @@ export default function ListingDetailPage() {
               {property.description && (
                 <div className="mb-8">
                   <h2 className="text-lg font-semibold mb-3">{t('aboutThisProperty')}</h2>
-                  <p className="text-gray-600 leading-relaxed">{property.description}</p>
+                  <p className="leading-relaxed" style={{ color: 'var(--text-light)' }}>{property.description}</p>
                 </div>
               )}
 
@@ -136,7 +136,7 @@ export default function ListingDetailPage() {
                   <h2 className="text-lg font-semibold mb-3">{t('amenities')}</h2>
                   <div className="flex flex-wrap gap-2">
                     {property.amenities.split(',').map((a, i) => (
-                      <span key={i} className="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-sm font-medium">{a.trim()}</span>
+                      <span key={i} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'rgba(34,197,94,0.1)', color: 'var(--success)' }}>{a.trim()}</span>
                     ))}
                   </div>
                 </div>
@@ -147,7 +147,7 @@ export default function ListingDetailPage() {
                   <h2 className="text-lg font-semibold mb-3">{t('nearbyPlaces')}</h2>
                   <div className="flex flex-wrap gap-2">
                     {property.nearby_places.split(',').map((p, i) => (
-                      <span key={i} className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">{p.trim()}</span>
+                      <span key={i} className="px-3 py-1.5 rounded-lg text-sm font-medium" style={{ background: 'rgba(59,130,246,0.1)', color: 'var(--primary)' }}>{p.trim()}</span>
                     ))}
                   </div>
                 </div>
@@ -159,10 +159,10 @@ export default function ListingDetailPage() {
                   <h2 className="text-lg font-semibold mb-4">{t('availableUnits', { count: available_units.length })}</h2>
                   <div className="space-y-4">
                     {available_units.map((unit) => (
-                      <div key={unit.id} className="bg-white border rounded-lg p-4 flex items-center justify-between">
+                      <div key={unit.id} className="card flex items-center justify-between">
                         <div>
                           <p className="font-semibold">{t('unitLabel', { number: unit.unit_number })}</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm" style={{ color: 'var(--text-light)' }}>
                             {unit.bedrooms} {t('beds', { count: unit.bedrooms })} &middot; {unit.bathrooms} {t('baths', { count: unit.bathrooms })}
                             {unit.toilets != null && unit.toilets > 0 && ` · ${unit.toilets} ${t('toilets', { count: unit.toilets })}`}
                             {unit.size_sqft && ` · ${unit.size_sqft} sqft`}
@@ -170,7 +170,7 @@ export default function ListingDetailPage() {
                         </div>
                         <div className="text-right">
                           {unit.price_rent && <p className="font-bold text-primary-600">${unit.price_rent.toLocaleString()}/{unit.rent_cycle === 'daily' ? t('perDay') : unit.rent_cycle === 'monthly' ? t('perMonth') : t('perYear')}</p>}
-                          {unit.price_sale && unit.price_sale > 0 && <p className="text-sm text-gray-500">${unit.price_sale.toLocaleString()} sale</p>}
+                          {unit.price_sale && unit.price_sale > 0 && <p className="text-sm" style={{ color: 'var(--text-light)' }}>${unit.price_sale.toLocaleString()} sale</p>}
                         </div>
                       </div>
                     ))}
@@ -189,19 +189,19 @@ export default function ListingDetailPage() {
                     ? `$${property.price_range.min.toLocaleString()} - $${property.price_range.max.toLocaleString()}`
                     : t('contactForPrice')}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">{t('perYear')}</p>
+                <p className="text-sm mt-1" style={{ color: 'var(--text-light)' }}>{t('perYear')}</p>
               </div>
-              <div className="border-t pt-4 space-y-3">
+              <div className="border-t pt-4 space-y-3" style={{ borderColor: 'var(--border)' }}>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">{t('propertyType')}</span>
+                  <span style={{ color: 'var(--text-light)' }}>{t('propertyType')}</span>
                   <span className="font-medium">{property.property_type}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">{t('totalUnits')}</span>
+                  <span style={{ color: 'var(--text-light)' }}>{t('totalUnits')}</span>
                   <span className="font-medium">{property.total_units}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">{t('available')}</span>
+                  <span style={{ color: 'var(--text-light)' }}>{t('available')}</span>
                   <span className="font-medium text-green-600">{property.available_units_count}</span>
                 </div>
               </div>
@@ -224,8 +224,8 @@ export default function ListingDetailPage() {
         </div>
       </main>
 
-      <footer className="border-t bg-white mt-20">
-        <div className="max-w-7xl mx-auto px-4 py-8 text-center text-sm text-gray-400">
+      <footer className="border-t mt-20" style={{ background: 'var(--nav-bg)', borderColor: 'var(--border)' }}>
+        <div className="max-w-7xl mx-auto px-4 py-8 text-center text-sm" style={{ color: 'var(--text-light)' }}>
           &copy; {new Date().getFullYear()} PropManager. {t('allRightsReserved')}
         </div>
       </footer>
@@ -233,20 +233,20 @@ export default function ListingDetailPage() {
       {/* Express Interest Modal */}
       {showInterestModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => { setShowInterestModal(false); setInterestSubmitted(false); setInterestError(''); }}>
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+          <div className="rounded-xl shadow-xl p-6 w-full max-w-md" style={{ background: 'var(--card)' }} onClick={e => e.stopPropagation()}>
             {interestSubmitted ? (
               <div className="text-center py-4">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(34,197,94,0.15)' }}>
+                  <svg className="w-8 h-8" style={{ color: 'var(--success)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{t('expressInterestTitle')}</h3>
-                <p className="text-sm text-gray-500 mb-6">{t('interestSubmitted')}</p>
+                <p className="text-sm mb-6" style={{ color: 'var(--text-light)' }}>{t('interestSubmitted')}</p>
                 <button onClick={() => { setShowInterestModal(false); setInterestSubmitted(false); }} className="btn btn-primary">Close</button>
               </div>
             ) : (
               <>
                 <h3 className="text-lg font-semibold mb-4">{t('expressInterestTitle')}</h3>
-                {interestError && <p className="text-sm text-red-600 mb-3">{interestError}</p>}
+                {interestError && <p className="text-sm mb-3" style={{ color: 'var(--danger)' }}>{interestError}</p>}
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   setInterestSubmitting(true);
@@ -262,38 +262,41 @@ export default function ListingDetailPage() {
                   }
                 }} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700">{t('interestName')}</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('interestName')}</label>
                     <input
                       type="text"
                       value={interestForm.name}
                       onChange={e => setInterestForm({ ...interestForm, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-4 py-2 border rounded-lg"
+                      style={{ borderColor: 'var(--border)', background: 'var(--input-bg)', color: 'var(--text)' }}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700">{t('interestEmail')}</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('interestEmail')}</label>
                     <input
                       type="email"
                       value={interestForm.email}
                       onChange={e => setInterestForm({ ...interestForm, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-4 py-2 border rounded-lg"
+                      style={{ borderColor: 'var(--border)', background: 'var(--input-bg)', color: 'var(--text)' }}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700">{t('interestPhone')}</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('interestPhone')}</label>
                     <PhoneInput
                       value={interestForm.phone}
                       onChange={(val) => setInterestForm({ ...interestForm, phone: val || '' })}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700">{t('interestMessage')}</label>
+                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('interestMessage')}</label>
                     <textarea
                       value={interestForm.message}
                       onChange={e => setInterestForm({ ...interestForm, message: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-4 py-2 border rounded-lg"
+                      style={{ borderColor: 'var(--border)', background: 'var(--input-bg)', color: 'var(--text)' }}
                       rows={3}
                       placeholder={t('interestMessagePlaceholder')}
                     />

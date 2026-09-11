@@ -71,10 +71,10 @@ export default function BookVisitPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <div className="card max-w-md text-center py-12 px-8">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(34,197,94,0.15)' }}>
+            <svg className="w-8 h-8" style={{ color: 'var(--success)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -93,8 +93,8 @@ export default function BookVisitPage() {
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b">
+    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+      <nav className="border-b" style={{ background: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
@@ -151,9 +151,9 @@ export default function BookVisitPage() {
                       className={`px-4 py-3 rounded-lg border text-sm font-medium transition-all ${
                         selectedSlot === slot.time
                           ? 'bg-primary-600 text-white border-primary-600 ring-2 ring-primary-200'
-                          : 'border-gray-200 hover:border-primary-300'
+                          : 'hover:border-primary-300'
                       }`}
-                      style={selectedSlot !== slot.time ? { color: 'var(--text)' } : {}}
+                      style={selectedSlot !== slot.time ? { color: 'var(--text)', borderColor: 'var(--border)' } : {}}
                     >
                       {slot.time}
                     </button>
@@ -225,7 +225,7 @@ export default function BookVisitPage() {
           )}
 
           {error && (
-            <div className="p-3 rounded-lg text-sm" style={{ background: '#FEE2E2', color: '#991B1B' }}>
+            <div className="p-3 rounded-lg text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--danger)' }}>
               {error}
             </div>
           )}
