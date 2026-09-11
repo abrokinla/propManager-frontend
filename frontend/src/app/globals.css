@@ -169,3 +169,63 @@ input, select, textarea {
   75% { background-position: 50% 100%; }
   100% { background-position: 0% 50%; }
 }
+
+/* ── Phone input (react-phone-number-input) ── */
+
+.phone-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--input-bg);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.phone-input:focus-within {
+  border-color: var(--primary, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.phone-input .PhoneInputCountry {
+  padding-left: 0.75rem;
+  padding-right: 0.25rem;
+}
+
+.phone-input .PhoneInputCountrySelect {
+  appearance: none;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  color: var(--text);
+}
+
+.phone-input .PhoneInputCountrySelect:focus {
+  outline: none;
+}
+
+.phone-input .PhoneInputInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  font-size: 1rem;
+  color: var(--text);
+  min-width: 0;
+}
+
+.phone-input .PhoneInputInput:focus {
+  outline: none;
+}
+
+.phone-input .PhoneInputCountryIcon {
+  width: 1.5em;
+  height: 1em;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.phone-input .PhoneInputCountrySelectArrow {
+  display: none;
+}

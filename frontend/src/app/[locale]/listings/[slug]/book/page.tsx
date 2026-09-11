@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '../../../../../navigation';
+import PhoneInput from '../../../../../components/PhoneInput';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import type { AvailableSlot } from '../../../../../types';
@@ -191,13 +192,9 @@ export default function BookVisitPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('phoneOptional')}</label>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     value={form.guest_phone}
-                    onChange={e => setForm({ ...form, guest_phone: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg"
-                    style={{ borderColor: 'var(--border)', background: 'var(--input-bg)', color: 'var(--text)' }}
-                    placeholder="+234..."
+                    onChange={(val) => setForm({ ...form, guest_phone: val || '' })}
                   />
                 </div>
                 <div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '../../../../navigation';
+import PhoneInput from '../../../../components/PhoneInput';
 import { useParams, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import type { PublicPropertyDetail } from '../../../../types';
@@ -282,12 +283,9 @@ export default function ListingDetailPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1 text-gray-700">{t('interestPhone')}</label>
-                    <input
-                      type="tel"
+                    <PhoneInput
                       value={interestForm.phone}
-                      onChange={e => setInterestForm({ ...interestForm, phone: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      placeholder="+234..."
+                      onChange={(val) => setInterestForm({ ...interestForm, phone: val || '' })}
                     />
                   </div>
                   <div>
