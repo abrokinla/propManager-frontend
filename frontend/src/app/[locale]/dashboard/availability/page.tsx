@@ -6,7 +6,7 @@ import DashboardLayout from '../../../../components/DashboardLayout';
 import ErrorBoundary from '../../../../components/ErrorBoundary';
 import api from '../../../../lib/api';
 import { useToast } from '../../../../context/ToastContext';
-import type { PropertyAvailability, Property } from '../../../../types';
+import type { PropertyAvailability, Property, PaginatedResponse } from '../../../../types';
 
 export default function AvailabilityPage() {
   const t = useTranslations('DashboardAvailability');
@@ -28,11 +28,11 @@ export default function AvailabilityPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<PropertyAvailability[]>('/availability/'),
-      api.get<{ results: Property[] }>('/properties/'),
+      api.get<PaginatedResponse<PropertyAvailability>>('/availability/'),
+      api.get<PaginatedResponse<Property>>('/properties/'),
     ]).then(([availRes, propRes]) => {
-      setSlots(availRes.data);
-      setProperties(propRes.data.results || propRes.data as any);
+      setSlots(availRes.data.results);
+      setProperties(propRes.data.results);
     }).catch(() => toast(t('failedToLoadData'), 'error'))
       .finally(() => setLoading(false));
   }, [t]);

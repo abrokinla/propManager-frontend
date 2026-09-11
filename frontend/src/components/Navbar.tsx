@@ -8,6 +8,17 @@ import { useTheme } from '../context/ThemeContext';
 import NotificationBell from './NotificationBell';
 import { useTranslations } from 'next-intl';
 
+interface NavItem {
+  href: string;
+  label: string;
+}
+
+interface NavGroup {
+  label: string;
+  href?: string;
+  items?: NavItem[];
+}
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -15,25 +26,55 @@ export default function Navbar() {
   const t = useTranslations('AppNavbar');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
 
-  const navItems = [
-    { href: '/dashboard', label: t('dashboard') },
-    { href: '/properties', label: t('properties') },
-    { href: '/units', label: t('units') },
-    { href: '/tenants', label: t('tenants') },
-    { href: '/payments', label: t('payments') },
-    { href: '/maintenance', label: t('maintenance') },
-    { href: '/dashboard/availability', label: t('availability') },
-    { href: '/dashboard/bookings', label: t('bookings') },
-    { href: '/dashboard/analytics', label: t('analytics') },
-    { href: '/agreement-template', label: t('agreement') },
+  const navGroups: NavGroup[] = [
+    { label: t('dashboard'), href: '/dashboard' },
+    {
+      label: t('properties'),
+      items: [
+        { href: '/properties', label: t('properties') },
+        { href: '/units', label: t('units') },
+        { href: '/tenants', label: t('tenants') },
+      ],
+    },
+    {
+      label: t('finance'),
+      items: [
+        { href: '/payments', label: t('payments') },
+      ],
+    },
+    {
+      label: t('operations'),
+      items: [
+        { href: '/maintenance', label: t('maintenance') },
+        { href: '/agreement-template', label: t('agreementTemplate') },
+      ],
+    },
+    {
+      label: t('scheduling'),
+      items: [
+        { href: '/dashboard/availability', label: t('availability') },
+        { href: '/dashboard/bookings', label: t('bookings') },
+      ],
+    },
+    { label: t('analytics'), href: '/dashboard/analytics' },
   ];
+
+  const isActive = (href: string) => pathname === href;
+  const isGroupActive = (group: NavGroup) =>
+    group.href ? isActive(group.href) : group.items?.some(i => isActive(i.href)) ?? false;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
+      }
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpenGroup(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -44,33 +85,88 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b" style={{ background: 'var(--nav-bg)', borderColor: 'var(--nav-border)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">PM</span>
             </div>
             <span className="font-bold text-lg" style={{ color: 'var(--text)' }}>PropManager</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  pathname === item.href
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'hover:bg-gray-100'
-                }`}
-                style={{
-                  color: pathname === item.href ? 'var(--primary)' : 'var(--text-light)',
-                  background: pathname === item.href ? 'rgba(37,99,235,0.08)' : 'transparent',
-                }}
-              >
-                {item.label}
-              </Link>
-            ))}
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-0.5" ref={navRef}>
+            {navGroups.map((group) => {
+              const active = isGroupActive(group);
+              const hasDropdown = !!group.items;
+
+              if (!hasDropdown) {
+                return (
+                  <Link
+                    key={group.href}
+                    href={group.href!}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      active ? 'bg-primary-50' : 'hover:bg-gray-100'
+                    }`}
+                    style={{
+                      color: active ? 'var(--primary)' : 'var(--text-light)',
+                      background: active ? 'rgba(37,99,235,0.08)' : 'transparent',
+                    }}
+                  >
+                    {group.label}
+                  </Link>
+                );
+              }
+
+              const isOpen = openGroup === group.label;
+
+              return (
+                <div key={group.label} className="relative">
+                  <button
+                    onClick={() => setOpenGroup(isOpen ? null : group.label)}
+                    onMouseEnter={() => setOpenGroup(group.label)}
+                    className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      active ? 'bg-primary-50' : 'hover:bg-gray-100'
+                    }`}
+                    style={{
+                      color: active ? 'var(--primary)' : 'var(--text-light)',
+                      background: active ? 'rgba(37,99,235,0.08)' : 'transparent',
+                    }}
+                  >
+                    {group.label}
+                    <svg className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {isOpen && (
+                    <div
+                      className="absolute left-0 mt-1 w-48 rounded-xl shadow-lg border py-1 z-50"
+                      style={{ background: 'var(--card-bg)', borderColor: 'var(--border)' }}
+                      onMouseLeave={() => setOpenGroup(null)}
+                    >
+                      {group.items!.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => { setOpenGroup(null); }}
+                          className={`block px-4 py-2 text-sm transition-colors ${
+                            isActive(item.href) ? 'font-medium' : 'hover:bg-gray-50'
+                          }`}
+                          style={{
+                            color: isActive(item.href) ? 'var(--primary)' : 'var(--text)',
+                            background: isActive(item.href) ? 'rgba(37,99,235,0.08)' : 'transparent',
+                          }}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
+          {/* Right side */}
           <div className="hidden md:flex items-center gap-2">
             <NotificationBell basePath="" />
 
@@ -115,15 +211,6 @@ export default function Navbar() {
                     <p className="text-xs" style={{ color: 'var(--text-light)' }}>{user?.profile.role === 'owner' ? t('propertyOwner') : t('propertyManager')}</p>
                   </div>
                   <Link
-                    href="/agreement-template"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-gray-50"
-                    style={{ color: 'var(--text)' }}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    {t('agreementTemplate')}
-                  </Link>
-                  <Link
                     href="/profile"
                     onClick={() => setDropdownOpen(false)}
                     className="flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-gray-50"
@@ -147,6 +234,7 @@ export default function Navbar() {
             </div>
           </div>
 
+          {/* Mobile hamburger */}
           <button
             className="md:hidden p-2 rounded-lg"
             style={{ color: 'var(--text)' }}
@@ -162,24 +250,69 @@ export default function Navbar() {
           </button>
         </div>
 
+        {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden pb-4 border-t pt-2" style={{ borderColor: 'var(--border)' }}>
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className={`block px-3 py-2 rounded-lg text-sm font-medium ${
-                  pathname === item.href ? 'bg-primary-50 text-primary-700' : ''
-                }`}
-                style={{
-                  color: pathname === item.href ? 'var(--primary)' : 'var(--text-light)',
-                  background: pathname === item.href ? 'rgba(37,99,235,0.08)' : 'transparent',
-                }}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navGroups.map((group) => {
+              const active = isGroupActive(group);
+              const hasDropdown = !!group.items;
+
+              if (!hasDropdown) {
+                return (
+                  <Link
+                    key={group.href}
+                    href={group.href!}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block px-3 py-2 rounded-lg text-sm font-medium ${
+                      active ? 'bg-primary-50' : ''
+                    }`}
+                    style={{
+                      color: active ? 'var(--primary)' : 'var(--text-light)',
+                      background: active ? 'rgba(37,99,235,0.08)' : 'transparent',
+                    }}
+                  >
+                    {group.label}
+                  </Link>
+                );
+              }
+
+              const expanded = mobileExpanded === group.label;
+
+              return (
+                <div key={group.label}>
+                  <button
+                    onClick={() => setMobileExpanded(expanded ? null : group.label)}
+                    className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm font-medium"
+                    style={{ color: active ? 'var(--primary)' : 'var(--text-light)' }}
+                  >
+                    {group.label}
+                    <svg className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {expanded && (
+                    <div className="pl-4">
+                      {group.items!.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`block px-3 py-2 rounded-lg text-sm ${
+                            isActive(item.href) ? 'font-medium' : ''
+                          }`}
+                          style={{
+                            color: isActive(item.href) ? 'var(--primary)' : 'var(--text-light)',
+                            background: isActive(item.href) ? 'rgba(37,99,235,0.08)' : 'transparent',
+                          }}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
             <div className="mt-2 pt-2 flex items-center justify-between px-3" style={{ borderTop: '1px solid var(--border)' }}>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium" style={{ color: 'var(--text-light)' }}>{user?.first_name || user?.username}</span>

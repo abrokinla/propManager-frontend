@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import DashboardLayout from '../../../../components/DashboardLayout';
 import api from '../../../../lib/api';
 import { useToast } from '../../../../context/ToastContext';
-import type { VisitBooking } from '../../../../types';
+import type { VisitBooking, PaginatedResponse } from '../../../../types';
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -22,8 +22,8 @@ export default function BookingsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    api.get<VisitBooking[]>('/bookings/')
-      .then(({ data }) => setBookings(data))
+    api.get<PaginatedResponse<VisitBooking>>('/bookings/')
+      .then(({ data }) => setBookings(data.results))
       .catch(() => toast(t('failedToLoadBookings'), 'error'))
       .finally(() => setLoading(false));
   }, [t]);
