@@ -4,35 +4,57 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '../../../../../navigation';
 import { useParams } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import axios from 'axios';
-import type { AgentPropertiesResponse } from '../../../../../types';
+import type { PublicAgentProfile, PublicProperty } from '../../../../../types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AgentListingsPage() {
   const t = useTranslations('ListingsAgent');
+  const locale = useLocale();
   const { slug } = useParams<{ slug: string }>();
-  const [data, setData] = useState<AgentPropertiesResponse | null>(null);
+  const [agent, setAgent] = useState<PublicAgentProfile | null>(null);
+  const [properties, setProperties] = useState<PublicProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!slug) return;
-    const fetchListings = async () => {
-      try {
-        const { data } = await axios.get<AgentPropertiesResponse>(`${API_URL}/public/properties/agent/${slug}/`);
-        setData(data);
-      } catch {
-        setError(t('loadError'));
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchListings();
-  }, [slug]);
+    let cancelled = false;
 
-  const properties = data?.properties || [];
-  const agentName = data?.agent?.company_name || 'Agent';
+    // Profile and listings are separate endpoints on purpose: the profile is
+    // what makes a 404 vs. an empty listing distinguishable.
+    const fetchAgent = async () => {
+      const [profileRes, listRes] = await Promise.all([
+        axios.get<PublicAgentProfile>(`${API_URL}/public/agents/${slug}/`),
+        axios.get<PublicProperty[]>(`${API_URL}/public/agents/${slug}/properties/`),
+      ]);
+      if (cancelled) return;
+      setAgent(profileRes.data);
+      setProperties(listRes.data);
+    };
+
+    fetchAgent()
+      .catch(() => {
+        if (!cancelled) setError(t('loadError'));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, t]);
+
+  const agentName = agent?.organization_name || agent?.name || t('defaultAgentName');
+  const money = (value: number) =>
+    new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(value);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -52,8 +74,33 @@ export default function AgentListingsPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
+          {agent && (
+            <div className="flex items-center justify-center gap-3 mb-6">
+              {agent.logo_url ? (
+                <img
+                  src={agent.logo_url}
+                  alt={agentName}
+                  className="w-14 h-14 rounded-full object-cover"
+                />
+              ) : (
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                  style={{ backgroundColor: agent.brand_color || '#6366f1' }}
+                >
+                  {agentName.slice(0, 1).toUpperCase()}
+                </div>
+              )}
+              <div className="text-left">
+                <p className="font-semibold text-gray-900">{agentName}</p>
+                {agent.city && <p className="text-sm text-gray-500">{agent.city}</p>}
+              </div>
+            </div>
+          )}
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('propertiesBy', { agentName })}</h1>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">{t('browseAgentProperties')}</p>
+          {agent?.bio && (
+            <p className="text-gray-600 max-w-2xl mx-auto mt-4">{agent.bio}</p>
+          )}
         </div>
 
         {loading ? (
@@ -87,7 +134,7 @@ export default function AgentListingsPage() {
                     </div>
                   ) : (
                     <div className="h-48 -mx-6 -mt-6 mb-4 bg-gradient-to-br from-primary-100 to-primary-50 flex items-center justify-center">
-                      <svg className="w-12 h-12 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                      <svg className="w-12 h-12 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 002-2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                     </div>
                   )}
                   <span className="badge badge-info mb-3">{prop.property_type}</span>
@@ -99,7 +146,7 @@ export default function AgentListingsPage() {
                   <div className="flex items-center justify-between text-sm border-t pt-4 mt-4">
                     <span className="text-primary-600 font-semibold">
                       {prop.price_range
-                        ? `$${prop.price_range.min.toLocaleString()} - $${prop.price_range.max.toLocaleString()}`
+                        ? `${money(prop.price_range.min)} - ${money(prop.price_range.max)}`
                         : t('contactForPrice')}
                     </span>
                     <span className="text-gray-500">{t('unitsAvailable', { count: prop.available_units_count })}</span>

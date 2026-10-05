@@ -150,6 +150,11 @@ export interface MaintenanceRequest {
 
 export interface DashboardStats {
   public_slug: string;
+  /** Agent-track only: the slug backing /listings/agent/<slug>. */
+  agent_public_slug: string | null;
+  /** 'agent' or 'owner'; drives which nav and CTAs are shown. */
+  track: Track;
+  kyc_status: string;
   company_name: string;
   total_properties: number;
   total_units: number;
@@ -177,9 +182,21 @@ export interface DashboardStats {
   }>;
 }
 
-export interface AgentPropertiesResponse {
-  agent: { company_name: string };
-  properties: PublicProperty[];
+/** Public agent profile from /api/public/agents/<slug>/. */
+export interface PublicAgentProfile {
+  name: string;
+  organization_name: string;
+  slug: string;
+  city: string;
+  bio: string;
+  whatsapp: string;
+  logo_url: string;
+  brand_color: string;
+  property_count: number;
+  created_at: string;
+  first_name?: string;
+  last_name?: string;
+  verified?: boolean;
 }
 
 export interface PaginatedResponse<T> {
@@ -434,4 +451,60 @@ export interface PropertyAnalyticsDetail {
   sources: SourceCount[];
   referrers: ReferrerCount[];
   views_over_time: ViewsOverTime[];
+}
+
+/* ---------------------------------------------------------------- pricing --
+ * Mirrors GET /api/pricing/. Amounts are integer cents in USD; the client
+ * formats them with Intl.NumberFormat. Copy (plan blurbs, feature lines) is
+ * NOT here - it lives in the message files so it can be localized.
+ *
+ * limits values are null where the backend means unlimited.
+ */
+
+export type Track = 'agent' | 'owner';
+export type BillingInterval = 'month' | 'year';
+
+export interface PlanLimits {
+  properties: number | null;
+  units?: number | null;
+  active_tenants?: number | null;
+  team_members: number | null;
+  analytics_days: number | null;
+  storage_mb: number | null;
+  ai_monthly?: number | null;
+  leads?: number | null;
+}
+
+export type PlanFeatureKey =
+  | 'lead_export'
+  | 'custom_domain'
+  | 'whatsapp_api'
+  | 'white_label';
+
+export interface CatalogPlan {
+  key: string;
+  label: string;
+  track: Track;
+  monthly_cents: number;
+  annual_cents: number;
+  display_monthly_cents: number;
+  is_free: boolean;
+  limits: PlanLimits;
+  features: Record<PlanFeatureKey, boolean>;
+  /** Features the plan includes that cannot be bought yet (WhatsApp). */
+  pending_features: PlanFeatureKey[];
+  has_pending_features: boolean;
+}
+
+export interface TrackCatalog {
+  label: string;
+  plans: CatalogPlan[];
+  popular_plan: string;
+}
+
+export interface PricingCatalog {
+  currency: string;
+  whatsapp_api_available: boolean;
+  checkout_available: boolean;
+  tracks: Record<Track, TrackCatalog>;
 }

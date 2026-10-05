@@ -67,13 +67,67 @@
   "Pricing": {
     "badge": "Pricing",
     "title": "Simple, transparent pricing",
-    "subtitle": "Pay based on where you operate. Nigerian pricing is annual; international is monthly.",
+    "subtitle": "One product, two ways in. Pick the plan that matches how you work.",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "perMonth": "/month",
+    "billedMonthly": "Billed monthly. Cancel any time.",
+    "billedAnnually": "Billed {total} annually.",
+    "getStarted": "Get Started",
+    "startFree": "Start Free",
+    "mostPopular": "Most Popular",
+    "trial": "Every plan starts with a 14-day free trial. No card needed for Free.",
+    "checkoutSoon": "Paid checkout is being switched on. Free plans are ready now.",
+    "loadError": "We could not load pricing. Please refresh, or tell us and we will fix it.",
+    "comingSoon": "Coming soon",
+    "unlimitedProperties": "Unlimited properties",
+    "unlimitedUnits": "Unlimited units",
+    "unlimitedTeam": "Unlimited team members",
+    "unlimitedAnalytics": "Full listing analytics history",
+    "propertiesCount": "{count, plural, one {# property} other {# properties}}",
+    "unitsCount": "{count, plural, one {# unit} other {# units}}",
+    "teamCount": "{count, plural, one {# team member} other {# team members}}",
+    "daysOfAnalytics": "{count}-day listing analytics",
+    "fullHistory": "Full listing analytics history",
+    "tracks": {
+      "agent": "For agents",
+      "owner": "For owners"
+    },
+    "features": {
+      "leadExport": "Lead export to CSV",
+      "whiteLabel": "White-label branding",
+      "customDomain": "Custom domain",
+      "whatsappApi": "WhatsApp Business API"
+    },
+    "plans": {
+      "agent_free": {
+        "blurb": "Try the agent CRM with one listing."
+      },
+      "agent_starter": {
+        "blurb": "For a solo agent taking on real volume."
+      },
+      "agent_pro": {
+        "blurb": "For agents running a full pipeline and a team."
+      },
+      "agent_agency": {
+        "blurb": "For agencies with no ceiling on listings or seats."
+      },
+      "owner_free": {
+        "blurb": "Manage your first property, free."
+      },
+      "owner_starter": {
+        "blurb": "For a small portfolio and a helping hand."
+      },
+      "owner_pro": {
+        "blurb": "For a growing portfolio that needs the full toolkit."
+      },
+      "owner_enterprise": {
+        "blurb": "For large portfolios with no ceiling."
+      }
+    },
     "year": "/year",
     "month": "/mo",
-    "trial": "All plans include a 14-day free trial. No credit card required for Free tier.",
-    "volumePricing": "Volume Pricing",
-    "getStarted": "Get Started",
-    "mostPopular": "Most Popular"
+    "volumePricing": "Volume Pricing"
   },
   "CTA": {
     "title": "Start Managing Properties Free",
@@ -182,7 +236,13 @@
     "createAccountBtn": "Create Account",
     "hasAccount": "Already have an account?",
     "signIn": "Sign in",
-    "registrationFailed": "Registration failed. Please try again."
+    "registrationFailed": "Registration failed. Please try again.",
+    "accountType": "I am",
+    "track.agent": "An agent",
+    "track.owner": "A property owner",
+    "trackHint.agent": "Agent workspaces get a public profile, lead inbox and KYC verification.",
+    "trackHint.owner": "Owner workspaces manage your properties, units and tenants.",
+    "selectedPlan": "Selected plan: {plan}. You can change or upgrade it later."
   },
   "TenantLogin": {
     "tenantPortal": "Tenant Portal",
@@ -808,10 +868,9 @@
       "title": "New Maintenance Request"
     },
     "editForm": {
-      "title": "Maintenance Request",
+      "title": "Title",
       "property": "Property",
       "unit": "Unit",
-      "title": "Title",
       "description": "Description",
       "reportedBy": "Reported By",
       "date": "Date",
@@ -1133,7 +1192,8 @@
     "noPropertiesDescription": "This agent hasn't listed any properties yet.",
     "contactForPrice": "Contact for price",
     "unitsAvailable": "{count} units available",
-    "allRightsReserved": "All rights reserved."
+    "allRightsReserved": "All rights reserved.",
+    "defaultAgentName": "Agent"
   },
   "RichTextEditor": {
     "bold": "B",

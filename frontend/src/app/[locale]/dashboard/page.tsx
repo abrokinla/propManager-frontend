@@ -100,7 +100,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      {stats?.public_slug && (
+      {stats?.agent_public_slug && (
         <div className="mb-8">
           <div
             onClick={() => setShowShareModal(true)}
@@ -132,7 +132,7 @@ export default function DashboardPage() {
             <div className="flex gap-2">
               <input
                 readOnly
-                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/listings/agent/${stats?.public_slug}`}
+                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/listings/agent/${stats?.agent_public_slug}`}
                 className="flex-1 text-sm px-3 py-2 border rounded"
                 onClick={e => (e.target as HTMLInputElement).select()}
               />
@@ -140,7 +140,7 @@ export default function DashboardPage() {
                 onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(
-                      `${window.location.origin}/listings/agent/${stats?.public_slug}`
+                      `${window.location.origin}/listings/agent/${stats?.agent_public_slug}`
                     );
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);

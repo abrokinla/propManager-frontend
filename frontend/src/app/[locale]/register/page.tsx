@@ -2,12 +2,20 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslations } from 'next-intl';
+import type { Track } from '../../../types';
 
 export default function RegisterPage() {
   const { register } = useAuth();
   const t = useTranslations('Register');
+  const searchParams = useSearchParams();
+  // Pricing links carry ?track=agent&plan=agent_pro. Anything unrecognised
+  // falls back to owner rather than posting an invalid choice to the API.
+  const requestedTrack = searchParams.get('track');
+  const plan = searchParams.get('plan');
+  const [track, setTrack] = useState<Track>(requestedTrack === 'agent' ? 'agent' : 'owner');
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -30,7 +38,7 @@ export default function RegisterPage() {
     setErrors({});
     setLoading(true);
     try {
-      await register(form);
+      await register({ ...form, track });
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: Record<string, string[] | string> } };
       const data = axiosError.response?.data;
@@ -59,6 +67,16 @@ export default function RegisterPage() {
           <p className="mt-1" style={{ color: 'var(--text-light)' }}>{t('startManaging')}</p>
         </div>
 
+        {plan && (
+          <div
+            className="text-sm text-center px-4 py-2 mb-4 rounded-lg"
+            style={{ backgroundColor: 'var(--card)', color: 'var(--text-light)' }}
+            data-testid="selected-plan"
+          >
+            {t('selectedPlan', { plan })}
+          </div>
+        )}
+
         <div className="card">
           {errors.general && (
             <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
@@ -67,6 +85,34 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <span className="block text-sm font-medium mb-2" style={{ color: 'var(--text)' }}>{t('accountType')}</span>
+              <div className="grid grid-cols-2 gap-2" data-testid="track-selector">
+                {(['agent', 'owner'] as Track[]).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setTrack(value)}
+                    aria-pressed={track === value}
+                    data-testid={`track-${value}`}
+                    className={`px-4 py-3 rounded-lg text-sm font-medium border transition-all ${
+                      track === value ? 'border-primary-600 text-primary-600' : ''
+                    }`}
+                    style={{
+                      backgroundColor: track === value ? 'var(--primary-light)' : 'var(--card)',
+                      borderColor: track === value ? 'var(--primary)' : 'var(--border)',
+                      color: track === value ? 'var(--primary)' : 'var(--text)',
+                    }}
+                  >
+                    {t(`track.${value}`)}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs mt-2" style={{ color: 'var(--text-light)' }}>
+                {t(`trackHint.${track}`)}
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>{t('firstName')}</label>

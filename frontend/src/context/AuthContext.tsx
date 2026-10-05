@@ -20,6 +20,12 @@ interface RegisterData {
   password: string;
   first_name: string;
   last_name: string;
+  /**
+   * Which workspace to provision. The backend defaults to 'owner' when the
+   * field is absent, so an agent who registers from the wrong funnel silently
+   * lands in an owner workspace with no way to switch.
+   */
+  track: 'agent' | 'owner';
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);

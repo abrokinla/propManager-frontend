@@ -67,13 +67,67 @@
   "Pricing": {
     "badge": "Precios",
     "title": "Precios simples y transparentes",
-    "subtitle": "Paga según dónde operes. Los precios en Nigeria son anuales; los internacionales son mensuales.",
+    "subtitle": "Un producto, dos caminos. Elige el plan que se ajuste a tu forma de trabajar.",
+    "monthly": "Mensual",
+    "annual": "Anual",
+    "perMonth": "/mes",
+    "billedMonthly": "Facturado cada mes. Cancela cuando quieras.",
+    "billedAnnually": "Facturado {total} al año.",
+    "getStarted": "Comenzar",
+    "startFree": "Empezar gratis",
+    "mostPopular": "Más popular",
+    "trial": "Todos los planes incluyen 14 días de prueba. Sin tarjeta para el plan gratuito.",
+    "checkoutSoon": "El pago se está activando. Los planes gratuitos ya están disponibles.",
+    "loadError": "No pudimos cargar los precios. Actualiza la página o avísanos y lo arreglamos.",
+    "comingSoon": "Próximamente",
+    "unlimitedProperties": "Propiedades ilimitadas",
+    "unlimitedUnits": "Unidades ilimitadas",
+    "unlimitedTeam": "Miembros del equipo ilimitados",
+    "unlimitedAnalytics": "Historial completo de analíticas",
+    "propertiesCount": "{count, plural, one {# propiedad} other {# propiedades}}",
+    "unitsCount": "{count, plural, one {# unidad} other {# unidades}}",
+    "teamCount": "{count, plural, one {# miembro del equipo} other {# miembros del equipo}}",
+    "daysOfAnalytics": "Analíticas de anuncios por {count} días",
+    "fullHistory": "Historial completo de analíticas",
+    "tracks": {
+      "agent": "Para agentes",
+      "owner": "Para propietarios"
+    },
+    "features": {
+      "leadExport": "Exportar contactos a CSV",
+      "whiteLabel": "Marca blanca",
+      "customDomain": "Dominio propio",
+      "whatsappApi": "WhatsApp Business API"
+    },
+    "plans": {
+      "agent_free": {
+        "blurb": "Prueba el CRM de agente con un anuncio."
+      },
+      "agent_starter": {
+        "blurb": "Para un agente independiente con volumen real."
+      },
+      "agent_pro": {
+        "blurb": "Para agentes con un pipeline completo y equipo."
+      },
+      "agent_agency": {
+        "blurb": "Para agencias sin límite de anuncios ni de asientos."
+      },
+      "owner_free": {
+        "blurb": "Gestiona tu primera propiedad gratis."
+      },
+      "owner_starter": {
+        "blurb": "Para un portafolio pequeño y algo de ayuda."
+      },
+      "owner_pro": {
+        "blurb": "Para un portafolio en crecimiento que necesita todo."
+      },
+      "owner_enterprise": {
+        "blurb": "Para portafolios grandes sin límite."
+      }
+    },
     "year": "/año",
     "month": "/mes",
-    "trial": "Todos los planes incluyen 14 días de prueba gratis. Sin tarjeta de crédito para el nivel Free.",
-    "volumePricing": "Precios por Volumen",
-    "getStarted": "Comenzar",
-    "mostPopular": "Más Popular"
+    "volumePricing": "Precios por Volumen"
   },
   "CTA": {
     "title": "Comienza a Gestionar Propiedades Gratis",
@@ -182,7 +236,13 @@
     "createAccountBtn": "Crear Cuenta",
     "hasAccount": "¿Ya tienes una cuenta?",
     "signIn": "Iniciar Sesión",
-    "registrationFailed": "Registro fallido. Por favor intenta de nuevo."
+    "registrationFailed": "Registro fallido. Por favor intenta de nuevo.",
+    "accountType": "Soy",
+    "track.agent": "Un agente",
+    "track.owner": "Un propietario",
+    "trackHint.agent": "Los espacios de agente incluyen perfil público, bandeja de clientes potenciales y verificación de identidad.",
+    "trackHint.owner": "Los espacios de propietario gestionan tus propiedades, unidades e inquilinos.",
+    "selectedPlan": "Plan seleccionado: {plan}. Podrás cambiarlo o mejorarlo más adelante."
   },
   "TenantLogin": {
     "tenantPortal": "Portal de Inquilinos",
@@ -1002,10 +1062,9 @@
       "title": "Nueva Solicitud de Mantenimiento"
     },
     "editForm": {
-      "title": "Solicitud de Mantenimiento",
+      "title": "Título",
       "property": "Propiedad",
       "unit": "Unidad",
-      "title": "Título",
       "description": "Descripción",
       "reportedBy": "Reportado Por",
       "date": "Fecha",
@@ -1327,6 +1386,7 @@
     "noPropertiesDescription": "Este agente aún no ha listado propiedades.",
     "contactForPrice": "Contactar por precio",
     "unitsAvailable": "{count} unidades disponibles",
-    "allRightsReserved": "Todos los derechos reservados."
+    "allRightsReserved": "Todos los derechos reservados.",
+    "defaultAgentName": "Agente"
   }
 }
