@@ -127,7 +127,11 @@
     },
     "year": "/year",
     "month": "/mo",
-    "volumePricing": "Volume Pricing"
+    "volumePricing": "Volume Pricing",
+    "free": "Free",
+    "usdFallback": "(USD)",
+    "trialPeriod": "{count, plural, one {# day free trial} other {# days free trial}}",
+    "annualTotal": "Annual total: {total}"
   },
   "CTA": {
     "title": "Start Managing Properties Free",

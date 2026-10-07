@@ -127,7 +127,11 @@
     },
     "year": "/año",
     "month": "/mes",
-    "volumePricing": "Precios por Volumen"
+    "volumePricing": "Precios por Volumen",
+    "free": "Gratis",
+    "usdFallback": "(USD)",
+    "trialPeriod": "{count, plural, one {# día de prueba gratis} other {# días de prueba gratis}}",
+    "annualTotal": "Total anual: {total}"
   },
   "CTA": {
     "title": "Comienza a Gestionar Propiedades Gratis",

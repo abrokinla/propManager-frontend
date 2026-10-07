@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X, Loader2 } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '../../navigation';
 import { API_BASE_URL } from '../../lib/api';
 import type { BillingInterval, CatalogPlan, PricingCatalog, Track } from '../../types';
+import { usePaddlePrices } from '../../hooks/usePaddlePrices';
 
 const EASE = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
 
@@ -17,6 +18,15 @@ function formatUSD(cents: number) {
     currency: 'USD',
     minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
   }).format(cents / 100);
+}
+
+function formatLocalized(amountMinor: string, currencyCode: string): string {
+  const amountMajor = parseInt(amountMinor, 10) / 100;
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: currencyCode,
+    minimumFractionDigits: amountMajor % 1 === 0 ? 0 : 2,
+  }).format(amountMajor);
 }
 
 /**
@@ -81,39 +91,70 @@ const FEATURE_ROWS: { key: string; feature: string }[] = [
   { key: 'whatsappApi', feature: 'whatsapp_api' },
 ];
 
+interface PricingCardProps {
+  plan: CatalogPlan;
+  interval: BillingInterval;
+  track: Track;
+  popular: boolean;
+  onCheckout: (priceId: string) => void;
+  localizedPrice: ReturnType<typeof usePaddlePrices>['localizedPrices'];
+  loading: ReturnType<typeof usePaddlePrices>['loading'];
+  error: ReturnType<typeof usePaddlePrices>['error'];
+}
+
 function PricingCard({
   plan,
   interval,
   track,
   popular,
   onCheckout,
-}: {
-  plan: CatalogPlan;
-  interval: BillingInterval;
-  track: Track;
-  popular: boolean;
-  onCheckout: (priceId: string) => void;
-}) {
+  localizedPrice,
+  loading,
+  error,
+}: PricingCardProps) {
   const t = useTranslations('Pricing');
-
-  const monthly = formatUSD(plan.display_monthly_cents);
-  const annualTotal = formatUSD(plan.annual_cents);
   const isAnnual = interval === 'year';
   const rows = limitRows(plan, t);
   const features = plan.features as Record<string, boolean>;
 
+  const priceId = isAnnual ? plan.paddle_price_id_annual : plan.paddle_price_id_monthly;
+  const localized = priceId ? localizedPrice.get(priceId) : null;
+  const isLoading = priceId ? loading.has(priceId) : false;
+  const hasError = priceId ? error.has(priceId) : false;
+
+  const displayPrice = (() => {
+    if (plan.is_free) return t('free');
+    if (isLoading) return <span className="animate-pulse w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded" />;
+    if (localized) return formatLocalized(localized.unit_price.amount, localized.unit_price.currency_code);
+    if (hasError) return `${formatUSD(plan.display_monthly_cents)} ${t('usdFallback')}`;
+    return formatUSD(plan.display_monthly_cents);
+  })();
+
+  const annualTotal = (() => {
+    if (plan.is_free) return t('free');
+    if (localized) {
+      const monthlyMajor = parseInt(localized.unit_price.amount, 10) / 100;
+      const annualMajor = monthlyMajor * 12;
+      return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: localized.unit_price.currency_code,
+        minimumFractionDigits: annualMajor % 1 === 0 ? 0 : 2,
+      }).format(annualMajor);
+    }
+    return formatUSD(plan.annual_cents);
+  })();
+
   const handleClick = () => {
     if (plan.is_free) {
-      // Free plans go straight to register
       window.location.href = `/register?track=${track}&plan=${plan.key}`;
-    } else {
-      // Paid plans open Paddle checkout
-      const priceId = isAnnual ? plan.paddle_price_id_annual : plan.paddle_price_id_monthly;
-      if (priceId) {
-        onCheckout(priceId);
-      }
+    } else if (priceId) {
+      onCheckout(priceId);
     }
   };
+
+  const trialText = localized?.trial_period
+    ? t('trialPeriod', { count: localized.trial_period.frequency, unit: localized.trial_period.interval })
+    : t('trial');
 
   return (
     <motion.div
@@ -150,7 +191,7 @@ function PricingCard({
 
       <div className="mb-2">
         <span className="text-4xl font-extrabold" style={{ color: 'var(--text)' }}>
-          {monthly}
+          {displayPrice}
         </span>
         <span className="text-sm ml-1" style={{ color: 'var(--text-light)' }}>
           {t('perMonth')}
@@ -159,6 +200,7 @@ function PricingCard({
 
       <p className="text-xs mb-6 min-h-[2rem]" style={{ color: 'var(--text-light)' }}>
         {isAnnual ? t('billedAnnually', { total: annualTotal }) : t('billedMonthly')}
+        {localized && isAnnual && <span className="ml-2">{t('annualTotal', { total: annualTotal })}</span>}
       </p>
 
       <button
@@ -211,6 +253,12 @@ function PricingCard({
           </li>
         ))}
       </ul>
+
+      {localized?.trial_period && (
+        <p className="mt-4 text-xs text-center" style={{ color: 'var(--primary)' }}>
+          {trialText}
+        </p>
+      )}
     </motion.div>
   );
 }
@@ -222,6 +270,8 @@ export default function PricingSection() {
   const [catalog, setCatalog] = useState<PricingCatalog | null>(null);
   const [error, setError] = useState(false);
   const [paddleReady, setPaddleReady] = useState(false);
+
+  const { localizedPrices, loading, error: paddleError, fetchPrices } = usePaddlePrices();
 
   // Load Paddle.js
   useEffect(() => {
@@ -255,11 +305,9 @@ export default function PricingSection() {
     });
   }, []);
 
+  // Fetch catalog
   useEffect(() => {
     let cancelled = false;
-    // No fallback copy: a hardcoded price list is exactly what drifted out of
-    // sync with the backend before. Better to show an error than to quote a
-    // number we cannot verify.
     fetch(`${API_BASE_URL}/pricing/`)
       .then((res) => {
         if (!res.ok) throw new Error(`pricing ${res.status}`);
@@ -271,10 +319,30 @@ export default function PricingSection() {
       .catch(() => {
         if (!cancelled) setError(true);
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
+
+  // Fetch localized prices when catalog changes
+  const allPriceIds = useMemo(() => {
+    if (!catalog) return [];
+    const ids: string[] = [];
+    for (const trackKey of ['agent', 'owner'] as Track[]) {
+      const plans = catalog.tracks[trackKey]?.plans ?? [];
+      for (const plan of plans) {
+        if (!plan.is_free) {
+          if (plan.paddle_price_id_monthly) ids.push(plan.paddle_price_id_monthly);
+          if (plan.paddle_price_id_annual) ids.push(plan.paddle_price_id_annual);
+        }
+      }
+    }
+    return [...new Set(ids)];
+  }, [catalog]);
+
+  useEffect(() => {
+    if (allPriceIds.length > 0) {
+      fetchPrices(allPriceIds);
+    }
+  }, [allPriceIds, fetchPrices]);
 
   const trackCatalog = catalog?.tracks[track];
   const plans = trackCatalog?.plans ?? [];
@@ -340,11 +408,7 @@ export default function PricingSection() {
         </ScrollReveal>
 
         {error && (
-          <p
-            className="text-center py-12"
-            style={{ color: 'var(--text-light)' }}
-            role="status"
-          >
+          <p className="text-center py-12" style={{ color: 'var(--text-light)' }} role="status">
             {t('loadError')}
           </p>
         )}
@@ -373,6 +437,9 @@ export default function PricingSection() {
                   track={track}
                   popular={plan.key === popularKey}
                   onCheckout={openCheckout}
+                  localizedPrice={localizedPrices}
+                  loading={loading}
+                  error={paddleError}
                 />
               ))}
             </motion.div>

@@ -702,7 +702,11 @@
     },
     "year": "/ano",
     "month": "/mês",
-    "volumePricing": "Preço por volume"
+    "volumePricing": "Preço por volume",
+    "free": "Grátis",
+    "usdFallback": "(USD)",
+    "trialPeriod": "{count, plural, one {# dia de teste grátis} other {# dias de teste grátis}}",
+    "annualTotal": "Total anual: {total}"
   },
   "Tenants": {
     "title": "Locatários",
