@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X, Loader2 } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
@@ -86,11 +86,13 @@ function PricingCard({
   interval,
   track,
   popular,
+  onCheckout,
 }: {
   plan: CatalogPlan;
   interval: BillingInterval;
   track: Track;
   popular: boolean;
+  onCheckout: (priceId: string) => void;
 }) {
   const t = useTranslations('Pricing');
 
@@ -99,6 +101,19 @@ function PricingCard({
   const isAnnual = interval === 'year';
   const rows = limitRows(plan, t);
   const features = plan.features as Record<string, boolean>;
+
+  const handleClick = () => {
+    if (plan.is_free) {
+      // Free plans go straight to register
+      window.location.href = `/register?track=${track}&plan=${plan.key}`;
+    } else {
+      // Paid plans open Paddle checkout
+      const priceId = isAnnual ? plan.paddle_price_id_annual : plan.paddle_price_id_monthly;
+      if (priceId) {
+        onCheckout(priceId);
+      }
+    }
+  };
 
   return (
     <motion.div
@@ -146,8 +161,9 @@ function PricingCard({
         {isAnnual ? t('billedAnnually', { total: annualTotal }) : t('billedMonthly')}
       </p>
 
-      <Link
-        href={`/register?track=${track}&plan=${plan.key}`}
+      <button
+        type="button"
+        onClick={handleClick}
         className={`block text-center py-3 rounded-xl text-sm font-semibold transition-all mb-8 ${
           popular
             ? 'text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-md hover:shadow-lg'
@@ -159,7 +175,7 @@ function PricingCard({
         }}
       >
         {plan.is_free ? t('startFree') : t('getStarted')}
-      </Link>
+      </button>
 
       <ul className="space-y-3">
         {rows.map((row) => (
@@ -205,6 +221,39 @@ export default function PricingSection() {
   const [interval, setInterval] = useState<BillingInterval>('month');
   const [catalog, setCatalog] = useState<PricingCatalog | null>(null);
   const [error, setError] = useState(false);
+  const [paddleReady, setPaddleReady] = useState(false);
+
+  // Load Paddle.js
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if ((window as any).Paddle) {
+      setPaddleReady(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.paddle.com/paddle/paddle.js';
+    script.async = true;
+    script.onload = () => {
+      (window as any).Paddle.Environment.set('sandbox');
+      (window as any).Paddle.Initialize({
+        token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN,
+      });
+      setPaddleReady(true);
+    };
+    document.head.appendChild(script);
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  const openCheckout = useCallback((priceId: string) => {
+    if (typeof window === 'undefined' || !(window as any).Paddle) return;
+    const frontendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'https://propmanager.abrokinla.workers.dev';
+    (window as any).Paddle.Checkout.open({
+      items: [{ price_id: priceId }],
+      successUrl: `${frontendUrl}/register?paddle_checkout=completed`,
+    });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -323,6 +372,7 @@ export default function PricingSection() {
                   interval={interval}
                   track={track}
                   popular={plan.key === popularKey}
+                  onCheckout={openCheckout}
                 />
               ))}
             </motion.div>

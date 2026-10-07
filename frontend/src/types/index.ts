@@ -494,6 +494,9 @@ export interface CatalogPlan {
   /** Features the plan includes that cannot be bought yet (WhatsApp). */
   pending_features: PlanFeatureKey[];
   has_pending_features: boolean;
+  /** Paddle price IDs for checkout. Empty string when not configured. */
+  paddle_price_id_monthly: string;
+  paddle_price_id_annual: string;
 }
 
 export interface TrackCatalog {

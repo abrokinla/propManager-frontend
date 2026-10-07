@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.19.11",
+    "@paddle/paddle-node-sdk": "^3.10.0",
     "@tiptap/extension-underline": "^3.26.1",
     "@tiptap/react": "^3.26.1",
     "@tiptap/starter-kit": "^3.26.1",
