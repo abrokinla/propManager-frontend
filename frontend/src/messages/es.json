@@ -242,11 +242,13 @@
     "signIn": "Iniciar Sesión",
     "registrationFailed": "Registro fallido. Por favor intenta de nuevo.",
     "accountType": "Soy",
-    "track.agent": "Un agente",
-    "track.owner": "Un propietario",
     "trackHint.agent": "Los espacios de agente incluyen perfil público, bandeja de clientes potenciales y verificación de identidad.",
     "trackHint.owner": "Los espacios de propietario gestionan tus propiedades, unidades e inquilinos.",
-    "selectedPlan": "Plan seleccionado: {plan}. Podrás cambiarlo o mejorarlo más adelante."
+    "selectedPlan": "Plan seleccionado: {plan}. Podrás cambiarlo o mejorarlo más adelante.",
+    "track": {
+      "agent": "Un agente",
+      "owner": "Un propietario"
+    }
   },
   "TenantLogin": {
     "tenantPortal": "Portal de Inquilinos",

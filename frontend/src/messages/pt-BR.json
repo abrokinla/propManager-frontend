@@ -173,11 +173,13 @@
     "signIn": "Entrar",
     "registrationFailed": "Falha no cadastro. Tente novamente.",
     "accountType": "Eu sou",
-    "track.agent": "Um corretor",
-    "track.owner": "Um proprietário",
     "trackHint.agent": "Espaços de corretor incluem perfil público, caixa de leads e verificação de identidade.",
     "trackHint.owner": "Espaços de proprietário gerenciam seus imóveis, unidades e locatários.",
-    "selectedPlan": "Plano escolhido: {plan}. Você pode trocar ou fazer upgrade depois."
+    "selectedPlan": "Plano escolhido: {plan}. Você pode trocar ou fazer upgrade depois.",
+    "track": {
+      "agent": "Um corretor",
+      "owner": "Um proprietário"
+    }
   },
   "TenantLogin": {
     "tenantPortal": "Portal do locatário",

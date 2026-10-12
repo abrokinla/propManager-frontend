@@ -242,11 +242,13 @@
     "signIn": "Sign in",
     "registrationFailed": "Registration failed. Please try again.",
     "accountType": "I am",
-    "track.agent": "An agent",
-    "track.owner": "A property owner",
     "trackHint.agent": "Agent workspaces get a public profile, lead inbox and KYC verification.",
     "trackHint.owner": "Owner workspaces manage your properties, units and tenants.",
-    "selectedPlan": "Selected plan: {plan}. You can change or upgrade it later."
+    "selectedPlan": "Selected plan: {plan}. You can change or upgrade it later.",
+    "track": {
+      "agent": "An agent",
+      "owner": "A property owner"
+    }
   },
   "TenantLogin": {
     "tenantPortal": "Tenant Portal",
