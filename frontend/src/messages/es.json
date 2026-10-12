@@ -349,7 +349,8 @@
       "provideReason": "Por favor proporciona un motivo",
       "rejected": "Contrato rechazado",
       "rejectFailed": "Error al rechazar"
-    }
+    },
+    "tenantUnitCount": "{count} de {total} unidades ocupadas"
   },
   "TenantDetail": {
     "notFound": "Inquilino no encontrado",

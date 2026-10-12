@@ -349,7 +349,8 @@
       "provideReason": "Please provide a reason",
       "rejected": "Agreement rejected",
       "rejectFailed": "Failed to reject"
-    }
+    },
+    "tenantUnitCount": "{count} of {total} units occupied"
   },
   "TenantDetail": {
     "notFound": "Tenant not found",
