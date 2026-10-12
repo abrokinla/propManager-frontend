@@ -6,13 +6,26 @@
     "getStarted": "Get Started"
   },
   "Hero": {
-    "badge": "Trusted by agents across Nigeria",
+    "badge": "Trusted by property managers worldwide",
     "title": "Property Management, Simplified.",
     "titleHighlight": "Management",
     "subtitle": "From listing to lease — manage properties, track rent, handle maintenance, and sign tenancy agreements digitally. One platform for agents and landlords.",
     "cta": "Get Started Free",
     "emailPlaceholder": "Enter your email",
-    "freeNote": "Free for 1 property. No credit card required."
+    "freeNote": "Free for 1 property. No credit card required.",
+    "dashboardMock": {
+      "property1": "Downtown Apartment",
+      "property1Rent": "$2,500/mo",
+      "tenant1": "Maria Santos",
+      "tenant1Status": "Rent due: Dec 1",
+      "agreement1": "Lease Agreement",
+      "agreement1Status": "Signed · Pending verification",
+      "agreement1View": "View",
+      "rentCollection": "Rent collected: $18,500 this month",
+      "active": "Active",
+      "pending": "Pending",
+      "view": "View"
+    }
   },
   "Stats": {
     "properties": "Properties Managed",

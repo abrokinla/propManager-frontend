@@ -93,11 +93,11 @@ export default function Hero() {
                         <Building className="w-4 h-4 text-indigo-300" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">Lekki Phase 1 Duplex</p>
-                        <p className="text-xs text-white/50">Unit A · ₦3.5M/yr</p>
+                        <p className="text-sm font-medium text-white">{t('dashboardMock.property1')}</p>
+                        <p className="text-xs text-white/50">{t('dashboardMock.property1Rent')}</p>
                       </div>
                     </div>
-                    <span className="text-xs font-medium text-emerald-300 bg-emerald-500/10 px-2 py-1 rounded-full">Active</span>
+                    <span className="text-xs font-medium text-emerald-300 bg-emerald-500/10 px-2 py-1 rounded-full">{t('dashboardMock.active')}</span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
@@ -106,11 +106,11 @@ export default function Hero() {
                         <Users className="w-4 h-4 text-violet-300" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">Chidi Okonkwo</p>
-                        <p className="text-xs text-white/50">Tenant · Rent due: Dec 1</p>
+                        <p className="text-sm font-medium text-white">{t('dashboardMock.tenant1')}</p>
+                        <p className="text-xs text-white/50">{t('dashboardMock.tenant1Status')}</p>
                       </div>
                     </div>
-                    <span className="text-xs font-medium text-amber-300 bg-amber-500/10 px-2 py-1 rounded-full">Pending</span>
+                    <span className="text-xs font-medium text-amber-300 bg-amber-500/10 px-2 py-1 rounded-full">{t('dashboardMock.pending')}</span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
@@ -119,11 +119,11 @@ export default function Hero() {
                         <FileText className="w-4 h-4 text-emerald-300" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">Tenancy Agreement</p>
-                        <p className="text-xs text-white/50">Signed · Awaiting verification</p>
+                        <p className="text-sm font-medium text-white">{t('dashboardMock.agreement1')}</p>
+                        <p className="text-xs text-white/50">{t('dashboardMock.agreement1Status')}</p>
                       </div>
                     </div>
-                    <span className="text-xs font-medium text-blue-300 bg-blue-500/10 px-2 py-1 rounded-full">View</span>
+                    <span className="text-xs font-medium text-blue-300 bg-blue-500/10 px-2 py-1 rounded-full">{t('dashboardMock.view')}</span>
                   </div>
 
                   <div className="h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
@@ -133,7 +133,7 @@ export default function Hero() {
                           <div key={i} className="w-6 h-3 rounded-sm bg-gradient-to-t from-indigo-500/40 to-indigo-400/20" style={{ height: `${6 + i * 4}px` }} />
                         ))}
                       </div>
-                      <span className="text-xs text-white/50">Rent collection: ₦2.4M this month</span>
+                      <span className="text-xs text-white/50">{t('dashboardMock.rentCollection')}</span>
                     </div>
                   </div>
                 </div>

@@ -6,13 +6,26 @@
     "getStarted": "Comenzar"
   },
   "Hero": {
-    "badge": "Confiado por agentes en Nigeria",
+    "badge": "Confiado por administradores de propiedades en todo el mundo",
     "title": "Gestión de Propiedades, Simplificada.",
     "titleHighlight": "Gestión",
     "subtitle": "Desde publicación hasta contrato — administra propiedades, rastrea alquileres, maneja mantenimiento y firma acuerdos de arrendamiento digitalmente. Una plataforma para agentes y propietarios.",
     "cta": "Comenzar Gratis",
     "emailPlaceholder": "Ingresa tu email",
-    "freeNote": "Gratis para 1 propiedad. Sin tarjeta de crédito."
+    "freeNote": "Gratis para 1 propiedad. Sin tarjeta de crédito.",
+    "dashboardMock": {
+      "property1": "Apartamento en el Centro",
+      "property1Rent": "$2,500/mes",
+      "tenant1": "María Santos",
+      "tenant1Status": "Alquiler vence: 1 dic",
+      "agreement1": "Contrato de Arrendamiento",
+      "agreement1Status": "Firmado · Pendiente de verificación",
+      "agreement1View": "Ver",
+      "rentCollection": "Alquiler cobrado: $18,500 este mes",
+      "active": "Activo",
+      "pending": "Pendiente",
+      "view": "Ver"
+    }
   },
   "Stats": {
     "properties": "Propiedades Gestionadas",

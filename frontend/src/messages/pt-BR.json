@@ -6,13 +6,26 @@
     "getStarted": "Começar"
   },
   "Hero": {
-    "badge": "Usado por corretores em toda a Nigéria",
+    "badge": "Confiado por gerentes de propriedades em todo o mundo",
     "title": "Gestão de imóveis, simplificada.",
     "titleHighlight": "Gestão",
     "subtitle": "Do anúncio ao contrato: gerencie imóveis, acompanhe o aluguel, resolva manutenção e assine contratos de locação digitalmente. Uma plataforma para corretores e proprietários.",
     "cta": "Começar grátis",
     "emailPlaceholder": "Digite seu e-mail",
-    "freeNote": "Grátis para 1 imóvel. Não é preciso cartão de crédito."
+    "freeNote": "Grátis para 1 imóvel. Não é preciso cartão de crédito.",
+    "dashboardMock": {
+      "property1": "Apartamento no Centro",
+      "property1Rent": "$2,500/mês",
+      "tenant1": "Maria Santos",
+      "tenant1Status": "Aluguel vence: 1 dez",
+      "agreement1": "Contrato de Locação",
+      "agreement1Status": "Assinado · Pendente de verificação",
+      "agreement1View": "Ver",
+      "rentCollection": "Aluguel arrecadado: $18,500 este mês",
+      "active": "Ativo",
+      "pending": "Pendente",
+      "view": "Ver"
+    }
   },
   "Stats": {
     "properties": "Imóveis gerenciados",
